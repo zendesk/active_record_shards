@@ -1,0 +1,19 @@
+test:
+  adapter: mysql
+  encoding: utf8
+  database: replica_test
+  username: root
+  password:
+  socket: /tmp/mysql.sock
+  host: localhost
+  
+test_slave:
+  adapter: mysql
+  encoding: utf8
+  database: replica_test_slave
+  username: root
+  password:
+  socket: /tmp/mysql.sock
+  host: localhost
+    
+  
