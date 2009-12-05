@@ -1,6 +1,19 @@
 = replica
 
-Description goes here.
+== Example
+  
+  Ticket.with_slave do
+    Ticket.first(50)
+  end
+
+== Install
+
+gem install replica
+
+Add the slave database to config/database.yml:
+  development_slave:
+    adapter: mysql
+    ...
 
 == Note on Patches/Pull Requests
  
@@ -14,4 +27,7 @@ Description goes here.
 
 == Copyright
 
-Copyright (c) 2009 Eric. See LICENSE for details.
+Copyright (c) 2009 Zendesk. See LICENSE for details.
+
+== Authors
+Mick Staugaard

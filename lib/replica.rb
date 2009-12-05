@@ -1,10 +1,10 @@
 require 'activerecord'
 
-module ActiveRecord
-  class Base
+module ActiveRecord # :nodoc:
+  class Base # :nodoc:
     module Replica
 
-      # Executes queries using the slave database. Silently uses master if no slave is found.
+      # Executes queries using the slave database. Fails over to master if no slave is found.
       # if you want to execute a block of code on the slave you can go:
       #   Account.with_slave do
       #     Account.first
@@ -93,8 +93,8 @@ module ActiveRecord
   
   # The only difference here is that we use klass.connection_pool_name
   # instead of klass.name as the pool key
-  module ConnectionAdapters
-    class ConnectionHandler
+  module ConnectionAdapters # :nodoc:
+    class ConnectionHandler # :nodoc:
       
       def retrieve_connection_pool(klass)
         pool = @connection_pools[klass.connection_pool_name]
