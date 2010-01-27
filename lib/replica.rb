@@ -24,6 +24,14 @@ module ActiveRecord # :nodoc:
         with_replica(nil, &block)
       end
 
+      def with_slave_if(condition, &block)
+        condition ? with_slave(&block) : with_master(&block)
+      end
+      
+      def with_slave_unless(condition, &block)
+        with_slave_if(!condition, &block)
+      end
+      
       # Name of the connection pool. Used by ConnectionHandler to retrieve the current connection pool.
       def connection_pool_name # :nodoc:
         replica = current_replica_name
