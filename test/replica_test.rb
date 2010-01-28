@@ -36,6 +36,7 @@ class ReplicaTest < ActiveRecord::TestCase
 
       assert_not_equal Account.count, ActiveRecord::Base.with_slave { Account.count }
       assert_not_equal Account.count, Account.with_slave { Account.count }
+      assert_not_equal Account.count, Account.with_slave.count
       assert_equal Account.count, Ticket.with_slave { Account.count }
     end
 

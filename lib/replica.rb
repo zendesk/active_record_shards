@@ -11,6 +11,9 @@ module ActiveRecord # :nodoc:
       #   end
       # the first account will be found on the slave DB
       #
+      # For one-liners you can simply do
+      #   Account.with_slave.first
+      #
       # this is the same as:
       #   Account.with_replica(:slave) do
       #     Account.first
@@ -53,15 +56,24 @@ module ActiveRecord # :nodoc:
       #     ...
       #
       # Account.with_replica(:slave) { Account.count }
+      # Account.with_replica(:slave).count
       #
       def with_replica(replica_name, &block)
+        if block_given?
+          with_replica_block(replica_name, &block)
+        else
+          Proxy.new(self, replica_name)
+        end
+      end
+
+      def with_replica_block(replica_name, &block)
         old_replica_name = current_replica_name
         begin
           self.current_replica_name = replica_name
         rescue ActiveRecord::AdapterNotSpecified => e
           self.current_replica_name = old_replica_name
           logger.warn("Failed to establish replica connection: #{e.message} - defaulting to master")
-        end        
+        end
         yield
       ensure
         self.current_replica_name = old_replica_name
@@ -95,6 +107,16 @@ module ActiveRecord # :nodoc:
           @replica_key ||= "#{name}_replica"
         end
         
+        class Proxy
+          def initialize(target, replica)
+            @target = target
+            @replica = replica
+          end
+          
+          def method_missing(method, *args)
+            @target.with_replica_block(@replica) { @target.send(method, *args) }
+          end
+        end
     end
   end
   Base.extend(Base::Replica)
