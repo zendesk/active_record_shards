@@ -20,7 +20,7 @@ load(File.dirname(__FILE__) + "/schema.rb")
 
 
 class Test::Unit::TestCase
-  
+
   def assert_using_master_db(klass)
     assert_equal('replica_test', klass.connection.instance_variable_get(:@config)[:database])
   end
@@ -28,5 +28,5 @@ class Test::Unit::TestCase
   def assert_using_slave_db(klass)
     assert_equal('replica_test_slave', klass.connection.instance_variable_get(:@config)[:database])
   end
-  
+
 end

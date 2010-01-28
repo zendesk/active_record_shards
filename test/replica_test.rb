@@ -13,7 +13,7 @@ class ReplicaTest < ActiveRecord::TestCase
     should "default to the master database" do
       Account.create!
 
-      ActiveRecord::Base.with_slave { assert_using_master_db(Account) } 
+      ActiveRecord::Base.with_slave { assert_using_master_db(Account) }
       Account.with_slave { assert_using_master_db(Account) }
       Ticket.with_slave  { assert_using_master_db(Account) }
     end
@@ -68,25 +68,25 @@ class ReplicaTest < ActiveRecord::TestCase
 
     should "support conditional methods" do
       assert_using_master_db(Account)
-      
+
       Account.with_slave_if(true) do
         assert_using_slave_db(Account)
       end
-      
+
       assert_using_master_db(Account)
 
       Account.with_slave_if(false) do
         assert_using_master_db(Account)
       end
-      
+
       Account.with_slave_unless(true) do
         assert_using_master_db(Account)
       end
-      
+
       Account.with_slave_unless(false) do
         assert_using_slave_db(Account)
       end
-      
+
     end
 
     should_eventually "support nested with_* blocks" do

@@ -21,7 +21,7 @@ module ActiveRecord # :nodoc:
       def with_slave(&block)
         with_replica(:slave, &block)
       end
-      
+
       # See with_slave
       def with_master(&block)
         with_replica(nil, &block)
@@ -30,11 +30,11 @@ module ActiveRecord # :nodoc:
       def with_slave_if(condition, &block)
         condition ? with_slave(&block) : with_master(&block)
       end
-      
+
       def with_slave_unless(condition, &block)
         with_slave_if(!condition, &block)
       end
-      
+
       # Name of the connection pool. Used by ConnectionHandler to retrieve the current connection pool.
       def connection_pool_name # :nodoc:
         replica = current_replica_name
@@ -47,7 +47,7 @@ module ActiveRecord # :nodoc:
         end
       end
 
-      # Specify which database to use. 
+      # Specify which database to use.
       #
       # Example:
       # database.yml
@@ -80,7 +80,7 @@ module ActiveRecord # :nodoc:
       end
 
       private
-      
+
         def current_replica_name
           Thread.current[replica_key]
         end
@@ -90,29 +90,29 @@ module ActiveRecord # :nodoc:
 
           establish_replica_connection(new_replica_name) unless connected_to_replica?
         end
-        
+
         def establish_replica_connection(replica_name)
-           name = replica_name ? "#{RAILS_ENV}_#{replica_name}" : RAILS_ENV
-           spec = configurations[name]
-           raise AdapterNotSpecified.new("No database defined by #{name} in database.yml") if spec.nil?
-           
-           connection_handler.establish_connection(connection_pool_name, ConnectionSpecification.new(spec, "#{spec['adapter']}_connection"))
+          name = replica_name ? "#{RAILS_ENV}_#{replica_name}" : RAILS_ENV
+          spec = configurations[name]
+          raise AdapterNotSpecified.new("No database defined by #{name} in database.yml") if spec.nil?
+
+          connection_handler.establish_connection(connection_pool_name, ConnectionSpecification.new(spec, "#{spec['adapter']}_connection"))
         end
-        
+
         def connected_to_replica?
           connection_handler.connection_pools.has_key?(connection_pool_name)
         end
-        
+
         def replica_key
           @replica_key ||= "#{name}_replica"
         end
-        
+
         class Proxy
           def initialize(target, replica)
             @target = target
             @replica = replica
           end
-          
+
           def method_missing(method, *args)
             @target.with_replica_block(@replica) { @target.send(method, *args) }
           end
@@ -120,27 +120,26 @@ module ActiveRecord # :nodoc:
     end
   end
   Base.extend(Base::Replica)
-  
+
   # The only difference here is that we use klass.connection_pool_name
   # instead of klass.name as the pool key
   module ConnectionAdapters # :nodoc:
     class ConnectionHandler # :nodoc:
-      
+
       def retrieve_connection_pool(klass)
         pool = @connection_pools[klass.connection_pool_name]
         return pool if pool
         return nil if ActiveRecord::Base == klass
         retrieve_connection_pool klass.superclass
       end
-      
+
       def remove_connection(klass)
-         pool = @connection_pools[klass.connection_pool_name]
-         @connection_pools.delete_if { |key, value| value == pool }
-         pool.disconnect! if pool
-         pool.spec.config if pool
-       end
-      
+        pool = @connection_pools[klass.connection_pool_name]
+        @connection_pools.delete_if { |key, value| value == pool }
+        pool.disconnect! if pool
+        pool.spec.config if pool
+      end
+
     end
   end
 end
-
