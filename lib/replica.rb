@@ -113,8 +113,8 @@ module ActiveRecord # :nodoc:
             @replica = replica
           end
 
-          def method_missing(method, *args)
-            @target.with_replica_block(@replica) { @target.send(method, *args) }
+          def method_missing(method, *args, &block)
+            @target.with_replica_block(@replica) { @target.send(method, *args, &block) }
           end
         end
     end
