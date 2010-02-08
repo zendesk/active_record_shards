@@ -36,7 +36,6 @@ class ReplicaTest < ActiveRecord::TestCase
 
       assert_not_equal Account.count, ActiveRecord::Base.with_slave { Account.count }
       assert_not_equal Account.count, Account.with_slave { Account.count }
-      assert_not_equal Account.count, Account.with_slave.count
       assert_equal Account.count, Ticket.with_slave { Account.count }
     end
 
@@ -111,5 +110,25 @@ class ReplicaTest < ActiveRecord::TestCase
       assert_using_master_db(Ticket)
     end
 
+  end
+
+  context "replica proxy" do
+    should "successfully execute queries" do
+      assert_using_master_db(Account)
+      Account.create!
+
+      assert_not_equal Account.count, Account.with_slave.count
+    end
+
+    should "work association collections" do
+      assert_using_master_db(Account)
+      account = Account.create!
+
+      Ticket.connection.expects(:select_all).with("SELECT * FROM `tickets` WHERE (`tickets`.account_id = #{account.id})  LIMIT 1", anything).returns([])
+      Ticket.with_slave.connection.expects(:select_all).with("SELECT * FROM `tickets` WHERE (`tickets`.account_id = #{account.id})  LIMIT 1", anything).returns([])
+
+      account.tickets.first
+      account.tickets.with_slave.first
+    end
   end
 end
