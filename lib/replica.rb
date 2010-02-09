@@ -1,4 +1,4 @@
-require 'activerecord'
+require 'active_record'
 require 'replica/base'
 require 'replica/association_collection'
 require 'replica/connection_pool'
