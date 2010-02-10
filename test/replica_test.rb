@@ -110,6 +110,30 @@ class ReplicaTest < ActiveRecord::TestCase
       assert_using_master_db(Ticket)
     end
 
+    context "a model loaded with the slave" do
+      setup do
+        Account.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'master_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
+        assert(Account.find(1000))
+        assert_equal('master_name', Account.find(1000).name)
+
+        Account.with_slave.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'slave_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
+
+        @model = Account.with_slave.find(1000)
+        assert(@model)
+        assert_equal('slave_name', @model.name)
+      end
+
+      should "read from master on reload" do
+        @model.reload
+        assert_equal('master_name', @model.name)
+      end
+
+      should "write to master on save" do
+        @model.name = 'new_master_name'
+        @model.save!
+        assert_equal('new_master_name', Account.connection.select_value("SELECT name FROM accounts WHERE id = 1000"))
+      end
+    end
   end
 
   context "replica proxy" do
