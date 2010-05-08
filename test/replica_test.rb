@@ -128,10 +128,21 @@ class ReplicaTest < ActiveRecord::TestCase
         assert_equal('master_name', @model.name)
       end
 
-      should "write to master on save" do
-        @model.name = 'new_master_name'
-        @model.save!
-        assert_equal('new_master_name', Account.connection.select_value("SELECT name FROM accounts WHERE id = 1000"))
+      should "be marked as read only" do
+        assert(@model.readonly?)
+      end
+    end
+
+    context "a model loaded with the master" do
+      setup do
+        Account.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'master_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
+        @model = Account.with_master.first
+        assert(@model)
+        assert_equal('master_name', @model.name)
+      end
+
+      should "not be marked as read only" do
+        assert(!@model.readonly?)
       end
     end
   end

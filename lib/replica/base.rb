@@ -72,7 +72,7 @@ module ActiveRecord # :nodoc:
           self.current_replica_name = old_replica_name
           logger.warn("Failed to establish replica connection: #{e.message} - defaulting to master")
         end
-        yield
+        with_scope({:find => {:readonly => current_replica_name.present?}}, :merge, &block)
       ensure
         self.current_replica_name = old_replica_name
       end
