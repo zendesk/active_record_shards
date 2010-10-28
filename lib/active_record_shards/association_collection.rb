@@ -6,12 +6,8 @@ module ActiveRecord # :nodoc:
           with_replica(:slave)
         end
 
-        def with_master
-          with_replica(nil)
-        end
-
         def with_slave_if(condition)
-          condition ? with_slave : with_master
+          condition ? with_slave : self
         end
 
         def with_slave_unless(condition)

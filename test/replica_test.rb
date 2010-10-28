@@ -88,28 +88,6 @@ class ReplicaTest < ActiveRecord::TestCase
 
     end
 
-    should_eventually "support nested with_* blocks" do
-
-      assert_using_master_db(Account)
-      assert_using_master_db(Ticket)
-
-      ActiveRecord::Base.with_slave do
-        assert_using_slave_db(Account)
-        assert_using_slave_db(Ticket)
-
-        Account.with_master do
-          assert_using_master_db(Account)
-          assert_using_slave_db(Ticket)
-        end
-
-        assert_using_slave_db(Account)
-        assert_using_slave_db(Ticket)
-      end
-
-      assert_using_master_db(Account)
-      assert_using_master_db(Ticket)
-    end
-
     context "a model loaded with the slave" do
       setup do
         Account.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'master_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
@@ -136,7 +114,7 @@ class ReplicaTest < ActiveRecord::TestCase
     context "a model loaded with the master" do
       setup do
         Account.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'master_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
-        @model = Account.with_master.first
+        @model = Account.first
         assert(@model)
         assert_equal('master_name', @model.name)
       end

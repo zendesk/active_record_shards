@@ -20,13 +20,8 @@ module ActiveRecord # :nodoc:
         with_replica(:slave, &block)
       end
 
-      # See with_slave
-      def with_master(&block)
-        with_replica(nil, &block)
-      end
-
       def with_slave_if(condition, &block)
-        condition ? with_slave(&block) : with_master(&block)
+        condition ? with_slave(&block) : yield
       end
 
       def with_slave_unless(condition, &block)
