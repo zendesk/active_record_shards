@@ -2,7 +2,7 @@
 
 == Example
   
-  Ticket.with_slave do
+  Ticket.on_slave do
     Ticket.first(50)
   end
 

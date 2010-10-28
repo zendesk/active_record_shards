@@ -13,17 +13,17 @@ class ReplicaTest < ActiveRecord::TestCase
     should "default to the master database" do
       Account.create!
 
-      ActiveRecord::Base.with_slave { assert_using_master_db(Account) }
-      Account.with_slave { assert_using_master_db(Account) }
-      Ticket.with_slave  { assert_using_master_db(Account) }
+      ActiveRecord::Base.on_slave { assert_using_master_db(Account) }
+      Account.on_slave { assert_using_master_db(Account) }
+      Ticket.on_slave  { assert_using_master_db(Account) }
     end
 
     should "successfully execute queries" do
       Account.create!
       assert_using_master_db(Account)
 
-      assert_equal Account.count, ActiveRecord::Base.with_slave { Account.count }
-      assert_equal Account.count, Account.with_slave { Account.count }
+      assert_equal Account.count, ActiveRecord::Base.on_slave { Account.count }
+      assert_equal Account.count, Account.on_slave { Account.count }
     end
 
   end
@@ -34,16 +34,16 @@ class ReplicaTest < ActiveRecord::TestCase
       assert_using_master_db(Account)
       Account.create!
 
-      assert_not_equal Account.count, ActiveRecord::Base.with_slave { Account.count }
-      assert_not_equal Account.count, Account.with_slave { Account.count }
-      assert_equal Account.count, Ticket.with_slave { Account.count }
+      assert_not_equal Account.count, ActiveRecord::Base.on_slave { Account.count }
+      assert_not_equal Account.count, Account.on_slave { Account.count }
+      assert_equal Account.count, Ticket.on_slave { Account.count }
     end
 
-    should "support model specific with_slave blocks" do
+    should "support model specific on_slave blocks" do
       assert_using_master_db(Account)
       assert_using_master_db(Ticket)
 
-      Account.with_slave do
+      Account.on_slave do
         assert_using_slave_db(Account)
         assert_using_master_db(Ticket)
       end
@@ -52,11 +52,11 @@ class ReplicaTest < ActiveRecord::TestCase
       assert_using_master_db(Ticket)
     end
 
-    should "support global with_slave blocks" do
+    should "support global on_slave blocks" do
       assert_using_master_db(Account)
       assert_using_master_db(Ticket)
 
-      ActiveRecord::Base.with_slave do
+      ActiveRecord::Base.on_slave do
         assert_using_slave_db(Account)
         assert_using_slave_db(Ticket)
       end
@@ -68,21 +68,21 @@ class ReplicaTest < ActiveRecord::TestCase
     should "support conditional methods" do
       assert_using_master_db(Account)
 
-      Account.with_slave_if(true) do
+      Account.on_slave_if(true) do
         assert_using_slave_db(Account)
       end
 
       assert_using_master_db(Account)
 
-      Account.with_slave_if(false) do
+      Account.on_slave_if(false) do
         assert_using_master_db(Account)
       end
 
-      Account.with_slave_unless(true) do
+      Account.on_slave_unless(true) do
         assert_using_master_db(Account)
       end
 
-      Account.with_slave_unless(false) do
+      Account.on_slave_unless(false) do
         assert_using_slave_db(Account)
       end
 
@@ -94,9 +94,9 @@ class ReplicaTest < ActiveRecord::TestCase
         assert(Account.find(1000))
         assert_equal('master_name', Account.find(1000).name)
 
-        Account.with_slave.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'slave_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
+        Account.on_slave.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'slave_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
 
-        @model = Account.with_slave.find(1000)
+        @model = Account.on_slave.find(1000)
         assert(@model)
         assert_equal('slave_name', @model.name)
       end
@@ -130,7 +130,7 @@ class ReplicaTest < ActiveRecord::TestCase
       assert_using_master_db(Account)
       Account.create!
 
-      assert_not_equal Account.count, Account.with_slave.count
+      assert_not_equal Account.count, Account.on_slave.count
     end
 
     should "work association collections" do
@@ -138,10 +138,10 @@ class ReplicaTest < ActiveRecord::TestCase
       account = Account.create!
 
       Ticket.connection.expects(:select_all).with("SELECT * FROM `tickets` WHERE (`tickets`.account_id = #{account.id})  LIMIT 1", anything).returns([])
-      Ticket.with_slave.connection.expects(:select_all).with("SELECT * FROM `tickets` WHERE (`tickets`.account_id = #{account.id})  LIMIT 1", anything).returns([])
+      Ticket.on_slave.connection.expects(:select_all).with("SELECT * FROM `tickets` WHERE (`tickets`.account_id = #{account.id})  LIMIT 1", anything).returns([])
 
       account.tickets.first
-      account.tickets.with_slave.first
+      account.tickets.on_slave.first
     end
   end
 end

@@ -2,16 +2,16 @@ module ActiveRecord # :nodoc:
   module Associations
     class AssociationCollection < AssociationProxy #:nodoc:
       module Replica
-        def with_slave
+        def on_slave
           with_replica(:slave)
         end
 
-        def with_slave_if(condition)
-          condition ? with_slave : self
+        def on_slave_if(condition)
+          condition ? on_slave : self
         end
 
-        def with_slave_unless(condition)
-          with_slave_if(!condition)
+        def on_slave_unless(condition)
+          on_slave_if(!condition)
         end
 
         def with_replica(replica_name)

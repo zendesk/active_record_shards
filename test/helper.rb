@@ -42,8 +42,8 @@ class ActiveRecord::TestCase
   def clear_databases
     ActiveRecord::Base.connection.execute("DELETE FROM accounts")
     ActiveRecord::Base.connection.execute("DELETE FROM tickets")
-    ActiveRecord::Base.with_slave.connection.execute("DELETE FROM accounts")
-    ActiveRecord::Base.with_slave.connection.execute("DELETE FROM tickets")
+    ActiveRecord::Base.on_slave.connection.execute("DELETE FROM accounts")
+    ActiveRecord::Base.on_slave.connection.execute("DELETE FROM tickets")
   end
   setup :clear_databases
 end

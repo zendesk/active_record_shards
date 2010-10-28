@@ -4,28 +4,28 @@ module ActiveRecord # :nodoc:
 
       # Executes queries using the slave database. Fails over to master if no slave is found.
       # if you want to execute a block of code on the slave you can go:
-      #   Account.with_slave do
+      #   Account.on_slave do
       #     Account.first
       #   end
       # the first account will be found on the slave DB
       #
       # For one-liners you can simply do
-      #   Account.with_slave.first
+      #   Account.on_slave.first
       #
       # this is the same as:
       #   Account.with_replica(:slave) do
       #     Account.first
       #   end
-      def with_slave(&block)
+      def on_slave(&block)
         with_replica(:slave, &block)
       end
 
-      def with_slave_if(condition, &block)
-        condition ? with_slave(&block) : yield
+      def on_slave_if(condition, &block)
+        condition ? on_slave(&block) : yield
       end
 
-      def with_slave_unless(condition, &block)
-        with_slave_if(!condition, &block)
+      def on_slave_unless(condition, &block)
+        on_slave_if(!condition, &block)
       end
 
       # Name of the connection pool. Used by ConnectionHandler to retrieve the current connection pool.
