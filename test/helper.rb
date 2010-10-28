@@ -1,11 +1,21 @@
 require 'rubygems'
-require 'test/unit'
+require 'bundler'
+Bundler.setup
+require 'activesupport'
+require 'active_support/test_case'
+require 'mysql'
+require 'activerecord'
 require 'shoulda'
+
+require 'ruby-debug'
+::Debugger.start
+::Debugger.settings[:autoeval] = true if ::Debugger.respond_to?(:settings)
 
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 require 'replica'
 require 'models'
+require 'logger'
 
 RAILS_ENV = "test"
 
