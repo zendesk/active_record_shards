@@ -13,7 +13,7 @@ require 'ruby-debug'
 
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
-require 'replica'
+require 'active_record_shards'
 require 'models'
 require 'logger'
 

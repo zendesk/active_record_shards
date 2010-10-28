@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    replica (1.0.1)
+    active_record_shards (1.0.1)
       activerecord (= 2.3.5)
 
 GEM
@@ -28,12 +28,12 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  active_record_shards!
   activerecord (= 2.3.5)
   bundler
   leftright
   mocha
   mysql
   rake
-  replica!
   ruby-debug
   shoulda
