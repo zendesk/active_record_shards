@@ -1,7 +1,7 @@
 test:
   adapter: mysql
   encoding: utf8
-  database: replica_test
+  database: ars_test
   username: root
   password:
   socket: /tmp/mysql.sock
@@ -10,10 +10,45 @@ test:
 test_slave:
   adapter: mysql
   encoding: utf8
-  database: replica_test_slave
+  database: ars_test_slave
   username: root
   password:
   socket: /tmp/mysql.sock
   host: localhost
-    
-  
+
+test_shard0:
+  adapter: mysql
+  encoding: utf8
+  database: ars_test_shard0
+  username: root
+  password:
+  socket: /tmp/mysql.sock
+  host: localhost
+
+test_shard0_slave:
+  adapter: mysql
+  encoding: utf8
+  database: ars_test_shard0_slave
+  username: root
+  password:
+  socket: /tmp/mysql.sock
+  host: localhost
+
+test_shard1:
+  adapter: mysql
+  encoding: utf8
+  database: ars_test_shard1
+  username: root
+  password:
+  socket: /tmp/mysql.sock
+  host: localhost
+
+test_shard1_slave:
+  adapter: mysql
+  encoding: utf8
+  database: ars_test_shard1_slave
+  username: root
+  password:
+  socket: /tmp/mysql.sock
+  host: localhost
+
