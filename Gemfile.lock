@@ -2,16 +2,15 @@ PATH
   remote: .
   specs:
     active_record_shards (1.0.1)
-      activerecord (= 2.3.5)
+      activerecord (~> 2.3.5)
 
 GEM
   remote: http://rubygems.org/
   specs:
-    activerecord (2.3.5)
-      activesupport (= 2.3.5)
-    activesupport (2.3.5)
+    activerecord (2.3.10)
+      activesupport (= 2.3.10)
+    activesupport (2.3.10)
     columnize (0.3.1)
-    leftright (0.9.0)
     linecache (0.43)
     mocha (0.9.9)
       rake
@@ -29,9 +28,8 @@ PLATFORMS
 
 DEPENDENCIES
   active_record_shards!
-  activerecord (= 2.3.5)
+  activerecord (~> 2.3.5)
   bundler
-  leftright
   mocha
   mysql
   rake
