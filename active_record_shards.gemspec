@@ -7,9 +7,9 @@ Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Mick Staugaard", "Eric Chapweske"]
   s.email       = ["mick@staugaard.com", "eac@zendesk.com"]
-  s.homepage    = "http://github.com/eac/replica"
+  s.homepage    = "http://github.com/staugaard/active_record_shards"
   s.summary     = "Simple database switching for ActiveRecord."
-  s.description = "Easily run queries on replicated/slave databases."
+  s.description = "Easily run queries on shard and slave databases."
 
   s.add_runtime_dependency("activerecord", "~> 2.3.5")
 
