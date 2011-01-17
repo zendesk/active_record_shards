@@ -28,7 +28,7 @@ module ActiveRecordShards
       s = ""
       s << prefix.to_s
       if @shard
-        s << '_shard'
+        s << '_shard_'
         s << @shard.to_s
       end
       s << "_slave" if @on_slave

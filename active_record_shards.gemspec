@@ -17,11 +17,18 @@ Gem::Specification.new do |s|
   s.add_development_dependency("bundler")
   s.add_development_dependency("shoulda")
   s.add_development_dependency("mocha")
-  s.add_development_dependency("mysql")
-  s.add_development_dependency("ruby-debug")
 
-  s.files         = `git ls-files`.split("\n")
-  s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
-  s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
-  s.require_paths = ["lib"]
+  if RUBY_PLATFORM == 'java'
+    s.add_development_dependency("mysql")
+  else
+    if RUBY_VERSION < "1.9"
+      s.add_development_dependency("ruby-debug")
+    else
+      s.add_development_dependency("ruby-debug19")
+    end
+  end
+
+  s.files        = Dir.glob("lib/**/*") + %w(README.rdoc)
+  s.test_files   = Dir.glob("test/**/*")
+  s.require_path = 'lib'
 end

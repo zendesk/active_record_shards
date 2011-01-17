@@ -1,0 +1,21 @@
+test:
+  adapter: mysql
+  encoding: utf8
+  database: ars_test
+  port: 123
+  username: root
+  password:
+  host: main_host
+  slave:
+    host: main_slave_host
+  shards:
+    a:
+      database: ars_test_shard_a
+      host: shard_a_host
+      slave:
+        host: shard_a_slave_host
+    b:
+      database: ars_test_shard_b
+      host: shard_b_host
+      slave:
+        database: ars_test_shard_b_slave

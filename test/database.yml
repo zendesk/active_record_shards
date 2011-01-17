@@ -16,7 +16,7 @@ test_slave:
   socket: /tmp/mysql.sock
   host: localhost
 
-test_shard0:
+test_shard_0:
   adapter: mysql
   encoding: utf8
   database: ars_test_shard0
@@ -25,7 +25,7 @@ test_shard0:
   socket: /tmp/mysql.sock
   host: localhost
 
-test_shard0_slave:
+test_shard_0_slave:
   adapter: mysql
   encoding: utf8
   database: ars_test_shard0_slave
@@ -34,7 +34,7 @@ test_shard0_slave:
   socket: /tmp/mysql.sock
   host: localhost
 
-test_shard1:
+test_shard_1:
   adapter: mysql
   encoding: utf8
   database: ars_test_shard1
@@ -43,7 +43,7 @@ test_shard1:
   socket: /tmp/mysql.sock
   host: localhost
 
-test_shard1_slave:
+test_shard_1_slave:
   adapter: mysql
   encoding: utf8
   database: ars_test_shard1_slave

@@ -1,15 +1,12 @@
 require 'rubygems'
 require 'bundler'
 Bundler.setup
-require 'activesupport'
-require 'active_support/test_case'
-require 'mysql'
-require 'activerecord'
-require 'shoulda'
+Bundler.require(:default, :development)
 
-require 'ruby-debug'
-::Debugger.start
-::Debugger.settings[:autoeval] = true if ::Debugger.respond_to?(:settings)
+if defined?(Debugger)
+  ::Debugger.start
+  ::Debugger.settings[:autoeval] = true if ::Debugger.respond_to?(:settings)
+end
 
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
@@ -34,6 +31,7 @@ ActiveRecord::Base.configurations.each do |name, conf|
   load(File.dirname(__FILE__) + "/schema.rb")
 end
 
+require 'active_support/test_case'
 class ActiveSupport::TestCase
   def clear_databases
     ActiveRecord::Base.configurations.each do |name, conf|
