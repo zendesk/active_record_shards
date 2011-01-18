@@ -1,7 +1,17 @@
-require 'helper'
+require File.expand_path('helper', File.dirname(__FILE__))
 
 class ConnectionSwitchenTest < ActiveSupport::TestCase
   context "shard switching" do
+    should "only switch connection on sharded models" do
+      assert_using_database('ars_test', Ticket)
+      assert_using_database('ars_test', Account)
+
+      ActiveRecord::Base.on_shard(0) do
+        assert_using_database('ars_test_shard0', Ticket)
+        assert_using_database('ars_test', Account)
+      end
+    end
+
     should "switch to shard and back" do
       assert_using_database('ars_test')
       ActiveRecord::Base.on_slave { assert_using_database('ars_test_slave') }

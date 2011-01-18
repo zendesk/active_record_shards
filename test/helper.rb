@@ -51,7 +51,7 @@ class ActiveSupport::TestCase
     assert_using_database('ars_test_slave')
   end
 
-  def assert_using_database(db_name)
-    assert_equal(db_name, ActiveRecord::Base.connection.select_value("SELECT DATABASE()"))
+  def assert_using_database(db_name, model = ActiveRecord::Base)
+    assert_equal(db_name, model.connection.select_value("SELECT DATABASE()"))
   end
 end

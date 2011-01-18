@@ -49,13 +49,14 @@ module ActiveRecordShards
 
     # Name of the connection pool. Used by ConnectionHandler to retrieve the current connection pool.
     def connection_pool_name # :nodoc:
-      if current_shard_selection.any?
-        current_shard_selection.shard_name(name)
-      elsif self == ActiveRecord::Base
-        name
-      else
-        superclass.connection_pool_name
-      end
+      current_shard_selection.shard_name(self)
+#      if current_shard_selection.any?
+#        current_shard_selection.shard_name(name, self)
+#      elsif self == ActiveRecord::Base
+#        name
+#      else
+#        superclass.connection_pool_name
+#      end
     end
 
     private
@@ -65,19 +66,21 @@ module ActiveRecordShards
     end
 
     def switch_connection(options)
-      if options.has_key?(:slave)
-        current_shard_selection.on_slave = options[:slave]
-      end
+      if options.any?
+        if options.has_key?(:slave)
+          current_shard_selection.on_slave = options[:slave]
+        end
 
-      if options.has_key?(:shard)
-        current_shard_selection.shard = options[:shard]
-      end
+        if options.has_key?(:shard)
+          current_shard_selection.shard = options[:shard]
+        end
 
-      establish_shard_connection if options.any? && !connected_to_shard?
+        establish_shard_connection unless connected_to_shard?
+      end
     end
 
     def establish_shard_connection
-      name = current_shard_selection.connection_configuration_name
+      name = current_shard_selection.shard_name(self)
       spec = configurations[name]
       raise ActiveRecord::AdapterNotSpecified.new("No database defined by #{name} in database.yml") if spec.nil?
 

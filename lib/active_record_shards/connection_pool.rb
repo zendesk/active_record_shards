@@ -15,3 +15,15 @@ ActiveRecord::ConnectionAdapters::ConnectionHandler.class_eval do
     pool.spec.config if pool
   end
 end
+
+ActiveRecord::Base.singleton_class.class_eval do
+  def establish_connection_with_connection_pool_name(spec = nil)
+    case spec
+    when ActiveRecord::Base::ConnectionSpecification
+      connection_handler.establish_connection(connection_pool_name, spec)
+    else
+      establish_connection_without_connection_pool_name(spec)
+    end
+  end
+  alias_method_chain :establish_connection, :connection_pool_name
+end

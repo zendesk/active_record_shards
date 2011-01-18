@@ -1,5 +1,7 @@
 class Account < ActiveRecord::Base
   # attributes: id, name, updated_at, created_at
+  not_sharded
+
   has_many :tickets
 end
 

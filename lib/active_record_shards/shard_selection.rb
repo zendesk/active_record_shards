@@ -21,13 +21,12 @@ module ActiveRecordShards
     end
 
     def connection_configuration_name
-      shard_name(RAILS_ENV)
+      shard_name#(RAILS_ENV)
     end
 
-    def shard_name(prefix)
-      s = ""
-      s << prefix.to_s
-      if @shard
+    def shard_name(klass = nil)
+      s = "#{RAILS_ENV}"
+      if @shard && (klass.nil? || klass.is_sharded?)
         s << '_shard_'
         s << @shard.to_s
       end
