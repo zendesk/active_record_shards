@@ -31,12 +31,12 @@ module ActiveRecordShards
       end
     end
 
-    def configurations_with_shard_explotion=(conf)
-      self.configurations_without_shard_explotion = explode(conf)
+    def configurations_with_shard_explosion=(conf)
+      self.configurations_without_shard_explosion = explode(conf)
     end
 
     def ConfigurationParser.extended(klass)
-      klass.singleton_class.alias_method_chain :configurations=, :shard_explotion
+      klass.singleton_class.alias_method_chain :configurations=, :shard_explosion
 
       if !klass.configurations.nil? && !klass.configurations.empty?
         klass.configurations = klass.configurations
