@@ -3,7 +3,7 @@ $:.push File.expand_path("../lib", __FILE__)
 
 Gem::Specification.new do |s|
   s.name        = "replica"
-  s.version     = "2.0.0.beta1"
+  s.version     = "2.0.0.beta2"
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Mick Staugaard", "Eric Chapweske"]
   s.email       = ["mick@staugaard.com", "eac@zendesk.com"]
