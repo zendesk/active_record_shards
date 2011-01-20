@@ -36,6 +36,8 @@ module ActiveRecordShards
 
     # just to ease the transition from replica to active_record_shards
     alias_method :with_slave, :on_slave
+    alias_method :with_slave_if, :on_slave_if
+    alias_method :with_slave_unless, :on_slave_unless
 
     def on_slave_block(&block)
       old_slave = current_shard_selection.on_slave?
