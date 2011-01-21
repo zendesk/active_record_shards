@@ -1,5 +1,9 @@
 module ActiveRecordShards
   module ConnectionSwitcher
+    def default_shard=(new_default_shard)
+      ActiveRecordShards::ShardSelection.default_shard = new_default_shard
+      switch_connection(:shard => new_default_shard)
+    end
 
     def on_shard(shard, &block)
       old_shard = current_shard_selection.shard
@@ -55,13 +59,6 @@ module ActiveRecordShards
     # Name of the connection pool. Used by ConnectionHandler to retrieve the current connection pool.
     def connection_pool_name # :nodoc:
       current_shard_selection.shard_name(self)
-#      if current_shard_selection.any?
-#        current_shard_selection.shard_name(name, self)
-#      elsif self == ActiveRecord::Base
-#        name
-#      else
-#        superclass.connection_pool_name
-#      end
     end
 
     private

@@ -33,7 +33,35 @@ class ConnectionSwitchenTest < ActiveSupport::TestCase
       ActiveRecord::Base.on_slave { assert_using_database('ars_test_slave') }
     end
   end
-  
+
+  context "default shard selection" do
+    context "of nil" do
+      setup do
+        ActiveRecord::Base.default_shard = nil
+      end
+
+      should "use unsharded db for sharded models" do
+        assert_using_database('ars_test', Ticket)
+        assert_using_database('ars_test', Account)
+      end
+    end
+
+    context "value" do
+      setup do
+        ActiveRecord::Base.default_shard = 0
+      end
+
+      teardown do
+        ActiveRecord::Base.default_shard = nil
+      end
+
+      should "use default shard db for sharded models" do
+        assert_using_database('ars_test_shard0', Ticket)
+        assert_using_database('ars_test', Account)
+      end
+    end
+  end
+
   context "slave driving" do
     context "without slave configuration" do
 

@@ -1,11 +1,15 @@
 module ActiveRecordShards
   class ShardSelection
+    cattr_accessor :default_shard
+
     def initialize
       @on_slave = false
     end
 
-    def shard
-      @shard
+    def shard(klass = nil)
+      if (@shard || self.class.default_shard) && (klass.nil? || klass.is_sharded?)
+        (@shard || self.class.default_shard).to_s
+      end
     end
 
     def shard=(new_shard)
@@ -20,22 +24,14 @@ module ActiveRecordShards
       @on_slave = (new_slave == true)
     end
 
-    def connection_configuration_name
-      shard_name#(RAILS_ENV)
-    end
-
     def shard_name(klass = nil)
       s = "#{RAILS_ENV}"
-      if @shard && (klass.nil? || klass.is_sharded?)
+      if the_shard = shard(klass)
         s << '_shard_'
-        s << @shard.to_s
+        s << the_shard
       end
       s << "_slave" if @on_slave
       s
-    end
-
-    def any?
-      @on_slave || @shard.present?
     end
   end
 end
