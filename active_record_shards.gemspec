@@ -18,14 +18,10 @@ Gem::Specification.new do |s|
   s.add_development_dependency("shoulda")
   s.add_development_dependency("mocha")
 
-  if RUBY_PLATFORM == 'java'
-    s.add_development_dependency("mysql")
+  if RUBY_VERSION < "1.9"
+    s.add_development_dependency("ruby-debug")
   else
-    if RUBY_VERSION < "1.9"
-      s.add_development_dependency("ruby-debug")
-    else
-      s.add_development_dependency("ruby-debug19")
-    end
+    s.add_development_dependency("ruby-debug19")
   end
 
   s.files        = Dir.glob("lib/**/*") + %w(README.rdoc)
