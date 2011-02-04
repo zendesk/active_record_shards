@@ -28,7 +28,7 @@ Gem::Specification.new do |s|
     end
   end
 
-  s.files        = Dir.glob("lib/**/*") + %w(README.rdoc)
+  s.files        = Dir.glob("lib/**/*") + %w(README.md)
   s.test_files   = Dir.glob("test/**/*")
   s.require_path = 'lib'
 end
