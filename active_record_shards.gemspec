@@ -3,7 +3,7 @@ $:.push File.expand_path("../lib", __FILE__)
 
 Gem::Specification.new do |s|
   s.name        = "active_record_shards"
-  s.version     = "2.0.0.beta2"
+  s.version     = "2.0.0.beta3"
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Mick Staugaard", "Eric Chapweske"]
   s.email       = ["mick@staugaard.com", "eac@zendesk.com"]
@@ -24,7 +24,7 @@ Gem::Specification.new do |s|
     s.add_development_dependency("ruby-debug19")
   end
 
-  s.files        = Dir.glob("lib/**/*") + %w(README.rdoc)
+  s.files        = Dir.glob("lib/**/*") + %w(README.md)
   s.test_files   = Dir.glob("test/**/*")
   s.require_path = 'lib'
 end
