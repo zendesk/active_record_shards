@@ -33,7 +33,7 @@ class ConnectionSwitchenTest < ActiveSupport::TestCase
       ActiveRecord::Base.on_slave { assert_using_database('ars_test_slave') }
     end
 
-    context "#on_all_shards" do
+    context "on_all_shards" do
       setup do
         @shard_0_master = ActiveRecord::Base.on_shard(0) {ActiveRecord::Base.connection}
         @shard_1_master = ActiveRecord::Base.on_shard(1) {ActiveRecord::Base.connection}
@@ -84,6 +84,46 @@ class ConnectionSwitchenTest < ActiveSupport::TestCase
           assert_using_database('ars_test', Ticket)
           assert_using_database('ars_test', Account)
         end
+      end
+    end
+  end
+
+  context "in an unsharded environment" do
+    setup do
+      silence_warnings { ::RAILS_ENV = 'test2' }
+      ActiveRecord::Base.establish_connection(::RAILS_ENV)
+      assert_using_database('ars_test2', Ticket)
+    end
+
+    teardown do
+      silence_warnings { ::RAILS_ENV = 'test' }
+      ActiveRecord::Base.establish_connection(::RAILS_ENV)
+      assert_using_database('ars_test', Ticket)
+    end
+
+    context "shard switching" do
+      should "just stay on the main db" do
+        assert_using_database('ars_test2', Ticket)
+        assert_using_database('ars_test2', Account)
+
+        ActiveRecord::Base.on_shard(0) do
+          assert_using_database('ars_test2', Ticket)
+          assert_using_database('ars_test2', Account)
+        end
+      end
+    end
+
+    context "on_all_shards" do
+      setup do
+        @database_names = []
+        ActiveRecord::Base.on_all_shards do
+          @database_names << ActiveRecord::Base.connection.select_value("SELECT DATABASE()")
+        end
+      end
+
+      should "execute the block on all shard masters" do
+        @database_names
+        assert_equal([ActiveRecord::Base.connection.select_value("SELECT DATABASE()")], @database_names)
       end
     end
   end

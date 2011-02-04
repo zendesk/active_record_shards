@@ -53,3 +53,20 @@ test_shard_1_slave:
   socket: /tmp/mysql.sock
   host: localhost
 
+test2:
+  adapter: mysql
+  encoding: utf8
+  database: ars_test2
+  username: root
+  password:
+  socket: /tmp/mysql.sock
+  host: localhost
+
+test2_slave:
+  adapter: mysql
+  encoding: utf8
+  database: ars_test2_slave
+  username: root
+  password:
+  socket: /tmp/mysql.sock
+  host: localhost

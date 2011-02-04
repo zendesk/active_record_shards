@@ -39,7 +39,7 @@ class ActiveSupport::TestCase
       ActiveRecord::Base.connection.execute("DELETE FROM accounts")
       ActiveRecord::Base.connection.execute("DELETE FROM tickets")
     end
-    ActiveRecord::Base.establish_connection('test')
+    ActiveRecord::Base.establish_connection(RAILS_ENV)
   end
   setup :clear_databases
 
