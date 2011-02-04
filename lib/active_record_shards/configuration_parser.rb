@@ -6,6 +6,7 @@ module ActiveRecordShards
       conf.keys.each do |env_name|
         env_config = conf[env_name]
         if shards = env_config.delete('shards')
+          env_config['shard_names'] = shards.keys
           shards.each do |shard_name, shard_conf|
             expand_child!(env_config, shard_conf)
             conf["#{env_name}_shard_#{shard_name}"] = shard_conf

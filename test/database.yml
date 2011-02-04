@@ -6,6 +6,7 @@ test:
   password:
   socket: /tmp/mysql.sock
   host: localhost
+  shard_names: ['0', '1']
   
 test_slave:
   adapter: mysql

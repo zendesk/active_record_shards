@@ -1,5 +1,6 @@
 module ActiveRecordShards
   class ShardSelection
+    NO_SHARD = :_no_shard
     cattr_accessor :default_shard
 
     def initialize
@@ -8,12 +9,16 @@ module ActiveRecordShards
 
     def shard(klass = nil)
       if (@shard || self.class.default_shard) && (klass.nil? || klass.is_sharded?)
-        (@shard || self.class.default_shard).to_s
+        if @shard == NO_SHARD
+          nil
+        else
+          (@shard || self.class.default_shard).to_s
+        end
       end
     end
 
     def shard=(new_shard)
-      @shard = new_shard
+      @shard = (new_shard || NO_SHARD)
     end
 
     def on_slave?

@@ -32,6 +32,25 @@ class ConnectionSwitchenTest < ActiveSupport::TestCase
       assert_using_database('ars_test')
       ActiveRecord::Base.on_slave { assert_using_database('ars_test_slave') }
     end
+
+    context "#on_all_shards" do
+      setup do
+        @shard_0_master = ActiveRecord::Base.on_shard(0) {ActiveRecord::Base.connection}
+        @shard_1_master = ActiveRecord::Base.on_shard(1) {ActiveRecord::Base.connection}
+        assert_not_equal(@shard_0_master.select_value("SELECT DATABASE()"), @shard_1_master.select_value("SELECT DATABASE()"))
+
+        @database_names = []
+        ActiveRecord::Base.on_all_shards do
+          @database_names << ActiveRecord::Base.connection.select_value("SELECT DATABASE()")
+        end
+      end
+
+      should "execute the block on all shard masters" do
+        assert_equal(2, @database_names.size)
+        assert_contains(@database_names, @shard_0_master.select_value("SELECT DATABASE()"))
+        assert_contains(@database_names, @shard_1_master.select_value("SELECT DATABASE()"))
+      end
+    end
   end
 
   context "default shard selection" do
@@ -58,6 +77,13 @@ class ConnectionSwitchenTest < ActiveSupport::TestCase
       should "use default shard db for sharded models" do
         assert_using_database('ars_test_shard0', Ticket)
         assert_using_database('ars_test', Account)
+      end
+
+      should "still be able to switch to shard nil" do
+        ActiveRecord::Base.on_shard(nil) do
+          assert_using_database('ars_test', Ticket)
+          assert_using_database('ars_test', Account)
+        end
       end
     end
   end

@@ -10,13 +10,14 @@ class ConfigurationParserTest < ActiveSupport::TestCase
       setup { @conf = @exploded_conf['test_slave'] }
       should "be exploded" do
         assert_equal({
-          "adapter"  => "mysql",
-          "encoding" => "utf8",
-          "database" => "ars_test",
-          "port"     => 123,
-          "username" => "root",
-          "password" => nil,
-          "host"     => "main_slave_host"
+          "adapter"     => "mysql",
+          "encoding"    => "utf8",
+          "database"    => "ars_test",
+          "port"        => 123,
+          "username"    => "root",
+          "password"    => nil,
+          "host"        => "main_slave_host",
+          "shard_names" => ["a", "b"]
         }, @conf)
       end
     end
@@ -26,13 +27,14 @@ class ConfigurationParserTest < ActiveSupport::TestCase
         setup { @conf = @exploded_conf['test_shard_a'] }
         should "be exploded" do
           assert_equal({
-            "adapter"  => "mysql",
-            "encoding" => "utf8",
-            "database" => "ars_test_shard_a",
-            "port"     => 123,
-            "username" => "root",
-            "password" => nil,
-            "host"     => "shard_a_host"
+            "adapter"     => "mysql",
+            "encoding"    => "utf8",
+            "database"    => "ars_test_shard_a",
+            "port"        => 123,
+            "username"    => "root",
+            "password"    => nil,
+            "host"        => "shard_a_host",
+            "shard_names" => ["a", "b"]
           }, @conf)
         end
       end
@@ -41,13 +43,14 @@ class ConfigurationParserTest < ActiveSupport::TestCase
         setup { @conf = @exploded_conf['test_shard_a_slave'] }
         should "be exploded" do
           assert_equal({
-            "adapter"  => "mysql",
-            "encoding" => "utf8",
-            "database" => "ars_test_shard_a",
-            "port"     => 123,
-            "username" => "root",
-            "password" => nil,
-            "host"     => "shard_a_slave_host"
+            "adapter"     => "mysql",
+            "encoding"    => "utf8",
+            "database"    => "ars_test_shard_a",
+            "port"        => 123,
+            "username"    => "root",
+            "password"    => nil,
+            "host"        => "shard_a_slave_host",
+            "shard_names" => ["a", "b"]
           }, @conf)
         end
       end
@@ -58,13 +61,14 @@ class ConfigurationParserTest < ActiveSupport::TestCase
         setup { @conf = @exploded_conf['test_shard_b'] }
         should "be exploded" do
           assert_equal({
-            "adapter"  => "mysql",
-            "encoding" => "utf8",
-            "database" => "ars_test_shard_b",
-            "port"     => 123,
-            "username" => "root",
-            "password" => nil,
-            "host"     => "shard_b_host"
+            "adapter"     => "mysql",
+            "encoding"    => "utf8",
+            "database"    => "ars_test_shard_b",
+            "port"        => 123,
+            "username"    => "root",
+            "password"    => nil,
+            "host"        => "shard_b_host",
+            "shard_names" => ["a", "b"]
           }, @conf)
         end
       end
@@ -73,13 +77,14 @@ class ConfigurationParserTest < ActiveSupport::TestCase
         setup { @conf = @exploded_conf['test_shard_b_slave'] }
         should "be exploded" do
           assert_equal({
-            "adapter"  => "mysql",
-            "encoding" => "utf8",
-            "database" => "ars_test_shard_b_slave",
-            "port"     => 123,
-            "username" => "root",
-            "password" => nil,
-            "host"     => "shard_b_host"
+            "adapter"     => "mysql",
+            "encoding"    => "utf8",
+            "database"    => "ars_test_shard_b_slave",
+            "port"        => 123,
+            "username"    => "root",
+            "password"    => nil,
+            "host"        => "shard_b_host",
+            "shard_names" => ["a", "b"]
           }, @conf)
         end
       end

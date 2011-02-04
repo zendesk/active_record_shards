@@ -13,6 +13,16 @@ module ActiveRecordShards
       switch_connection(:shard => old_shard)
     end
 
+    def on_all_shards(&block)
+        old_shard = current_shard_selection.shard
+        shard_names.each do |shard|
+          switch_connection(:shard => shard)
+          yield
+        end
+      ensure
+        switch_connection(:shard => old_shard)
+    end
+
     def on_slave_if(condition, &block)
       condition ? on_slave(&block) : yield
     end
@@ -79,6 +89,11 @@ module ActiveRecordShards
 
         establish_shard_connection unless connected_to_shard?
       end
+    end
+
+    def shard_names
+      env_name = defined?(Rails.env) ? Rails.env : RAILS_ENV
+      configurations[env_name]['shard_names']
     end
 
     def establish_shard_connection
