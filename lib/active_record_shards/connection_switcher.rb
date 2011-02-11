@@ -6,25 +6,25 @@ module ActiveRecordShards
     end
 
     def on_shard(shard, &block)
-      old_shard = current_shard_selection.shard
+      old_options = current_shard_selection.options
       switch_connection(:shard => shard) if supports_sharding?
       yield
     ensure
-      switch_connection(:shard => old_shard)
+      switch_connection(old_options)
     end
 
     def on_all_shards(&block)
-        old_shard = current_shard_selection.shard
-        if supports_sharding?
-          shard_names.each do |shard|
-            switch_connection(:shard => shard)
-            yield
-          end
-        else
+      old_options = current_shard_selection.options
+      if supports_sharding?
+        shard_names.each do |shard|
+          switch_connection(:shard => shard)
           yield
         end
-      ensure
-        switch_connection(:shard => old_shard)
+      else
+        yield
+      end
+    ensure
+      switch_connection(old_options)
     end
 
     def on_slave_if(condition, &block)
@@ -58,21 +58,22 @@ module ActiveRecordShards
     alias_method :with_slave_unless, :on_slave_unless
 
     def on_slave_block(&block)
-      old_slave = current_shard_selection.on_slave?
-      begin
-        switch_connection(:slave => true)
-      rescue ActiveRecord::AdapterNotSpecified => e
-        switch_connection(:slave => old_slave)
-        logger.warn("Failed to establish shard connection: #{e.message} - defaulting to master")
-      end
+      old_options = current_shard_selection.options
+      switch_connection(:slave => true)
       with_scope({:find => {:readonly => current_shard_selection.on_slave?}}, :merge, &block)
     ensure
-      switch_connection(:slave => old_slave)
+      switch_connection(old_options)
     end
 
     # Name of the connection pool. Used by ConnectionHandler to retrieve the current connection pool.
     def connection_pool_name # :nodoc:
-      current_shard_selection.shard_name(self)
+      name = current_shard_selection.shard_name(self)
+
+      if configurations[name].nil? && current_shard_selection.on_slave?
+        current_shard_selection.shard_name(self, false)
+      else
+        name
+      end
     end
 
     def supports_sharding?
@@ -100,13 +101,17 @@ module ActiveRecordShards
     end
 
     def shard_names
-      env_name = defined?(Rails.env) ? Rails.env : RAILS_ENV
-      configurations[env_name]['shard_names'] || []
+      configurations[shard_env]['shard_names'] || []
+    end
+
+    def shard_env
+      @shard_env = defined?(Rails.env) ? Rails.env : RAILS_ENV
     end
 
     def establish_shard_connection
-      name = current_shard_selection.shard_name(self)
+      name = connection_pool_name
       spec = configurations[name]
+
       raise ActiveRecord::AdapterNotSpecified.new("No database defined by #{name} in database.yml") if spec.nil?
 
       connection_handler.establish_connection(connection_pool_name, ActiveRecord::Base::ConnectionSpecification.new(spec, "#{spec['adapter']}_connection"))

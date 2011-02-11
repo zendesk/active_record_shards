@@ -29,14 +29,20 @@ module ActiveRecordShards
       @on_slave = (new_slave == true)
     end
 
-    def shard_name(klass = nil)
+    def shard_name(klass = nil, try_slave = true)
       s = "#{RAILS_ENV}"
       if the_shard = shard(klass)
         s << '_shard_'
         s << the_shard
       end
-      s << "_slave" if @on_slave
+      if @on_slave && try_slave
+        s << "_slave" if @on_slave
+      end
       s
+    end
+
+    def options
+      {:shard => @shard, :slave => @on_slave}
     end
   end
 end
