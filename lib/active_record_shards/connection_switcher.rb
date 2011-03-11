@@ -1,5 +1,10 @@
 module ActiveRecordShards
   module ConnectionSwitcher
+    def self.extended(klass)
+      klass.singleton_class.alias_method_chain :columns, :default_shard
+      klass.singleton_class.alias_method_chain :table_exists?, :default_shard
+    end
+
     def default_shard=(new_default_shard)
       ActiveRecordShards::ShardSelection.default_shard = new_default_shard
       switch_connection(:shard => new_default_shard)
@@ -119,6 +124,28 @@ module ActiveRecordShards
 
     def connected_to_shard?
       connection_handler.connection_pools.has_key?(connection_pool_name)
+    end
+
+    def columns_with_default_shard
+      begin
+        columns_without_default_shard
+      rescue
+        if is_sharded? && (shard_name = shard_names.first)
+          on_shard(shard_name) { columns_without_default_shard }
+        else
+          raise
+        end
+      end
+    end
+
+    def table_exists_with_default_shard?
+      result = table_exists_without_default_shard?
+
+      if !result && is_sharded? && (shard_name = shard_names.first)
+        result = on_shard(shard_name) { table_exists_without_default_shard? }
+      end
+
+      result
     end
 
     class SlaveProxy

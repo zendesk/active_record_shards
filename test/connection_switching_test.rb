@@ -88,6 +88,101 @@ class ConnectionSwitchenTest < ActiveSupport::TestCase
     end
   end
 
+  context "ActiveRecord::Base.columns" do
+    setup do
+      ActiveRecord::Base.default_shard = nil
+    end
+
+    context "for unsharded models" do
+      setup do
+        class UnshardedModel < ActiveRecord::Base
+          not_sharded
+        end
+
+        begin
+          UnshardedModel.columns
+        rescue
+        end
+      end
+      
+      before_should "not touch any shard connections" do
+        ActiveRecord::Base.on_all_shards do
+          ActiveRecord::Base.connection.expects(:execute).never
+        end
+      end
+    end
+
+    context "for sharded models" do
+      setup do
+        class ShardedModel < ActiveRecord::Base
+        end
+
+        begin
+          ShardedModel.columns
+        rescue
+        end
+      end
+
+      before_should "try the first shard" do
+        shards = ActiveRecord::Base.configurations[RAILS_ENV]['shard_names'].dup
+
+        ActiveRecord::Base.on_shard(shards.shift) do
+          ActiveRecord::Base.connection.expects(:execute)
+        end
+
+        shards.each do |shard|
+          ActiveRecord::Base.on_shard(shard) do
+            ActiveRecord::Base.connection.expects(:execute).never
+          end
+        end
+      end
+    end
+  end
+
+  context "ActiveRecord::Base.table_exists?" do
+    setup do
+      ActiveRecord::Base.default_shard = nil
+    end
+
+    context "for unsharded models" do
+      setup do
+        class UnshardedModel < ActiveRecord::Base
+          not_sharded
+        end
+        assert(!UnshardedModel.table_exists?)
+      end
+      
+      before_should "not touch any shard connections" do
+        ActiveRecord::Base.on_all_shards do
+          ActiveRecord::Base.connection.expects(:execute).never
+        end
+      end
+    end
+
+    context "for sharded models" do
+      setup do
+        class ShardedModel < ActiveRecord::Base
+        end
+
+        assert(!ShardedModel.table_exists?)
+      end
+
+      before_should "try the first shard" do
+        shards = ActiveRecord::Base.configurations[RAILS_ENV]['shard_names'].dup
+
+        ActiveRecord::Base.on_shard(shards.shift) do
+          ActiveRecord::Base.connection.expects(:tables).returns([])
+        end
+
+        shards.each do |shard|
+          ActiveRecord::Base.on_shard(shard) do
+            ActiveRecord::Base.connection.expects(:tables).never
+          end
+        end
+      end
+    end
+  end
+
   context "in an unsharded environment" do
     setup do
       silence_warnings { ::RAILS_ENV = 'test2' }
