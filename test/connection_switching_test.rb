@@ -107,7 +107,7 @@ class ConnectionSwitchenTest < ActiveSupport::TestCase
       
       before_should "not touch any shard connections" do
         ActiveRecord::Base.on_all_shards do
-          ActiveRecord::Base.connection.expects(:execute).never
+          ActiveRecord::Base.connection.expects(:columns).never
         end
       end
     end
@@ -127,12 +127,12 @@ class ConnectionSwitchenTest < ActiveSupport::TestCase
         shards = ActiveRecord::Base.configurations[RAILS_ENV]['shard_names'].dup
 
         ActiveRecord::Base.on_shard(shards.shift) do
-          ActiveRecord::Base.connection.expects(:execute)
+          ActiveRecord::Base.connection.expects(:columns)
         end
 
         shards.each do |shard|
           ActiveRecord::Base.on_shard(shard) do
-            ActiveRecord::Base.connection.expects(:execute).never
+            ActiveRecord::Base.connection.expects(:columns).never
           end
         end
       end

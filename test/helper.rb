@@ -52,6 +52,6 @@ class ActiveSupport::TestCase
   end
 
   def assert_using_database(db_name, model = ActiveRecord::Base)
-    assert_equal(db_name, model.connection.select_value("SELECT DATABASE()"))
+    assert_equal(db_name, model.connection.current_database)
   end
 end
