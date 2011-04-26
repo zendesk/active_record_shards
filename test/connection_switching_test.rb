@@ -317,6 +317,10 @@ class ConnectionSwitchenTest < ActiveSupport::TestCase
         should "be marked as read only" do
           assert(@model.readonly?)
         end
+
+        should "be marked as comming from the slave" do
+          assert(@model.from_slave?)
+        end
       end
 
       context "a model loaded with the master" do
@@ -329,6 +333,10 @@ class ConnectionSwitchenTest < ActiveSupport::TestCase
 
         should "not be marked as read only" do
           assert(!@model.readonly?)
+        end
+
+        should "not be marked as comming from the slave" do
+          assert(!@model.from_slave?)
         end
       end
     end

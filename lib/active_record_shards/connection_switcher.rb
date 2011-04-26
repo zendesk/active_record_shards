@@ -65,7 +65,7 @@ module ActiveRecordShards
     def on_slave_block(&block)
       old_options = current_shard_selection.options
       switch_connection(:slave => true)
-      with_scope({:find => {:readonly => current_shard_selection.on_slave?}}, :merge, &block)
+      with_scope({:find => {:readonly => on_slave?}}, :merge, &block)
     ensure
       switch_connection(old_options)
     end
@@ -74,7 +74,7 @@ module ActiveRecordShards
     def connection_pool_name # :nodoc:
       name = current_shard_selection.shard_name(self)
 
-      if configurations[name].nil? && current_shard_selection.on_slave?
+      if configurations[name].nil? && on_slave?
         current_shard_selection.shard_name(self, false)
       else
         name
@@ -83,6 +83,10 @@ module ActiveRecordShards
 
     def supports_sharding?
       shard_names.any?
+    end
+
+    def on_slave?
+      current_shard_selection.on_slave?
     end
 
     private
