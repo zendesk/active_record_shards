@@ -89,11 +89,11 @@ module ActiveRecordShards
       current_shard_selection.on_slave?
     end
 
-    private
-
     def current_shard_selection
       Thread.current[:shard_selection] ||= ShardSelection.new
     end
+
+    private
 
     def switch_connection(options)
       if options.any?

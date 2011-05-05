@@ -20,11 +20,15 @@ module ActiveRecordShards
     module InstanceMethods
       def after_initialize_with_slave
         after_initialize_without_slave if respond_to?(:after_initialize_without_slave)
-        @from_slave = self.class.on_slave?
+        @shard_selection = self.class.current_shard_selection.options.clone
       end
 
       def from_slave?
-        @from_slave
+        @shard_selection[:slave]
+      end
+
+      def from_shard
+        @shard_selection[:shard]
       end
     end
 
