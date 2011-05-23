@@ -70,3 +70,13 @@ test2_slave:
   password:
   socket: /tmp/mysql.sock
   host: localhost
+
+alternative:
+  adapter: mysql
+  encoding: utf8
+  database: ars_test_alternative
+  username: root
+  password:
+  socket: /tmp/mysql.sock
+  host: localhost
+  shard_names: ['0', '1']

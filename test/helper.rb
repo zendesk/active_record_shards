@@ -11,7 +11,6 @@ end
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 require 'active_record_shards'
-require 'models'
 require 'logger'
 
 RAILS_ENV = "test"
@@ -30,6 +29,8 @@ ActiveRecord::Base.configurations.each do |name, conf|
   end
   load(File.dirname(__FILE__) + "/schema.rb")
 end
+
+require 'models'
 
 require 'active_support/test_case'
 class ActiveSupport::TestCase

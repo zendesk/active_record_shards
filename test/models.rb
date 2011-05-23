@@ -5,6 +5,11 @@ class Account < ActiveRecord::Base
   has_many :tickets
 end
 
+class Email < ActiveRecord::Base
+  not_sharded
+  establish_connection_override :alternative
+end
+
 class Ticket < ActiveRecord::Base
   # attributes: id, title, account_id, updated_at, created_at
   belongs_to :account

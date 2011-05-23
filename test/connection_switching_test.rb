@@ -361,4 +361,22 @@ class ConnectionSwitchenTest < ActiveSupport::TestCase
       end
     end
   end
+
+  context "alternative connections" do
+    should "not interfere with other connections" do
+      assert_using_database('ars_test', Account)
+      assert_using_database('ars_test', Ticket)
+      assert_using_database('ars_test_alternative', Email)
+
+      ActiveRecord::Base.on_shard(0) do
+        assert_using_database('ars_test', Account)
+        assert_using_database('ars_test_shard0', Ticket)
+        assert_using_database('ars_test_alternative', Email)
+      end
+
+      assert_using_database('ars_test', Account)
+      assert_using_database('ars_test', Ticket)
+      assert_using_database('ars_test_alternative', Email)
+    end
+  end
 end
