@@ -18,6 +18,11 @@ module ActiveRecordShards
       switch_connection(old_options)
     end
 
+    def on_first_shard(&block)
+      shard_name = shard_names.first
+      on_shard(shard_name) { yield }
+    end
+
     def on_all_shards(&block)
       old_options = current_shard_selection.options
       if supports_sharding?

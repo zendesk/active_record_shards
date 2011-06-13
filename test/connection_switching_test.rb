@@ -33,6 +33,14 @@ class ConnectionSwitchenTest < ActiveSupport::TestCase
       ActiveRecord::Base.on_slave { assert_using_database('ars_test_slave') }
     end
 
+    context "on_first_shard" do
+      should "use the first shard" do
+        ActiveRecord::Base.on_first_shard {
+          assert_using_database('ars_test_shard0')
+        }
+      end
+    end
+
     context "on_all_shards" do
       setup do
         @shard_0_master = ActiveRecord::Base.on_shard(0) {ActiveRecord::Base.connection}
@@ -104,7 +112,7 @@ class ConnectionSwitchenTest < ActiveSupport::TestCase
         rescue
         end
       end
-      
+
       before_should "not touch any shard connections" do
         ActiveRecord::Base.on_all_shards do
           ActiveRecord::Base.connection.expects(:columns).never
@@ -151,7 +159,7 @@ class ConnectionSwitchenTest < ActiveSupport::TestCase
         end
         assert(!UnshardedModel.table_exists?)
       end
-      
+
       before_should "not touch any shard connections" do
         ActiveRecord::Base.on_all_shards do
           ActiveRecord::Base.connection.expects(:execute).never
