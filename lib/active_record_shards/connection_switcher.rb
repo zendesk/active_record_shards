@@ -28,7 +28,7 @@ module ActiveRecordShards
       if supports_sharding?
         shard_names.each do |shard|
           switch_connection(:shard => shard)
-          yield
+          yield(shard)
         end
       else
         yield
