@@ -4,8 +4,7 @@ test:
   database: ars_test
   username: root
   password:
-  socket: /tmp/mysql.sock
-  host: localhost
+  host: 127.0.0.1
   shard_names: ['0', '1']
   
 test_slave:
@@ -14,8 +13,7 @@ test_slave:
   database: ars_test_slave
   username: root
   password:
-  socket: /tmp/mysql.sock
-  host: localhost
+  host: 127.0.0.1
 
 test_shard_0:
   adapter: mysql
@@ -23,8 +21,7 @@ test_shard_0:
   database: ars_test_shard0
   username: root
   password:
-  socket: /tmp/mysql.sock
-  host: localhost
+  host: 127.0.0.1
 
 test_shard_0_slave:
   adapter: mysql
@@ -32,8 +29,7 @@ test_shard_0_slave:
   database: ars_test_shard0_slave
   username: root
   password:
-  socket: /tmp/mysql.sock
-  host: localhost
+  host: 127.0.0.1
 
 test_shard_1:
   adapter: mysql
@@ -41,8 +37,7 @@ test_shard_1:
   database: ars_test_shard1
   username: root
   password:
-  socket: /tmp/mysql.sock
-  host: localhost
+  host: 127.0.0.1
 
 test_shard_1_slave:
   adapter: mysql
@@ -50,8 +45,7 @@ test_shard_1_slave:
   database: ars_test_shard1_slave
   username: root
   password:
-  socket: /tmp/mysql.sock
-  host: localhost
+  host: 127.0.0.1
 
 test2:
   adapter: mysql
@@ -59,8 +53,7 @@ test2:
   database: ars_test2
   username: root
   password:
-  socket: /tmp/mysql.sock
-  host: localhost
+  host: 127.0.0.1
 
 test2_slave:
   adapter: mysql
@@ -68,8 +61,7 @@ test2_slave:
   database: ars_test2_slave
   username: root
   password:
-  socket: /tmp/mysql.sock
-  host: localhost
+  host: 127.0.0.1
 
 alternative:
   adapter: mysql
@@ -77,6 +69,5 @@ alternative:
   database: ars_test_alternative
   username: root
   password:
-  socket: /tmp/mysql.sock
-  host: localhost
+  host: 127.0.0.1
   shard_names: ['0', '1']
