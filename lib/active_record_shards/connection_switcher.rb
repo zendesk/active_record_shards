@@ -45,6 +45,27 @@ module ActiveRecordShards
       on_slave_if(!condition, &block)
     end
 
+    def on_master_if(condition, &block)
+      condition ? on_master(&block) : yield
+    end
+
+    def on_master_unless(condition, &block)
+      on_master_if(!condition, &block)
+    end
+
+    def on_master_or_slave(which, &block)
+      if block_given?
+        case which
+          when :master
+            on_master_block(&block)
+          when :slave
+            on_slave_block(&block)
+        end
+      else
+        MasterSlaveProxy.new(self, which)
+      end
+   end
+
     # Executes queries using the slave database. Fails over to master if no slave is found.
     # if you want to execute a block of code on the slave you can go:
     #   Account.on_slave do
@@ -55,11 +76,11 @@ module ActiveRecordShards
     # For one-liners you can simply do
     #   Account.on_slave.first
     def on_slave(&block)
-      if block_given?
-        on_slave_block(&block)
-      else
-        SlaveProxy.new(self)
-      end
+      on_master_or_slave(:slave, &block)
+    end
+
+    def on_master(&block)
+      on_master_or_slave(:master, &block)
     end
 
     # just to ease the transition from replica to active_record_shards
@@ -69,10 +90,19 @@ module ActiveRecordShards
 
     def on_slave_block(&block)
       old_options = current_shard_selection.options
-      switch_connection(:slave => true)
+      switch_connection(:slave => (@disallow_slave.nil? || @disallow_slave == 0))
       with_scope({:find => {:readonly => on_slave?}}, :merge, &block)
     ensure
       switch_connection(old_options)
+    end
+
+    # to make this re-entrant we need to keep a counter.
+    def on_master_block(&block)
+      @disallow_slave ||= 0
+      @disallow_slave += 1
+      yield
+    ensure
+      @disallow_slave -= 1
     end
 
     # Name of the connection pool. Used by ConnectionHandler to retrieve the current connection pool.
@@ -162,13 +192,14 @@ module ActiveRecordShards
       result
     end
 
-    class SlaveProxy
-      def initialize(target)
+    class MasterSlaveProxy
+      def initialize(target, which)
         @target = target
+        @which = which
       end
 
       def method_missing(method, *args, &block)
-        @target.on_slave_block { @target.send(method, *args, &block) }
+        @target.on_master_or_slave(@which) { @target.send(method, *args, &block) }
       end
     end
   end

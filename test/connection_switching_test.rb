@@ -301,7 +301,6 @@ class ConnectionSwitchenTest < ActiveSupport::TestCase
         Account.on_slave_unless(false) do
           assert_using_slave_db
         end
-
       end
 
       context "a model loaded with the slave" do
@@ -345,6 +344,44 @@ class ConnectionSwitchenTest < ActiveSupport::TestCase
 
         should "not be marked as comming from the slave" do
           assert(!@model.from_slave?)
+        end
+      end
+
+      context "with finds routed to the slave by default" do
+        setup do
+          Account.on_slave_by_default = true
+          Account.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'master_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
+          Account.on_slave.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'slave_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
+          Account.on_slave.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1001, 'slave_name2', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
+        end
+
+        should "find() by default on the slave" do
+          account = Account.find(1000)
+          assert_equal 'slave_name', account.name
+        end
+
+        should "count() by default on the slave" do
+          count = Account.all.size
+          assert_equal 2, count
+        end
+
+        should "Allow override using on_master" do
+          model = Account.on_master.find(1000)
+          assert_equal "master_name", model.name
+        end
+
+        should "not override on_master with on_slave" do
+          model = Account.on_master { Account.on_slave.find(1000) }
+          assert_equal "master_name", model.name
+        end
+
+        should "override on_slave with on_master" do
+          model = Account.on_slave { Account.on_master.find(1000) }
+          assert_equal "master_name", model.name
+        end
+
+        teardown do
+          Account.on_slave_by_default = false
         end
       end
     end

@@ -17,6 +17,14 @@ module ActiveRecordShards
       end
     end
 
+    def on_slave_by_default?
+      @on_slave_by_default
+    end
+
+    def on_slave_by_default=(val)
+      @on_slave_by_default = val
+    end
+
     module InstanceMethods
       def after_initialize_with_slave
         after_initialize_without_slave if respond_to?(:after_initialize_without_slave)
@@ -40,7 +48,7 @@ module ActiveRecordShards
       else
         base.send(:alias_method, :after_initialize, :after_initialize_with_slave)
       end
-      
+
     end
   end
 end
