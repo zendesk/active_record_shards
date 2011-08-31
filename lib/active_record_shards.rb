@@ -6,6 +6,7 @@ require 'active_record_shards/shard_selection'
 require 'active_record_shards/connection_switcher'
 require 'active_record_shards/association_collection_connection_selection'
 require 'active_record_shards/connection_pool'
+require 'active_record_shards/migration'
 
 ActiveRecord::Base.extend(ActiveRecordShards::ConfigurationParser)
 ActiveRecord::Base.extend(ActiveRecordShards::Model)
