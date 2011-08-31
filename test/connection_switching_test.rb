@@ -48,8 +48,10 @@ class ConnectionSwitchenTest < ActiveSupport::TestCase
         assert_not_equal(@shard_0_master.select_value("SELECT DATABASE()"), @shard_1_master.select_value("SELECT DATABASE()"))
 
         @database_names = []
-        ActiveRecord::Base.on_all_shards do
+        @database_shards = []
+        ActiveRecord::Base.on_all_shards do |shard|
           @database_names << ActiveRecord::Base.connection.select_value("SELECT DATABASE()")
+          @database_shards << shard
         end
       end
 
@@ -57,6 +59,9 @@ class ConnectionSwitchenTest < ActiveSupport::TestCase
         assert_equal(2, @database_names.size)
         assert_contains(@database_names, @shard_0_master.select_value("SELECT DATABASE()"))
         assert_contains(@database_names, @shard_1_master.select_value("SELECT DATABASE()"))
+        assert_equal(2, @database_shards.size)
+        assert_contains(@database_shards, "0")
+        assert_contains(@database_shards, "1")
       end
     end
   end
