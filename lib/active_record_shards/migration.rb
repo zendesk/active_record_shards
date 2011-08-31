@@ -44,7 +44,8 @@ module ActiveRecordShards
 
     def migrate_with_forced_shard(direction)
       if migration_shard.blank?
-        raise "Can't run migrations with a shard spec: this may be :all, :none, or a specific shard (for data-fixups) please call shard(arg) in your migration"
+        raise "#{self.name}: Can't run migrations without a shard spec: this may be :all, :none,
+                 or a specific shard (for data-fixups).  please call shard(arg) in your migration."
       end
 
       shard = ActiveRecord::Base.current_shard_selection.shard

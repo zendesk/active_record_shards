@@ -58,6 +58,12 @@ class MigratorTest < ActiveSupport::TestCase
   end
 
   def test_bad_migration
+    begin
+      CowardlyMigration.up
+    rescue Exception => e
+      assert_match /CowardlyMigration/, e.message
+    end
+
     assert_raises(RuntimeError) do
       CowardlyMigration.up
     end
