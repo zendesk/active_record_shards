@@ -31,6 +31,30 @@ module ActiveRecord
         end
       end
     end
+
+    # don't allow Migrator class to cache versions
+    def migrated
+      self.class.get_all_versions
+    end
+
+    # list of pending migrations is any migrations that haven't run on all shards.
+    def pending_migrations
+      migration_counts = Hash.new(0)
+      ActiveRecord::Base.on_shard(nil) do
+        migrated.each { |v| migration_counts[v] += 1 }
+      end
+
+      shard_count = 1
+      ActiveRecord::Base.on_all_shards do
+        migrated.each { |v| migration_counts[v] += 1 }
+        shard_count += 1
+      end
+   
+      migrations.select do |m|
+        count = migration_counts[m.version]
+        count.nil? || count < shard_count
+      end
+    end
   end
 end
 

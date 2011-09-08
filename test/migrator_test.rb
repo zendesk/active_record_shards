@@ -75,19 +75,28 @@ class MigratorTest < ActiveSupport::TestCase
 
   def test_failing_migration
     # like, if you have to break a migration in the middle somewhere.
+    migration_path = File.join(File.dirname(__FILE__), "/failure_migration")
+
+    assert failure_migration_pending?(migration_path)
     begin
-      migration_path = File.join(File.dirname(__FILE__), "/failure_migration")
       ActiveRecord::Migrator.migrate(migration_path)
     rescue
+      # after first fail, should still be pending
+      assert failure_migration_pending?(migration_path)
       retry
     end
 
+    assert !failure_migration_pending?(migration_path)
     ActiveRecord::Base.on_all_shards do
       assert table_has_column?("tickets", "sharded_column")
     end
   end
 
   private
+  def failure_migration_pending?(migration_path)
+    ActiveRecord::Migrator.new(:up, migration_path).pending_migrations.detect { |f| f.name == "FailureMigration" }
+  end
+
   def table_has_column?(table, column)
     ActiveRecord::Base.connection.select_value("show create table #{table}") =~ /#{column}/
   end
