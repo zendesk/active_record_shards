@@ -103,6 +103,10 @@ module ActiveRecordShards
       Thread.current[:shard_selection] ||= ShardSelection.new
     end
 
+    def shard_names
+      configurations[shard_env]['shard_names'] || []
+    end
+
     private
 
     def switch_connection(options)
@@ -117,10 +121,6 @@ module ActiveRecordShards
 
         establish_shard_connection unless connected_to_shard?
       end
-    end
-
-    def shard_names
-      configurations[shard_env]['shard_names'] || []
     end
 
     def shard_env
