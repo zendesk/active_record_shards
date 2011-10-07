@@ -103,6 +103,10 @@ module ActiveRecordShards
       Thread.current[:shard_selection] ||= ShardSelection.new
     end
 
+    def current_shard_id
+      current_shard_selection.shard
+    end
+
     def shard_names
       configurations[shard_env]['shard_names'] || []
     end
