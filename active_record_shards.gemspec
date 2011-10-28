@@ -3,7 +3,7 @@ $:.push File.expand_path("../lib", __FILE__)
 
 Gem::Specification.new do |s|
   s.name        = "active_record_shards"
-  s.version     = "2.4.5"
+  s.version     = "2.4.6"
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Mick Staugaard", "Eric Chapweske", "Ben Osheroff"]
   s.email       = ["mick@staugaard.com", "eac@zendesk.com", "ben@gimbo.net"]
@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.summary     = "Simple database switching for ActiveRecord."
   s.description = "Easily run queries on shard and slave databases."
 
-  s.add_runtime_dependency("activerecord", "~> 2.3.5")
+  s.add_runtime_dependency("activerecord")
 
   s.add_development_dependency("rake")
   s.add_development_dependency("bundler")

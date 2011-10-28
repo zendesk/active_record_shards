@@ -14,23 +14,23 @@ class ConnectionSwitchenTest < ActiveSupport::TestCase
 
     should "switch to shard and back" do
       assert_using_database('ars_test')
-      ActiveRecord::Base.on_slave { assert_using_database('ars_test_slave') }
+      Ticket.on_slave { assert_using_database('ars_test_slave') }
 
       ActiveRecord::Base.on_shard(0) do
         assert_using_database('ars_test_shard0')
-        ActiveRecord::Base.on_slave { assert_using_database('ars_test_shard0_slave') }
+        Ticket.on_slave { assert_using_database('ars_test_shard0_slave') }
 
         ActiveRecord::Base.on_shard(nil) do
           assert_using_database('ars_test')
-          ActiveRecord::Base.on_slave { assert_using_database('ars_test_slave') }
+          Ticket.on_slave { assert_using_database('ars_test_slave') }
         end
 
         assert_using_database('ars_test_shard0')
-        ActiveRecord::Base.on_slave { assert_using_database('ars_test_shard0_slave') }
+        Ticket.on_slave { assert_using_database('ars_test_shard0_slave') }
       end
 
       assert_using_database('ars_test')
-      ActiveRecord::Base.on_slave { assert_using_database('ars_test_slave') }
+      Ticket.on_slave { assert_using_database('ars_test_slave') }
     end
 
     context "on_first_shard" do
@@ -184,7 +184,7 @@ class ConnectionSwitchenTest < ActiveSupport::TestCase
         shards = ActiveRecord::Base.configurations[RAILS_ENV]['shard_names'].dup
 
         ActiveRecord::Base.on_shard(shards.shift) do
-          ActiveRecord::Base.connection.expects(:tables).returns([])
+          ActiveRecord::Base.connection.stubs(:tables).returns([])
         end
 
         shards.each do |shard|
@@ -248,7 +248,7 @@ class ConnectionSwitchenTest < ActiveSupport::TestCase
       should "default to the master database" do
         Account.create!
 
-        ActiveRecord::Base.on_slave { assert_using_master_db }
+        Ticket.on_slave { assert_using_master_db }
         Account.on_slave { assert_using_master_db }
         Ticket.on_slave  { assert_using_master_db }
       end
@@ -257,7 +257,7 @@ class ConnectionSwitchenTest < ActiveSupport::TestCase
         Account.create!
         assert_using_master_db
 
-        assert_equal Account.count, ActiveRecord::Base.on_slave { Account.count }
+        assert_equal Account.count, Ticket.on_slave { Account.count }
         assert_equal Account.count, Account.on_slave { Account.count }
       end
 
@@ -270,14 +270,14 @@ class ConnectionSwitchenTest < ActiveSupport::TestCase
         Account.create!
 
         assert_equal(1, Account.count)
-        assert_equal(0, ActiveRecord::Base.on_slave { Account.count })
+        assert_equal(0, Ticket.on_slave { Account.count })
       end
 
       should "support global on_slave blocks" do
         assert_using_master_db
         assert_using_master_db
 
-        ActiveRecord::Base.on_slave do
+        Ticket.on_slave do
           assert_using_slave_db
           assert_using_slave_db
         end
@@ -366,8 +366,11 @@ class ConnectionSwitchenTest < ActiveSupport::TestCase
         assert_using_master_db
         account = Account.create!
 
-        Ticket.connection.expects(:select_all).with("SELECT * FROM `tickets` WHERE (`tickets`.account_id = #{account.id})  LIMIT 1", anything).returns([])
-        Ticket.on_slave.connection.expects(:select_all).with("SELECT * FROM `tickets` WHERE (`tickets`.account_id = #{account.id})  LIMIT 1", anything).returns([])
+        Ticket.columns
+        Ticket.on_slave { Ticket.columns }
+
+        Ticket.connection.expects(:select).with { |*q| q[0] =~ /SELECT/i }.returns([])
+        Ticket.on_slave.connection.expects(:select).with { |*q| q[0] =~ /SELECT/i }.returns([])
 
         account.tickets.first
         account.tickets.on_slave.first

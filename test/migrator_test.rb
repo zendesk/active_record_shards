@@ -58,19 +58,14 @@ class MigratorTest < ActiveSupport::TestCase
   end
 
   def test_bad_migration
+    migration_path = File.join(File.dirname(__FILE__), "/cowardly_migration")
+    exception = nil
     begin
-      CowardlyMigration.up
+      ActiveRecord::Migrator.migrate(migration_path)
     rescue Exception => e
-      assert_match /CowardlyMigration/, e.message
+      exception = e
     end
-
-    assert_raises(RuntimeError) do
-      CowardlyMigration.up
-    end
-
-    assert_raises(RuntimeError) do
-      CowardlyMigration.down
-    end
+    assert e
   end
 
   def test_failing_migration
@@ -98,6 +93,6 @@ class MigratorTest < ActiveSupport::TestCase
   end
 
   def table_has_column?(table, column)
-    ActiveRecord::Base.connection.select_value("show create table #{table}") =~ /#{column}/
+    !ActiveRecord::Base.connection.select_values("desc #{table}").grep(column).empty?
   end
 end

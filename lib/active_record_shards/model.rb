@@ -35,12 +35,15 @@ module ActiveRecordShards
     def self.extended(base)
       base.send(:include, InstanceMethods)
 
-      if base.method_defined?(:after_initialize)
-        base.alias_method_chain :after_initialize, :slave
+      if ActiveRecord::VERSION::MAJOR >= 3
+        base.after_initialize :after_initialize_with_slave
       else
-        base.send(:alias_method, :after_initialize, :after_initialize_with_slave)
+        if base.method_defined?(:after_initialize)
+          base.alias_method_chain :after_initialize, :slave
+        else
+          base.send(:alias_method, :after_initialize, :after_initialize_with_slave)
+        end
       end
-      
     end
   end
 end
