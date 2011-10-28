@@ -1,6 +1,6 @@
 source "http://rubygems.org"
 
-gem 'activerecord', '~> 2.3.5'
+gemspec
 
 group :development do
   gem 'rake'
