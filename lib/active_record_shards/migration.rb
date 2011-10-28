@@ -49,7 +49,7 @@ module ActiveRecord
         migrated.each { |v| migration_counts[v] += 1 }
         shard_count += 1
       end
-   
+
       migrations.select do |m|
         count = migration_counts[m.version]
         count.nil? || count < shard_count
@@ -59,16 +59,22 @@ module ActiveRecord
 end
 
 module ActiveRecordShards
-  module MigrationExtension
+  module MigrationClassExtension
     attr_accessor :migration_shard
 
     def shard(arg = nil)
       self.migration_shard = arg
     end
 
+  end
+
+  # ok, so some 'splaining to do.  Rails 3.1 puts the migrate() method on the instance of the
+  # migration, where it should have been.  But this makes our monkey patch incompatible.
+  # So we're forced to *either* include or extend this.
+  module ActualMigrationExtension
     def migrate_with_forced_shard(direction)
       if migration_shard.blank?
-        raise "#{self.name}: Can't run migrations without a shard spec: this may be :all, :none,
+        raise RuntimeError, "#{self.name}: Can't run migrations without a shard spec: this may be :all, :none,
                  or a specific shard (for data-fixups).  please call shard(arg) in your migration."
       end
 
@@ -87,9 +93,19 @@ module ActiveRecordShards
 end
 
 ActiveRecord::Migration.class_eval do
-  extend ActiveRecordShards::MigrationExtension
-  class << self
+  extend ActiveRecordShards::MigrationClassExtension
+
+  if ActiveRecord::VERSION::MAJOR >= 3
+    include ActiveRecordShards::ActualMigrationExtension
+    define_method :migration_shard do
+      self.class.migration_shard
+    end
     alias_method_chain :migrate, :forced_shard
+  else
+    extend ActiveRecordShards::ActualMigrationExtension
+    class << self
+      alias_method_chain :migrate, :forced_shard
+    end
   end
 end
 

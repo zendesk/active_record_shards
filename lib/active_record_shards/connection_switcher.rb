@@ -70,7 +70,12 @@ module ActiveRecordShards
     def on_slave_block(&block)
       old_options = current_shard_selection.options
       switch_connection(:slave => true)
-      with_scope({:find => {:readonly => on_slave?}}, :merge, &block)
+      # setting read-only scope on ActiveRecord::Base never made any sense, anyway
+      if self == ActiveRecord::Base
+        yield
+      else
+        with_scope({:find => {:readonly => on_slave?}}, :merge, &block)
+      end
     ensure
       switch_connection(old_options)
     end

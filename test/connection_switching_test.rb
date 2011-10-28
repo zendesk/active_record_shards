@@ -184,7 +184,7 @@ class ConnectionSwitchenTest < ActiveSupport::TestCase
         shards = ActiveRecord::Base.configurations[RAILS_ENV]['shard_names'].dup
 
         ActiveRecord::Base.on_shard(shards.shift) do
-          ActiveRecord::Base.connection.expects(:tables).returns([])
+          ActiveRecord::Base.connection.expects(:tables).at_least_once.returns([])
         end
 
         shards.each do |shard|
@@ -366,8 +366,11 @@ class ConnectionSwitchenTest < ActiveSupport::TestCase
         assert_using_master_db
         account = Account.create!
 
-        Ticket.connection.expects(:select_all).with("SELECT * FROM `tickets` WHERE (`tickets`.account_id = #{account.id})  LIMIT 1", anything).returns([])
-        Ticket.on_slave.connection.expects(:select_all).with("SELECT * FROM `tickets` WHERE (`tickets`.account_id = #{account.id})  LIMIT 1", anything).returns([])
+        Ticket.columns
+        Ticket.on_slave { Ticket.columns }
+
+        Ticket.connection.expects(:select).with { |*q| q[0] =~ /SELECT/i }.returns([])
+        Ticket.on_slave.connection.expects(:select).with { |*q| q[0] =~ /SELECT/i }.returns([])
 
         account.tickets.first
         account.tickets.on_slave.first
