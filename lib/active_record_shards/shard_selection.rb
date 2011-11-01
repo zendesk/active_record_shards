@@ -30,7 +30,7 @@ module ActiveRecordShards
     end
 
     def shard_name(klass = nil, try_slave = true)
-      s = "#{RAILS_ENV}"
+      s = ActiveRecordShards.rails_env.dup
       if the_shard = shard(klass)
         s << '_shard_'
         s << the_shard

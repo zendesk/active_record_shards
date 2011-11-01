@@ -133,7 +133,7 @@ module ActiveRecordShards
     end
 
     def shard_env
-      @shard_env = defined?(Rails.env) ? Rails.env : RAILS_ENV
+      ActiveRecordShards.rails_env
     end
 
     def establish_shard_connection

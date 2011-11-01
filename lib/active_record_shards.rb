@@ -12,3 +12,9 @@ ActiveRecord::Base.extend(ActiveRecordShards::ConfigurationParser)
 ActiveRecord::Base.extend(ActiveRecordShards::Model)
 ActiveRecord::Base.extend(ActiveRecordShards::ConnectionSwitcher)
 ActiveRecord::Associations::AssociationCollection.send(:include, ActiveRecordShards::AssociationCollectionConnectionSelection)
+
+module ActiveRecordShards
+  def self.rails_env
+    Kernel.const_defined?(:Rails) ? Rails.env : RAILS_ENV
+  end
+end
