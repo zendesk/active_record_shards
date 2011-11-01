@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.summary     = "Simple database switching for ActiveRecord."
   s.description = "Easily run queries on shard and slave databases."
 
-  s.add_runtime_dependency("activerecord")
+  s.add_runtime_dependency("activerecord",  ">= 2.3.5", "< 3.2")
 
   s.add_development_dependency("rake")
   s.add_development_dependency("bundler")
