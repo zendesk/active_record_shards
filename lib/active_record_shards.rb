@@ -15,6 +15,6 @@ ActiveRecord::Associations::AssociationCollection.send(:include, ActiveRecordSha
 
 module ActiveRecordShards
   def self.rails_env
-    Kernel.const_defined?(:Rails) ? Rails.env : RAILS_ENV
+    Object.const_defined?(:Rails) ? Rails.env : RAILS_ENV
   end
 end
