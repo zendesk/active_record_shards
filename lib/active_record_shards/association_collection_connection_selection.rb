@@ -8,13 +8,26 @@ module ActiveRecordShards
       on_slave_if(!condition)
     end
 
-    def on_slave
-      SlaveProxy.new(self)
+    def on_master_if(condition)
+      condition ? on_master : self
     end
 
-    class SlaveProxy
-      def initialize(association_collection)
+    def on_master_unless(condition)
+      on_master_if(!condition)
+    end
+
+    def on_slave
+      MasterSlaveProxy.new(self, :slave)
+    end
+
+    def on_master
+      MasterSlaveProxy.new(self, :master)
+    end
+
+    class MasterSlaveProxy
+      def initialize(association_collection, which)
         @association_collection = association_collection
+        @which = which
       end
 
       def method_missing(method, *args, &block)
@@ -26,7 +39,12 @@ module ActiveRecordShards
           reflection = @association_collection.proxy_reflection
         end
 
-        reflection.klass.on_slave_block { @association_collection.send(method, *args, &block) }
+        case @which
+          when :slave
+            reflection.klass.on_slave_block { @association_collection.send(method, *args, &block) }
+          when :master
+            reflection.klass.on_master_block { @association_collection.send(method, *args, &block) }
+        end
       end
     end
   end
