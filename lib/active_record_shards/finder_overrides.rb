@@ -1,18 +1,18 @@
 module ActiveRecordShards
   module FinderOverrides
-    CLASS_SLAVE_METHODS = [ :find_by_sql, :count_by_sql, :calculate, :find_one, :find_some, :find_every, :quote_value ]
+    CLASS_SLAVE_METHODS = [ :find_by_sql, :count_by_sql, :calculate, :find_one, :find_some, :find_every, :quote_value, :columns, :sanitize_sql_hash_for_conditions ]
 
     def self.extended(base)
       CLASS_SLAVE_METHODS.each do |slave_method|
         base.class_eval <<-EOF, __FILE__, __LINE__ + 1
           class <<self
-            def #{slave_method}_with_slave_by_default(*args, &block)
+            def #{slave_method}_with_default_slave(*args, &block)
               on_slave_unless_tx do
-                #{slave_method}_without_slave_by_default(*args, &block)
+                #{slave_method}_without_default_slave(*args, &block)
               end
             end
 
-            alias_method_chain :#{slave_method}, :slave_by_default
+            alias_method_chain :#{slave_method}, :default_slave
           end
         EOF
       end
@@ -38,6 +38,13 @@ module ActiveRecordShards
           end
 
           alias_method_chain :transaction, :slave_off
+
+
+          def table_exists_with_default_slave?(*args)
+            on_slave_unless_tx(*args) { table_exists_without_default_slave?(*args) }
+          end
+
+          alias_method_chain :table_exists?, :default_slave
         end
       end
     end
