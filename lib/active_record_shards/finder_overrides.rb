@@ -47,6 +47,24 @@ module ActiveRecordShards
           alias_method_chain :table_exists?, :default_slave
         end
       end
+
+
+      ActiveRecord::Associations::HasAndBelongsToManyAssociation.class_eval do
+        def construct_sql_with_default_slave(*args, &block)
+          on_slave_unless_tx do
+            construct_sql_without_default_slave(*args, &block)
+          end
+        end
+
+        def construct_find_options_with_default_slave!(*args, &block)
+          on_slave_unless_tx do
+            construct_find_options_without_default_slave!(*args, &block)
+          end
+        end
+
+        alias_method_chain :construct_sql,           :default_slave
+        alias_method_chain :construct_find_options!, :default_slave
+      end
     end
 
     def on_slave_unless_tx(&block)
