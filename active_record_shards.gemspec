@@ -14,9 +14,11 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency("activerecord",  ">= 2.3.5", "< 3.2")
 
   s.add_development_dependency("rake")
+  s.add_development_dependency("mysql")
   s.add_development_dependency("bundler")
   s.add_development_dependency("shoulda")
   s.add_development_dependency("mocha")
+  s.add_development_dependency("appraisal")
 
   if RUBY_VERSION < "1.9"
     s.add_development_dependency("ruby-debug")
