@@ -12,7 +12,7 @@ module ActiveRecordShards
               end
             end
 
-            alias_method_chain :#{slave_method}, :default_slave
+            alias_method_chain :#{slave_method}, :default_slave if respond_to?(:#{slave_method})
           end
         EOF
       end
@@ -62,8 +62,8 @@ module ActiveRecordShards
           end
         end
 
-        alias_method_chain :construct_sql,           :default_slave
-        alias_method_chain :construct_find_options!, :default_slave
+        alias_method_chain :construct_sql,           :default_slave if respond_to?(:construct_sql)
+        alias_method_chain :construct_find_options!, :default_slave if respond_to?(:construct_find_options!)
       end
     end
 
