@@ -7,12 +7,12 @@ require 'active_record_shards/connection_switcher'
 require 'active_record_shards/association_collection_connection_selection'
 require 'active_record_shards/connection_pool'
 require 'active_record_shards/migration'
-require 'active_record_shards/finder_overrides'
+require 'active_record_shards/default_slave_patches'
 
 ActiveRecord::Base.extend(ActiveRecordShards::ConfigurationParser)
 ActiveRecord::Base.extend(ActiveRecordShards::Model)
 ActiveRecord::Base.extend(ActiveRecordShards::ConnectionSwitcher)
-ActiveRecord::Base.extend(ActiveRecordShards::FinderOverrides)
+ActiveRecord::Base.extend(ActiveRecordShards::DefaultSlavePatches)
 ActiveRecord::Associations::AssociationCollection.send(:include, ActiveRecordShards::AssociationCollectionConnectionSelection)
 
 module ActiveRecordShards
