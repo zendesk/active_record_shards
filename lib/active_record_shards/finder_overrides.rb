@@ -3,7 +3,8 @@ module ActiveRecordShards
     CLASS_SLAVE_METHODS = [ :find_by_sql, :count_by_sql, :calculate, :find_one, :find_some, :find_every, :quote_value, :columns, :sanitize_sql_hash_for_conditions ]
 
     def self.extended(base)
-      (CLASS_SLAVE_METHODS & base.methods(true).map(&:to_sym)).each do |slave_method|
+      base_methods = (base.methods | base.private_methods).map(&:to_sym)
+      (CLASS_SLAVE_METHODS & base_methods).each do |slave_method|
         base.class_eval <<-EOF, __FILE__, __LINE__ + 1
           class <<self
             def #{slave_method}_with_default_slave(*args, &block)
