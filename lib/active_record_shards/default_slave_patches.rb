@@ -1,5 +1,5 @@
 module ActiveRecordShards
-  module FinderOverrides
+  module DefaultSlavePatches
     CLASS_SLAVE_METHODS = [ :find_by_sql, :count_by_sql, :calculate, :find_one, :find_some, :find_every, :quote_value, :columns, :sanitize_sql_hash_for_conditions ]
 
     def self.extended(base)
