@@ -1,7 +1,7 @@
 PATH
   remote: /Users/ben/src/active_record_shards
   specs:
-    active_record_shards (2.5.3)
+    active_record_shards (2.5.6)
       activerecord (>= 2.3.5, < 3.2)
 
 GEM
