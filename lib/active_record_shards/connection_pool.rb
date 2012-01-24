@@ -2,15 +2,15 @@ ActiveRecord::ConnectionAdapters::ConnectionHandler.class_eval do
   # The only difference here is that we use klass.connection_pool_name
   # instead of klass.name as the pool key
   def retrieve_connection_pool(klass)
-    pool = @connection_pools[klass.connection_pool_name]
+    pool = @class_to_pool[klass.connection_pool_name]
     return pool if pool
     return nil if ActiveRecord::Base == klass
     retrieve_connection_pool klass.superclass
   end
 
   def remove_connection(klass)
-    pool = @connection_pools[klass.connection_pool_name]
-    @connection_pools.delete_if { |key, value| value == pool }
+    pool = @class_to_pool[klass.connection_pool_name]
+    @class_to_pool.delete_if { |key, value| value == pool }
     pool.disconnect! if pool
     pool.spec.config if pool
   end

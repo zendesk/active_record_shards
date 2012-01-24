@@ -1,7 +1,7 @@
 module ActiveRecordShards
   module ConfigurationParser
     module_function
-    
+
     def explode(conf)
       conf.keys.each do |env_name|
         env_config = conf[env_name]
