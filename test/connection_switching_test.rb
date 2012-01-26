@@ -136,6 +136,10 @@ class ConnectionSwitchenTest < ActiveSupport::TestCase
         end
       end
 
+      before_should "not try the unsharded connection" do
+        ActiveRecord::Base.connection.expects(:columns).never
+      end
+
       before_should "try the first shard" do
         shards = ActiveRecord::Base.configurations[RAILS_ENV]['shard_names'].dup
 

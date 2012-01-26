@@ -180,14 +180,10 @@ module ActiveRecordShards
     end
 
     def columns_with_default_shard
-      begin
+      if is_sharded? && current_shard_id.nil?
+        on_first_shard { columns_without_default_shard }
+      else
         columns_without_default_shard
-      rescue
-        if is_sharded? && (shard_name = shard_names.first)
-          on_shard(shard_name) { columns_without_default_shard }
-        else
-          raise
-        end
       end
     end
 
