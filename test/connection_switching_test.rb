@@ -390,6 +390,10 @@ class ConnectionSwitchenTest < ActiveSupport::TestCase
           assert_equal "master_name", model.name
         end
 
+        should "propogate the default_slave setting to inherited classes" do
+          assert AccountInherited.on_slave_by_default?
+        end
+
         teardown do
           Account.on_slave_by_default = false
         end

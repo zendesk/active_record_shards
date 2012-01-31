@@ -18,7 +18,13 @@ module ActiveRecordShards
     end
 
     def on_slave_by_default?
-      @on_slave_by_default
+      if self == ActiveRecord::Base
+        false
+      elsif self == base_class
+        @on_slave_by_default
+      else
+        base_class.on_slave_by_default?
+      end
     end
 
     def on_slave_by_default=(val)

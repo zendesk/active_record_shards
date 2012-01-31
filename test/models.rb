@@ -10,6 +10,9 @@ class Email < ActiveRecord::Base
   establish_connection_override :alternative
 end
 
+class AccountInherited < Account
+end
+
 class Ticket < ActiveRecord::Base
   # attributes: id, title, account_id, updated_at, created_at
   belongs_to :account
