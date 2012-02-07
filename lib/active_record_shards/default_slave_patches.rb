@@ -24,6 +24,11 @@ module ActiveRecordShards
           self.class.quote_value(*args, &block)
         end
 
+        def reload_with_slave_off
+          self.class.on_master { reload_without_slave_off }
+        end
+        alias_method_chain :reload, :slave_off
+
         class << self
           def transaction_with_slave_off(*args, &block)
             if on_slave_by_default?

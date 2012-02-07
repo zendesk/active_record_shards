@@ -39,12 +39,7 @@ module ActiveRecordShards
           reflection = @association_collection.proxy_reflection
         end
 
-        case @which
-          when :slave
-            reflection.klass.on_slave_block { @association_collection.send(method, *args, &block) }
-          when :master
-            reflection.klass.on_master_block { @association_collection.send(method, *args, &block) }
-        end
+        reflection.klass.on_cx_switch_block(@which) { @association_collection.send(method, *args, &block) }
       end
     end
   end

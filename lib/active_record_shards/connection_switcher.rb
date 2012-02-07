@@ -55,12 +55,7 @@ module ActiveRecordShards
 
     def on_master_or_slave(which, &block)
       if block_given?
-        case which
-          when :master
-            on_master_block(&block)
-          when :slave
-            on_slave_block(&block)
-        end
+        on_cx_switch_block(which, &block)
       else
         MasterSlaveProxy.new(self, which)
       end
@@ -88,9 +83,13 @@ module ActiveRecordShards
     alias_method :with_slave_if, :on_slave_if
     alias_method :with_slave_unless, :on_slave_unless
 
-    def on_slave_block(&block)
+    def on_cx_switch_block(which, &block)
       old_options = current_shard_selection.options
-      switch_connection(:slave => (@disallow_slave.nil? || @disallow_slave == 0))
+      switch_to_slave = (which == :slave && (@disallow_slave.nil? || @disallow_slave == 0))
+      switch_connection(:slave => switch_to_slave)
+
+      @disallow_slave = (@disallow_slave || 0) + 1 if which == :master
+
       # setting read-only scope on ActiveRecord::Base never made any sense, anyway
       if self == ActiveRecord::Base
         yield
@@ -98,16 +97,8 @@ module ActiveRecordShards
         with_scope({:find => {:readonly => on_slave?}}, :merge, &block)
       end
     ensure
+      @disallow_slave -= 1 if which == :master
       switch_connection(old_options)
-    end
-
-    # to make this re-entrant we need to keep a counter.
-    def on_master_block(&block)
-      @disallow_slave ||= 0
-      @disallow_slave += 1
-      yield
-    ensure
-      @disallow_slave -= 1
     end
 
     # Name of the connection pool. Used by ConnectionHandler to retrieve the current connection pool.
