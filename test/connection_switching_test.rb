@@ -1,6 +1,6 @@
 require File.expand_path('helper', File.dirname(__FILE__))
 
-class ConnectionSwitchenTest < ActiveSupport::TestCase
+class ConnectionSwitchingTest < ActiveSupport::TestCase
   context "shard switching" do
     should "only switch connection on sharded models" do
       assert_using_database('ars_test', Ticket)
