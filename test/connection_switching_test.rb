@@ -107,51 +107,32 @@ class ConnectionSwitchingTest < ActiveSupport::TestCase
     end
 
     context "for unsharded models" do
-      setup do
-        class UnshardedModel < ActiveRecord::Base
-          not_sharded
-        end
+      should "use the non-sharded connection" do
+        assert_using_database('ars_test', Account)
+        Account.connection.execute("alter table accounts add column foo int")
 
-        begin
-          UnshardedModel.columns
-        rescue
-        end
-      end
-
-      before_should "not touch any shard connections" do
-        ActiveRecord::Base.on_all_shards do
-          ActiveRecord::Base.connection.expects(:columns).never
-        end
+        assert Account.column_names.include?('foo')
       end
     end
 
     context "for sharded models" do
       setup do
-        class ShardedModel < ActiveRecord::Base
-        end
-
-        begin
-          ShardedModel.columns
-        rescue
+        ActiveRecord::Base.on_first_shard do
+          ActiveRecord::Base.connection.execute("alter table tickets add column foo int")
         end
       end
 
-      before_should "not try the unsharded connection" do
-        ActiveRecord::Base.connection.expects(:columns).never
+      teardown do
+        ActiveRecord::Base.on_first_shard do
+          ActiveRecord::Base.connection.execute("alter table tickets drop column foo")
+        end
+        Ticket.instance_variable_set("@column_names", nil)
+        Ticket.instance_variable_set("@columns", nil)
+        Ticket.instance_variable_set("@columns_hash", nil)
       end
 
-      before_should "try the first shard" do
-        shards = ActiveRecord::Base.configurations[RAILS_ENV]['shard_names'].dup
-
-        ActiveRecord::Base.on_shard(shards.shift) do
-          ActiveRecord::Base.connection.expects(:columns)
-        end
-
-        shards.each do |shard|
-          ActiveRecord::Base.on_shard(shard) do
-            ActiveRecord::Base.connection.expects(:columns).never
-          end
-        end
+      should "get colmns from the first shard" do
+        assert Ticket.column_names.include?('foo')
       end
     end
   end
@@ -162,40 +143,29 @@ class ConnectionSwitchingTest < ActiveSupport::TestCase
     end
 
     context "for unsharded models" do
-      setup do
+      should "use the unsharded connection" do
         class UnshardedModel < ActiveRecord::Base
           not_sharded
         end
-        assert(!UnshardedModel.table_exists?)
-      end
+        UnshardedModel.connection.execute("create table unsharded_models (id int)")
+        assert(UnshardedModel.table_exists?)
 
-      before_should "not touch any shard connections" do
         ActiveRecord::Base.on_all_shards do
-          ActiveRecord::Base.connection.expects(:execute).never
+          assert !ActiveRecord::Base.connection.table_exists?("unsharded_models")
         end
       end
     end
 
     context "for sharded models" do
-      setup do
+      should "try the first shard" do
         class ShardedModel < ActiveRecord::Base
         end
 
-        assert(!ShardedModel.table_exists?)
-      end
-
-      before_should "try the first shard" do
-        shards = ActiveRecord::Base.configurations[RAILS_ENV]['shard_names'].dup
-
-        ActiveRecord::Base.on_shard(shards.shift) do
-          ActiveRecord::Base.connection.expects(:tables).at_least_once.returns([])
+        ActiveRecord::Base.on_first_shard do
+          ShardedModel.connection.execute("create table sharded_models (id int)")
         end
 
-        shards.each do |shard|
-          ActiveRecord::Base.on_shard(shard) do
-            ActiveRecord::Base.connection.expects(:tables).never
-          end
-        end
+        assert ShardedModel.table_exists?
       end
     end
   end
@@ -418,13 +388,14 @@ class ConnectionSwitchingTest < ActiveSupport::TestCase
         account = Account.create!
 
         Ticket.columns
-        Ticket.on_slave { Ticket.columns }
+        account.tickets.create! :title => 'master ticket'
 
-        Ticket.connection.expects(:select).with { |*q| q[0] =~ /SELECT/i }.returns([])
-        Ticket.on_slave.connection.expects(:select).with { |*q| q[0] =~ /SELECT/i }.returns([])
+        Ticket.on_slave {
+          account.tickets.create! :title => 'slave ticket'
+        }
 
-        account.tickets.first
-        account.tickets.on_slave.first
+        assert_equal "master ticket", account.tickets.first.title
+        assert_equal "slave ticket", account.tickets.on_slave.first.title
       end
     end
   end
