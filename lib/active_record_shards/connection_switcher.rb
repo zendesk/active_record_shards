@@ -163,7 +163,14 @@ module ActiveRecordShards
 
       raise ActiveRecord::AdapterNotSpecified.new("No database defined by #{name} in database.yml") if spec.nil?
 
-      connection_handler.establish_connection(connection_pool_name, ActiveRecord::Base::ConnectionSpecification.new(spec, "#{spec['adapter']}_connection"))
+      # in 3.2 rails is asking for a connection pool in a map of these ConnectionSpecifications.  If we want to re-use connections,
+      # we need to re-use specs.
+      @@specification_cache ||= {}
+      cx_spec = (@@specification_cache[spec] ||= ActiveRecord::Base::ConnectionSpecification.new(spec, "#{spec['adapter']}_connection"))
+
+      # puts "spec: " + cx_spec.object_id.to_s
+
+      connection_handler.establish_connection(connection_pool_name, cx_spec)
     end
 
     def connected_to_shard?
