@@ -1,6 +1,6 @@
 require File.expand_path('helper', File.dirname(__FILE__))
 
-class ConnectionSwitchenTest < ActiveSupport::TestCase
+class ConnectionSwitchingTest < ActiveSupport::TestCase
   context "shard switching" do
     should "only switch connection on sharded models" do
       assert_using_database('ars_test', Ticket)
@@ -134,6 +134,10 @@ class ConnectionSwitchenTest < ActiveSupport::TestCase
           ShardedModel.columns
         rescue
         end
+      end
+
+      before_should "not try the unsharded connection" do
+        ActiveRecord::Base.connection.expects(:columns).never
       end
 
       before_should "try the first shard" do
@@ -371,6 +375,11 @@ class ConnectionSwitchenTest < ActiveSupport::TestCase
           assert_equal 2, count
         end
 
+        should "reload() on the master" do
+          account = Account.find(1000)
+          assert_equal 'master_name', account.reload.name
+        end
+
         should "Allow override using on_master" do
           model = Account.on_master.find(1000)
           assert_equal "master_name", model.name
@@ -384,6 +393,10 @@ class ConnectionSwitchenTest < ActiveSupport::TestCase
         should "override on_slave with on_master" do
           model = Account.on_slave { Account.on_master.find(1000) }
           assert_equal "master_name", model.name
+        end
+
+        should "propogate the default_slave setting to inherited classes" do
+          assert AccountInherited.on_slave_by_default?
         end
 
         teardown do
