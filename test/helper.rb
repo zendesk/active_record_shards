@@ -20,7 +20,6 @@ ActiveRecord::Base.configurations = YAML::load(IO.read(File.dirname(__FILE__) + 
 
 def init_schema
   ActiveRecord::Base.configurations.each do |name, conf|
-    puts "Setting up the #{conf['database']} db"
     `echo "drop DATABASE if exists #{conf['database']}" | mysql --user=#{conf['username']}`
     `echo "create DATABASE #{conf['database']}" | mysql --user=#{conf['username']}`
     ActiveRecord::Base.establish_connection(name)
