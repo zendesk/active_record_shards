@@ -113,6 +113,11 @@ class ConnectionSwitchingTest < ActiveSupport::TestCase
 
         assert Account.column_names.include?('foo')
       end
+
+      teardown do
+        ActiveRecord::Base.connection.execute("alter table accounts drop column foo")
+        Account.reset_column_information
+      end
     end
 
     context "for sharded models" do
@@ -125,10 +130,8 @@ class ConnectionSwitchingTest < ActiveSupport::TestCase
       teardown do
         ActiveRecord::Base.on_first_shard do
           ActiveRecord::Base.connection.execute("alter table tickets drop column foo")
+          Ticket.reset_column_information
         end
-        Ticket.instance_variable_set("@column_names", nil)
-        Ticket.instance_variable_set("@columns", nil)
-        Ticket.instance_variable_set("@columns_hash", nil)
       end
 
       should "get colmns from the first shard" do
@@ -387,7 +390,6 @@ class ConnectionSwitchingTest < ActiveSupport::TestCase
         assert_using_master_db
         account = Account.create!
 
-        Ticket.columns
         account.tickets.create! :title => 'master ticket'
 
         Ticket.on_slave {
