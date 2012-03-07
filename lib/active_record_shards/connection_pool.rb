@@ -2,24 +2,30 @@ ActiveRecord::ConnectionAdapters::ConnectionHandler.class_eval do
   # The only difference here is that we use klass.connection_pool_name
   # instead of klass.name as the pool key
   def retrieve_connection_pool(klass)
-    pool = connection_pool_hash_compat[klass.connection_pool_name]
+    pool = (@class_to_pool || @connection_pools)[klass.connection_pool_name]
     return pool if pool
     return nil if ActiveRecord::Base == klass
     retrieve_connection_pool klass.superclass
   end
 
   def remove_connection(klass)
-    pool = connection_pool_hash_compat[klass.connection_pool_name]
-    connection_pool_hash_compat.delete_if { |key, value| value == pool }
+    # rails 2: @connection_pools is a hash of klass.name => pool
+    # rails 3: @connection_pools is a hash of pool.spec => pool
+    #          @class_to_pool is a hash of klass.name => pool
+    #
+    if @class_to_pool
+      pool = @class_to_pool.delete(klass.connection_pool_name)
+      @connection_pools.delete(pool.spec) if pool
+    else
+      pool = @connection_pools.delete(klass.connection_pool_name)
+      @connection_pools.delete_if { |key, value| value == pool }
+    end
+
+    return nil unless pool
+
     pool.disconnect! if pool
     pool.spec.config if pool
   end
-
-  def connection_pool_hash_compat
-    @class_to_pool || @connection_pools
-  end
-
-  private :connection_pool_hash_compat
 end
 
 ActiveRecord::Base.singleton_class.class_eval do

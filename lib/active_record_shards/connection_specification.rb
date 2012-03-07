@@ -9,6 +9,7 @@ class ActiveRecord::Base
     end
 
     remove_connection
+    specification_cache[connection_pool_name] = spec
     connection_handler.establish_connection connection_pool_name, spec
   end
 end
