@@ -1,3 +1,5 @@
+require 'active_record_shards'
+
 Rake::TaskManager.class_eval do
   def remove_task(task_name)
     @tasks.delete(task_name.to_s)
@@ -26,7 +28,7 @@ namespace :db do
 
   task :reset => :load_config do
     Rake::Task["db:drop"].invoke rescue nil
-    Rake::Task["db:setup"].invoke rescue nil
+    Rake::Task["db:setup"].invoke
   end
 
   desc "Create the database defined in config/database.yml for the current RAILS_ENV including shards and slaves"
