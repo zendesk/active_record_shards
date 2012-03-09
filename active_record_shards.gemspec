@@ -3,7 +3,7 @@ $:.push File.expand_path("../lib", __FILE__)
 
 Gem::Specification.new do |s|
   s.name        = "active_record_shards"
-  s.version     = "2.6.1"
+  s.version     = "2.6.2"
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Mick Staugaard", "Eric Chapweske", "Ben Osheroff"]
   s.email       = ["mick@staugaard.com", "eac@zendesk.com", "ben@gimbo.net"]
@@ -27,6 +27,6 @@ Gem::Specification.new do |s|
   end
 
   s.files        = Dir.glob("lib/**/*") + %w(README.md)
-  s.test_files   = Dir.glob("test/**/*")
+  s.test_files   = Dir.glob("test/**/*") - ["test/test.log"]
   s.require_path = 'lib'
 end
