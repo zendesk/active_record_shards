@@ -1,6 +1,8 @@
 require 'bundler'
 require "appraisal"
-Bundler::GemHelper.install_tasks :name => 'active_record_shards'
+require 'yaggy'
+
+Yaggy.gem('active_record_shards.gemspec', :push_gem => true)
 
 require 'rake/testtask'
 Rake::TestTask.new(:test) do |test|
