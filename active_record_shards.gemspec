@@ -15,6 +15,7 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency("rake")
   s.add_development_dependency("mysql")
+  s.add_development_dependency("mysql2")
   s.add_development_dependency("bundler")
   s.add_development_dependency("shoulda")
   s.add_development_dependency("mocha")
@@ -23,7 +24,7 @@ Gem::Specification.new do |s|
   if RUBY_VERSION < "1.9"
     s.add_development_dependency("ruby-debug")
   else
-    s.add_development_dependency("ruby-debug19")
+    s.add_development_dependency("debugger")
   end
 
   s.files        = Dir.glob("lib/**/*") + %w(README.md)
