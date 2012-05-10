@@ -3,7 +3,7 @@ $:.push File.expand_path("../lib", __FILE__)
 
 Gem::Specification.new do |s|
   s.name        = "active_record_shards"
-  s.version     = "2.6.2"
+  s.version     = "2.6.3"
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Mick Staugaard", "Eric Chapweske", "Ben Osheroff"]
   s.email       = ["mick@staugaard.com", "eac@zendesk.com", "ben@gimbo.net"]
@@ -20,6 +20,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency("shoulda")
   s.add_development_dependency("mocha")
   s.add_development_dependency("appraisal")
+  s.add_development_dependency("yaggy")
 
   if RUBY_VERSION < "1.9"
     s.add_development_dependency("ruby-debug")
