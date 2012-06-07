@@ -36,7 +36,7 @@ module ActiveRecordShards
         s << the_shard
       end
       if @on_slave && try_slave
-        s << "_slave" if @on_slave
+        s << "_slave"
       end
       s
     end
