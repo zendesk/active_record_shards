@@ -1,7 +1,7 @@
 PATH
   remote: /Users/ben/src/active_record_shards
   specs:
-    active_record_shards (2.6.2)
+    active_record_shards (2.6.3)
       activerecord (>= 2.3.5, < 3.3)
 
 GEM
@@ -45,6 +45,7 @@ GEM
     shoulda-context (1.0.0)
     shoulda-matchers (1.0.0)
     tzinfo (0.3.33)
+    yaggy (0.1.5)
 
 PLATFORMS
   ruby
@@ -60,3 +61,4 @@ DEPENDENCIES
   mysql2
   rake
   shoulda
+  yaggy
