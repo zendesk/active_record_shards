@@ -21,6 +21,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency("mocha")
   s.add_development_dependency("appraisal")
   s.add_development_dependency("yaggy")
+  s.add_development_dependency("test-unit", ">=2.5.1")
 
   if RUBY_VERSION < "1.9"
     s.add_development_dependency("ruby-debug")
