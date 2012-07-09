@@ -95,7 +95,7 @@ end
 ActiveRecord::Migration.class_eval do
   extend ActiveRecordShards::MigrationClassExtension
 
-  if ActiveRecord::VERSION::MAJOR >= 3
+  if ActiveRecord::VERSION::STRING >= "3.1.0"
     include ActiveRecordShards::ActualMigrationExtension
     define_method :migration_shard do
       self.class.migration_shard

@@ -177,7 +177,7 @@ module ActiveRecordShards
     end
 
     def connection_pool_key
-      if ActiveRecord::VERSION::MAJOR >= 3
+      if ActiveRecord::VERSION::STRING >= "3.1.0"
         specification_cache[connection_pool_name]
       else
         connection_pool_name
