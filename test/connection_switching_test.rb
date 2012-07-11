@@ -186,6 +186,16 @@ class ConnectionSwitchingTest < ActiveSupport::TestCase
       assert_using_database('ars_test', Ticket)
     end
 
+    if ActiveRecord::VERSION::MAJOR >= 3
+      should "be able to find by column" do
+        Account.where(:name => "peter").to_sql # does not blow up
+      end
+
+      should "have correct engine" do
+        assert_equal Account, Account.arel_engine
+      end
+    end
+
     context "shard switching" do
       should "just stay on the main db" do
         assert_using_database('ars_test2', Ticket)
