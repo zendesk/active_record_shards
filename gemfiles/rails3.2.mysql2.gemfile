@@ -3,6 +3,6 @@
 source "http://rubygems.org"
 
 gem "activerecord", "~> 3.2.6"
-gem "mysql2", "~> 0.3.0"
+gem "mysql2", "~>0.3.0"
 
 gemspec :path=>"../"
