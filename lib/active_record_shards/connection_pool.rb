@@ -39,3 +39,18 @@ ActiveRecord::Base.singleton_class.class_eval do
   end
   alias_method_chain :establish_connection, :connection_pool_name
 end
+
+# backport improved connection fetching from rails 3.2
+if ActiveRecord::VERSION::MAJOR == 3 && ActiveRecord::VERSION::MINOR == 0
+  class ActiveRecord::Base
+    def self.arel_engine
+      @arel_engine ||= begin
+        if self == ActiveRecord::Base
+          ActiveRecord::Base
+        else
+          connection_handler.retrieve_connection_pool(self) ? self : superclass.arel_engine
+        end
+      end
+    end
+  end
+end

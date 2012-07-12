@@ -13,3 +13,8 @@ appraise "rails3.2.mysql2" do
   gem "activerecord", "~> 3.2.6"
   gem "mysql2", "~>0.3.0"
 end
+
+appraise "rails3.0.mysql2" do
+  gem "activerecord", "~> 3.0.15"
+  gem "mysql2", "~>0.3.0"
+end
