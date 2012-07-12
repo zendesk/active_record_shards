@@ -1,6 +1,4 @@
-old_stdout = $stdout.clone
-devnull = File.open("/dev/null", "w+")
-$stdout.reopen(devnull)
+ActiveRecord::Migration.verbose = false
 
 ActiveRecord::Schema.define(:version => 1) do
   create_table "accounts", :force => true do |t|
@@ -24,5 +22,3 @@ ActiveRecord::Schema.define(:version => 1) do
     t.datetime "updated_at"
   end
 end
-
-$stdout.reopen(old_stdout)
