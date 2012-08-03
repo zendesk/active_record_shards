@@ -91,10 +91,10 @@ module ActiveRecordShards
       @disallow_slave = (@disallow_slave || 0) + 1 if which == :master
 
       # setting read-only scope on ActiveRecord::Base never made any sense, anyway
-      if self == ActiveRecord::Base
+      if self == ActiveRecord::Base || !switch_to_slave
         yield
       else
-        with_scope({:find => {:readonly => on_slave?}}, :merge, &block)
+        with_scope({:find => {:readonly => true}}, &block)
       end
     ensure
       @disallow_slave -= 1 if which == :master

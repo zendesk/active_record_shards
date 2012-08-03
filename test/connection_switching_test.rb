@@ -330,6 +330,19 @@ class ConnectionSwitchingTest < ActiveSupport::TestCase
           assert_equal('master_name', @model.name)
         end
 
+        # TODO mocha raises stack level too deep on ActiveRecord 3.2+
+        if ActiveRecord::VERSION::STRING < "3.2.0"
+          should "not unnecessary call with_scope" do
+            Account.expects(:with_scope).never
+            Account.on_master.first
+          end
+        end
+
+        should "not unset readonly" do
+          @model = Account.on_master.scoped(:readonly => true).first
+          assert(@model.readonly?)
+        end
+
         should "not be marked as read only" do
           assert(!@model.readonly?)
         end
