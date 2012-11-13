@@ -1,19 +1,8 @@
 require 'active_record_shards'
 
-Rake::TaskManager.class_eval do
-  def remove_task(task_name)
-    @tasks.delete(task_name.to_s)
-  end
+%w[db:drop db:create db:abort_if_pending_migrations db:reset].each do |name|
+  Rake.application.instance_variable_get(:@tasks).delete(name) || warn("could not delete #{name} task, potential load-order problem")
 end
-
-def remove_task(task_name)
-  Rake.application.remove_task(task_name)
-end
-
-remove_task 'db:drop'
-remove_task 'db:create'
-remove_task 'db:abort_if_pending_migrations'
-remove_task 'db:reset'
 
 namespace :db do
   desc 'Drops the database for the current RAILS_ENV including shards and slaves'
