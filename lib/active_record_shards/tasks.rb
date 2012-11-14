@@ -21,7 +21,11 @@ namespace :db do
     env_name = defined?(Rails.env) ? Rails.env : RAILS_ENV || 'development'
     ActiveRecord::Base.configurations.each do |key, conf|
       if key.starts_with?(env_name) && !key.ends_with?("_slave")
-        drop_database(conf)
+        begin
+          drop_database(conf)
+        rescue Exception => e
+          puts "Couldn't drop #{conf['database']} : #{e.inspect}"
+        end
       end
     end
   end
