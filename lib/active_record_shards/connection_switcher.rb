@@ -26,12 +26,12 @@ module ActiveRecordShards
     def on_all_shards(&block)
       old_options = current_shard_selection.options
       if supports_sharding?
-        shard_names.each do |shard|
+        shard_names.map do |shard|
           switch_connection(:shard => shard)
           yield(shard)
         end
       else
-        yield
+        [yield]
       end
     ensure
       switch_connection(old_options)

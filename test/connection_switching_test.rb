@@ -46,22 +46,30 @@ class ConnectionSwitchingTest < ActiveSupport::TestCase
         @shard_0_master = ActiveRecord::Base.on_shard(0) {ActiveRecord::Base.connection}
         @shard_1_master = ActiveRecord::Base.on_shard(1) {ActiveRecord::Base.connection}
         assert_not_equal(@shard_0_master.select_value("SELECT DATABASE()"), @shard_1_master.select_value("SELECT DATABASE()"))
-
-        @database_names = []
-        @database_shards = []
-        ActiveRecord::Base.on_all_shards do |shard|
-          @database_names << ActiveRecord::Base.connection.select_value("SELECT DATABASE()")
-          @database_shards << shard
-        end
       end
 
       should "execute the block on all shard masters" do
-        assert_equal(2, @database_names.size)
-        assert_contains(@database_names, @shard_0_master.select_value("SELECT DATABASE()"))
-        assert_contains(@database_names, @shard_1_master.select_value("SELECT DATABASE()"))
-        assert_equal(2, @database_shards.size)
-        assert_contains(@database_shards, "0")
-        assert_contains(@database_shards, "1")
+        result = ActiveRecord::Base.on_all_shards do |shard|
+          [ActiveRecord::Base.connection.select_value("SELECT DATABASE()"), shard]
+        end
+        database_names = result.map(&:first)
+        database_shards = result.map(&:last)
+
+        assert_equal(2, database_names.size)
+        assert_contains(database_names, @shard_0_master.select_value("SELECT DATABASE()"))
+        assert_contains(database_names, @shard_1_master.select_value("SELECT DATABASE()"))
+
+        assert_equal(2, database_shards.size)
+        assert_contains(database_shards, "0")
+        assert_contains(database_shards, "1")
+      end
+
+      should "execute the block unsharded" do
+        ActiveRecord::Base.expects(:supports_sharding?).returns false
+        result = ActiveRecord::Base.on_all_shards do |shard|
+          [ActiveRecord::Base.connection.select_value("SELECT DATABASE()"), shard]
+        end
+        assert_equal [["ars_test", nil]], result
       end
     end
   end
