@@ -21,4 +21,11 @@ ActiveRecord::Schema.define(:version => 1) do
     t.datetime "created_at"
     t.datetime "updated_at"
   end
+
+  create_table "people", :force => true do |t|
+    t.string "name"
+    t.string "type"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 end

@@ -17,3 +17,11 @@ class Ticket < ActiveRecord::Base
   # attributes: id, title, account_id, updated_at, created_at
   belongs_to :account
 end
+
+class Person < ActiveRecord::Base
+  not_sharded
+end
+
+class User < Person
+end
+
