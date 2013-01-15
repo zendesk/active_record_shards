@@ -1,12 +1,12 @@
 module ActiveRecordShards
   module DefaultSlavePatches
-    CLASS_SLAVE_METHODS = [ :find_by_sql, :count_by_sql, :calculate, :find_one, :find_some, :find_every, :quote_value, :columns, :sanitize_sql_hash_for_conditions ]
+    CLASS_SLAVE_METHODS = [ :find_by_sql, :count_by_sql, :calculate, :find_one, :find_some, :find_every, :quote_value, :sanitize_sql_hash_for_conditions ]
 
     def self.extended(base)
       base_methods = (base.methods | base.private_methods).map(&:to_sym)
       (CLASS_SLAVE_METHODS & base_methods).each do |slave_method|
-        base.class_eval <<-EOF, __FILE__, __LINE__ + 1
-          class <<self
+        base.class_eval <<-RUBY, __FILE__, __LINE__ + 1
+          class << self
             def #{slave_method}_with_default_slave(*args, &block)
               on_slave_unless_tx do
                 #{slave_method}_without_default_slave(*args, &block)
@@ -15,7 +15,7 @@ module ActiveRecordShards
 
             alias_method_chain :#{slave_method}, :default_slave
           end
-        EOF
+        RUBY
       end
 
       base.class_eval do
@@ -28,6 +28,19 @@ module ActiveRecordShards
           self.class.on_master { reload_without_slave_off(*args, &block) }
         end
         alias_method_chain :reload, :slave_off
+
+        class << self
+          def columns_with_default_slave(*args, &block)
+            if on_slave_by_default? && !Thread.current[:_active_record_shards_slave_off]
+              read_columns_from = :slave
+            else
+              read_columns_form = :master
+            end
+
+            on_cx_switch_block(read_columns_from, :construct_ro_scope => false) { columns_without_default_slave(*args, &block) }
+          end
+          alias_method_chain :columns, :default_slave
+        end
 
         class << self
           def transaction_with_slave_off(*args, &block)

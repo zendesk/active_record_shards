@@ -330,6 +330,18 @@ class ConnectionSwitchingTest < ActiveSupport::TestCase
         end
       end
 
+      context "a inherited model without cached columns hash" do
+        # before columns -> with_scope -> type-condition -> columns == loop
+        should "not loop when on slave by default" do
+          Person.on_slave_by_default = true
+          assert User.on_slave_by_default?
+          assert User.finder_needs_type_condition?
+
+          User.instance_variable_set(:@columns_hash, nil)
+          User.columns_hash
+        end
+      end
+
       context "a model loaded with the master" do
         setup do
           Account.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'master_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
