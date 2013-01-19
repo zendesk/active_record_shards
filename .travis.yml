@@ -1,9 +1,4 @@
-script: "bundle exec rake test"
+script: "./script/travis_build"
 rvm:
   - 1.8.7
   - 1.9.3
-gemfile:
-  - gemfiles/rails2.mysql.gemfile
-  - gemfiles/rails2.mysql2.gemfile
-  - gemfiles/rails3.2.gemfile
-  - gemfiles/rails3.2.mysql2.gemfile
