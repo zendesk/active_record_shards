@@ -1,7 +1,10 @@
 require 'rubygems'
 require 'bundler'
+
 Bundler.setup
 Bundler.require(:default, :development)
+
+require 'mocha'
 
 if defined?(Debugger)
   ::Debugger.start

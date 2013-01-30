@@ -18,9 +18,8 @@ Gem::Specification.new do |s|
   s.add_development_dependency("mysql2")
   s.add_development_dependency("bundler")
   s.add_development_dependency("shoulda")
-  s.add_development_dependency("mocha")
+  s.add_development_dependency("mocha", "0.12.0")
   s.add_development_dependency("appraisal")
-  s.add_development_dependency("yaggy")
   s.add_development_dependency("test-unit", ">=2.5.1")
 
   if RUBY_VERSION < "1.9"
