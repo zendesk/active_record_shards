@@ -167,11 +167,14 @@ module ActiveRecordShards
       # in 3.2 rails is asking for a connection pool in a map of these ConnectionSpecifications.  If we want to re-use connections,
       # we need to re-use specs.
 
+      # note that since we're subverting the standard establish_connection path, we have to handle the funky autoloading of the
+      # connection adapter ourselves.
       specification_cache[name] ||= begin
         if ActiveRecord::VERSION::STRING >= "3.2.0"
           resolver = ActiveRecord::Base::ConnectionSpecification::Resolver.new spec, configurations
           resolver.spec
         else
+          autoload_adapter(spec['adapter'])
           ActiveRecord::Base::ConnectionSpecification.new(spec, "#{spec['adapter']}_connection")
         end
       end
@@ -211,6 +214,25 @@ module ActiveRecordShards
       end
 
       result
+    end
+
+    def autoload_adapter(adapter_name)
+      begin
+        require 'rubygems'
+        gem "activerecord-#{adapter_name}-adapter"
+        require "active_record/connection_adapters/#{adapter_name}_adapter"
+      rescue LoadError
+        begin
+          require "active_record/connection_adapters/#{adapter_name}_adapter"
+        rescue LoadError
+          raise "Please install the #{adapter_name} adapter: `gem install activerecord-#{adapter_name}-adapter` (#{$!})"
+        end
+      end
+
+      adapter_method = "#{adapter_name}_connection"
+      if !ActiveRecord::Base.respond_to?(adapter_name + "_connection")
+        raise AdapterNotFound, "database configuration specifies nonexistent #{adapter_name} adapter"
+      end
     end
 
     class MasterSlaveProxy
