@@ -167,10 +167,16 @@ module ActiveRecordShards
       # in 3.2 rails is asking for a connection pool in a map of these ConnectionSpecifications.  If we want to re-use connections,
       # we need to re-use specs.
 
-      specification_cache[name] ||= ActiveRecord::Base::ConnectionSpecification.new(spec, "#{spec['adapter']}_connection")
-      cx_spec = specification_cache[name]
+      specification_cache[name] ||= begin
+        if ActiveRecord::VERSION::STRING >= "3.2.0"
+          resolver = ActiveRecord::Base::ConnectionSpecification::Resolver.new spec, configurations
+          resolver.spec
+        else
+          ActiveRecord::Base::ConnectionSpecification.new(spec, "#{spec['adapter']}_connection")
+        end
+      end
 
-      connection_handler.establish_connection(connection_pool_name, cx_spec)
+      connection_handler.establish_connection(connection_pool_name, specification_cache[name])
     end
 
     def specification_cache
