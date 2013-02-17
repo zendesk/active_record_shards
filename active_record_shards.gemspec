@@ -10,6 +10,7 @@ Gem::Specification.new do |s|
   s.homepage    = "http://github.com/staugaard/active_record_shards"
   s.summary     = "Simple database switching for ActiveRecord."
   s.description = "Easily run queries on shard and slave databases."
+  s.license     = "MIT"
 
   s.add_runtime_dependency("activerecord",  ">= 2.3.5", "< 3.3")
 
