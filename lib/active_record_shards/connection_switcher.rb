@@ -135,7 +135,10 @@ module ActiveRecordShards
     end
 
     def shard_names
-      configurations[shard_env]['shard_names'] || []
+      unless config = configurations[shard_env]
+        raise "Did not find #{shard_env} in configurations, did you forget to add it to your database.yml ? (configurations: #{configurations.inspect})"
+      end
+      config['shard_names'] || []
     end
 
     private
