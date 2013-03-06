@@ -3,8 +3,7 @@ module ActiveRecordShards
     module_function
 
     def explode(conf)
-      conf.keys.each do |env_name|
-        env_config = conf[env_name]
+      conf.to_a.each do |env_name, env_config|
         if shards = env_config.delete('shards')
           env_config['shard_names'] = shards.keys
           shards.each do |shard_name, shard_conf|
@@ -14,13 +13,13 @@ module ActiveRecordShards
         end
       end
 
-      conf.keys.each do |env_name|
-        env_config = conf[env_name]
+      conf.to_a.each do |env_name, env_config|
         if slave_conf = env_config.delete('slave')
           expand_child!(env_config, slave_conf)
           conf["#{env_name}_slave"] = slave_conf
         end
       end
+
       conf
     end
 
