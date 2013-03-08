@@ -396,6 +396,12 @@ class ConnectionSwitchingTest < ActiveSupport::TestCase
           assert_equal 'master_name', account.reload.name
         end
 
+        should "do exists? on the slave" do
+          if Account.respond_to?(:exists?)
+            assert Account.exists?(1001)
+          end
+        end
+
         should "Allow override using on_master" do
           model = Account.on_master.find(1000)
           assert_equal "master_name", model.name

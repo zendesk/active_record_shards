@@ -1,19 +1,20 @@
 module ActiveRecordShards
   module DefaultSlavePatches
-    CLASS_SLAVE_METHODS = [ :find_by_sql, :count_by_sql, :calculate, :find_one, :find_some, :find_every, :quote_value, :sanitize_sql_hash_for_conditions ]
+    CLASS_SLAVE_METHODS = [ :find_by_sql, :count_by_sql, :calculate, :find_one, :find_some, :find_every, :quote_value, :sanitize_sql_hash_for_conditions, :exists? ]
 
     def self.extended(base)
       base_methods = (base.methods | base.private_methods).map(&:to_sym)
       (CLASS_SLAVE_METHODS & base_methods).each do |slave_method|
+        _, slave_method, punctuation = slave_method.to_s.match(/^(.*?)([\?\!]?)$/).to_a
         base.class_eval <<-RUBY, __FILE__, __LINE__ + 1
           class << self
-            def #{slave_method}_with_default_slave(*args, &block)
+            def #{slave_method}_with_default_slave#{punctuation}(*args, &block)
               on_slave_unless_tx do
-                #{slave_method}_without_default_slave(*args, &block)
+                #{slave_method}_without_default_slave#{punctuation}(*args, &block)
               end
             end
 
-            alias_method_chain :#{slave_method}, :default_slave
+            alias_method_chain :#{slave_method}#{punctuation}, :default_slave
           end
         RUBY
       end
