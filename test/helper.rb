@@ -1,10 +1,9 @@
 require 'rubygems'
 require 'bundler'
+require 'test/unit'
 
 Bundler.setup
 Bundler.require(:default, :development)
-
-require 'mocha'
 
 if defined?(Debugger)
   ::Debugger.start
@@ -15,6 +14,7 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 require 'active_record_shards'
 require 'logger'
+require 'shoulda'
 
 RAILS_ENV = "test"
 
