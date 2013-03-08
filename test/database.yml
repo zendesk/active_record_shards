@@ -1,14 +1,14 @@
 test:
-  adapter: mysql
+  adapter: mysql2
   encoding: utf8
   database: ars_test
   username: root
   password:
   host: 127.0.0.1
   shard_names: ['0', '1']
-  
+
 test_slave:
-  adapter: mysql
+  adapter: mysql2
   encoding: utf8
   database: ars_test_slave
   username: root
@@ -16,7 +16,7 @@ test_slave:
   host: 127.0.0.1
 
 test_shard_0:
-  adapter: mysql
+  adapter: mysql2
   encoding: utf8
   database: ars_test_shard0
   username: root
@@ -24,7 +24,7 @@ test_shard_0:
   host: 127.0.0.1
 
 test_shard_0_slave:
-  adapter: mysql
+  adapter: mysql2
   encoding: utf8
   database: ars_test_shard0_slave
   username: root
@@ -32,7 +32,7 @@ test_shard_0_slave:
   host: 127.0.0.1
 
 test_shard_1:
-  adapter: mysql
+  adapter: mysql2
   encoding: utf8
   database: ars_test_shard1
   username: root
@@ -40,7 +40,7 @@ test_shard_1:
   host: 127.0.0.1
 
 test_shard_1_slave:
-  adapter: mysql
+  adapter: mysql2
   encoding: utf8
   database: ars_test_shard1_slave
   username: root
@@ -48,7 +48,7 @@ test_shard_1_slave:
   host: 127.0.0.1
 
 test2:
-  adapter: mysql
+  adapter: mysql2
   encoding: utf8
   database: ars_test2
   username: root
@@ -56,7 +56,7 @@ test2:
   host: 127.0.0.1
 
 test2_slave:
-  adapter: mysql
+  adapter: mysql2
   encoding: utf8
   database: ars_test2_slave
   username: root
@@ -64,7 +64,7 @@ test2_slave:
   host: 127.0.0.1
 
 alternative:
-  adapter: mysql
+  adapter: mysql2
   encoding: utf8
   database: ars_test_alternative
   username: root
