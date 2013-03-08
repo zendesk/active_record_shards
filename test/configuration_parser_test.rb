@@ -1,4 +1,4 @@
-require File.expand_path('helper', File.dirname(__FILE__))
+require_relative 'helper'
 
 class ConfigurationParserTest < ActiveSupport::TestCase
   context "exploding the database.yml" do
