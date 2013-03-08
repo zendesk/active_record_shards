@@ -1,11 +1,11 @@
 PATH
   remote: .
   specs:
-    active_record_shards (2.6.7)
+    active_record_shards (2.7.0)
       activerecord (>= 2.3.5, < 3.3)
 
 GEM
-  remote: http://rubygems.org/
+  remote: https://rubygems.org/
   specs:
     activemodel (3.2.11)
       activesupport (= 3.2.11)
@@ -23,14 +23,6 @@ GEM
       rake
     arel (3.0.2)
     builder (3.0.4)
-    columnize (0.3.6)
-    debugger (1.1.1)
-      columnize (>= 0.3.1)
-      debugger-linecache (~> 1.1)
-      debugger-ruby_core_source (~> 1.1)
-    debugger-linecache (1.1.1)
-      debugger-ruby_core_source (>= 1.1.1)
-    debugger-ruby_core_source (1.1.2)
     i18n (0.6.1)
     metaclass (0.0.1)
     mocha (0.12.0)
@@ -40,7 +32,6 @@ GEM
     mysql2 (0.3.11)
     rake (10.0.3)
     shoulda (2.11.3)
-    test-unit (2.5.3)
     tzinfo (0.3.35)
 
 PLATFORMS
@@ -49,11 +40,8 @@ PLATFORMS
 DEPENDENCIES
   active_record_shards!
   appraisal
-  bundler
-  debugger
-  mocha (= 0.12.0)
+  mocha (~> 0.12.0)
   mysql
   mysql2
   rake
   shoulda
-  test-unit (>= 2.5.1)
