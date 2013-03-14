@@ -3,8 +3,8 @@
 ActiveRecord Shards is an extension for ActiveRecord that provides support for sharded database and slaves. Basically it is just a nice way to
 switch between database connection. We've made the implementation very small, and have tried not to reinvent any wheels already present in ActiveRecord.
 
-ActiveRecord Shards has only been used and tested on Rails 2.3.x, and has in some form or another been used on in production on a large rails app for
-more than a year!
+ActiveRecord Shards has used and tested on Rails 2.3.x, 3.0.x, and 3.2.x and has in some form or another been used on in production on a large rails app for
+more than a year.
 
 ## Installation
 
