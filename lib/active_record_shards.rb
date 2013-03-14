@@ -18,6 +18,10 @@ ActiveRecord::Base.extend(ActiveRecordShards::Model)
 ActiveRecord::Base.extend(ActiveRecordShards::ConnectionSwitcher)
 ActiveRecord::Base.extend(ActiveRecordShards::DefaultSlavePatches)
 
+if ActiveRecord.const_defined?(:Relation)
+  ActiveRecord::Relation.send(:include, ActiveRecordShards::DefaultSlavePatches::ActiveRelationPatches)
+end
+
 if ActiveRecord::VERSION::STRING >= "3.1.0"
   ActiveRecord::Associations::CollectionProxy.send(:include, ActiveRecordShards::AssociationCollectionConnectionSelection)
 else

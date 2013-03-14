@@ -402,6 +402,14 @@ class ConnectionSwitchingTest < ActiveSupport::TestCase
           end
         end
 
+        should "count associations on the slave" do
+          AccountThing.on_slave_by_default = true
+          Account.on_slave.connection.execute("INSERT INTO account_things (id, account_id) VALUES(123123, 1000)")
+          Account.on_slave.connection.execute("INSERT INTO account_things (id, account_id) VALUES(123124, 1000)")
+          assert_equal 2, Account.find(1000).account_things.size
+          AccountThing.on_slave_by_default = false
+        end
+
         should "Allow override using on_master" do
           model = Account.on_master.find(1000)
           assert_equal "master_name", model.name

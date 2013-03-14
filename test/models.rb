@@ -3,6 +3,11 @@ class Account < ActiveRecord::Base
   not_sharded
 
   has_many :tickets
+  has_many :account_things
+end
+
+class AccountThing < ActiveRecord::Base
+  not_sharded
 end
 
 class Email < ActiveRecord::Base

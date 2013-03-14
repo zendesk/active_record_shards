@@ -7,6 +7,10 @@ ActiveRecord::Schema.define(:version => 1) do
     t.datetime "updated_at"
   end
 
+  create_table "account_things", :force => true do |t|
+    t.integer "account_id"
+  end
+
   create_table "emails", :force => true do |t|
     t.string   "from"
     t.string   "to"

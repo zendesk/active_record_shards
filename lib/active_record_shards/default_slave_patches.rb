@@ -1,6 +1,6 @@
 module ActiveRecordShards
   module DefaultSlavePatches
-    CLASS_SLAVE_METHODS = [ :find_by_sql, :count_by_sql, :calculate, :find_one, :find_some, :find_every, :quote_value, :sanitize_sql_hash_for_conditions, :exists? ]
+    CLASS_SLAVE_METHODS = [ :find_by_sql, :count_by_sql,  :calculate, :find_one, :find_some, :find_every, :quote_value, :sanitize_sql_hash_for_conditions, :exists? ]
 
     def self.extended(base)
       base_methods = (base.methods | base.private_methods).map(&:to_sym)
@@ -92,6 +92,20 @@ module ActiveRecordShards
         on_slave { yield }
       else
         yield
+      end
+    end
+
+    module ActiveRelationPatches
+      def self.included(base)
+        base.send :alias_method_chain, :calculate, :default_slave
+      end
+
+      def on_slave_unless_tx
+        @klass.on_slave_unless_tx { yield }
+      end
+
+      def calculate_with_default_slave(*args, &block)
+        on_slave_unless_tx { calculate_without_default_slave(*args, &block) }
       end
     end
   end
