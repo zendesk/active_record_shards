@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Mick Staugaard", "Eric Chapweske", "Ben Osheroff"]
   s.email       = ["mick@staugaard.com", "eac@zendesk.com", "ben@gimbo.net"]
-  s.homepage    = "http://github.com/staugaard/active_record_shards"
+  s.homepage    = "http://github.com/zendesk/active_record_shards"
   s.summary     = "Simple database switching for ActiveRecord."
   s.description = "Easily run queries on shard and slave databases."
   s.license     = "MIT"
