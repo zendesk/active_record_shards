@@ -145,6 +145,12 @@ class ConnectionSwitchingTest < ActiveSupport::TestCase
       should "get colmns from the first shard" do
         assert Ticket.column_names.include?('foo')
       end
+
+      should "have correct from_shard" do
+        ActiveRecord::Base.on_all_shards do |shard|
+          assert_equal shard, Ticket.new.from_shard
+        end
+      end
     end
   end
 
