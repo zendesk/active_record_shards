@@ -1,4 +1,0 @@
-#!/bin/bash
-rm -Rf gemfiles
-rake appraisal:install
-rake appraisal test
