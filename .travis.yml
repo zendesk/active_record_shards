@@ -1,3 +1,12 @@
-script: "./script/travis_build"
 rvm:
   - 1.9.3
+  - 2.0
+gemfile:
+  - gemfiles/rails2.gemfile
+  - gemfiles/rails30.gemfile
+  - gemfiles/rails32.gemfile
+matrix:
+  exclude:
+    - rvm: 2.0
+      gemfile: gemfiles/rails2.gemfile
+script: "bundle exec rake test"
