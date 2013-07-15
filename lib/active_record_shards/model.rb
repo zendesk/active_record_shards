@@ -32,8 +32,7 @@ module ActiveRecordShards
     end
 
     module InstanceMethods
-      def after_initialize_with_slave
-        after_initialize_without_slave if respond_to?(:after_initialize_without_slave)
+      def initialize_shard_and_slave
         @from_slave = !!self.class.current_shard_selection.options[:slave]
         @from_shard = self.class.current_shard_selection.options[:shard]
       end
@@ -49,16 +48,11 @@ module ActiveRecordShards
 
     def self.extended(base)
       base.send(:include, InstanceMethods)
-
-      if ActiveRecord::VERSION::MAJOR >= 3
-        base.after_initialize :after_initialize_with_slave
-      else
-        if base.method_defined?(:after_initialize)
-          base.alias_method_chain :after_initialize, :slave
-        else
-          base.send(:alias_method, :after_initialize, :after_initialize_with_slave)
-        end
+      if ActiveRecord::VERSION::MAJOR == 2 && !base.method_defined?(:after_initialize)
+        # trick rails 2 into running callbacks
+        base.send(:define_method, :after_initialize){}
       end
+      base.after_initialize :initialize_shard_and_slave
     end
   end
 end
