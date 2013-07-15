@@ -1,9 +1,8 @@
-require 'rubygems'
-require 'bundler'
-require 'test/unit'
+require 'bundler/setup'
+Bundler.require
 
-Bundler.setup
-Bundler.require(:default, :development)
+require 'minitest/autorun'
+MiniTest::Reporters.use! MiniTest::Reporters::DefaultReporter.new
 
 if defined?(Debugger)
   ::Debugger.start
