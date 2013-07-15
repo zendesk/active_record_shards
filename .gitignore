@@ -2,5 +2,5 @@ pkg/*
 *.gem
 .bundle
 *.log
-gemfiles/*
+gemfiles/*.lock
 Gemfile.lock
