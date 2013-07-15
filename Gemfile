@@ -2,7 +2,6 @@ source "https://rubygems.org"
 
 gem 'appraisal'
 gem 'rake'
-gem 'shoulda'
 gem 'mysql'
 gem 'mysql2'
 gem 'minitest'

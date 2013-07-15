@@ -1,14 +1,14 @@
 require_relative 'helper'
 
-class ConfigurationParserTest < ActiveSupport::TestCase
-  context "exploding the database.yml" do
-    setup do
+describe ActiveRecordShards::ConfigurationParser do
+  describe "exploding the database.yml" do
+    before do
       @exploded_conf = ActiveRecordShards::ConfigurationParser.explode(YAML::load(IO.read(File.dirname(__FILE__) + '/database_parse_test.yml')))
     end
 
-    context "main slave" do
-      setup { @conf = @exploded_conf['test_slave'] }
-      should "be exploded" do
+    describe "main slave" do
+      before { @conf = @exploded_conf['test_slave'] }
+      it "be exploded" do
         @conf["shard_names"] = @conf["shard_names"].to_set
         assert_equal({
           "adapter"     => "mysql",
@@ -23,10 +23,10 @@ class ConfigurationParserTest < ActiveSupport::TestCase
       end
     end
 
-    context "shard a" do
-      context "master" do
-        setup { @conf = @exploded_conf['test_shard_a'] }
-        should "be exploded" do
+    describe "shard a" do
+      describe "master" do
+        before { @conf = @exploded_conf['test_shard_a'] }
+        it "be exploded" do
           @conf["shard_names"] = @conf["shard_names"].to_set
           assert_equal({
             "adapter"     => "mysql",
@@ -41,9 +41,9 @@ class ConfigurationParserTest < ActiveSupport::TestCase
         end
       end
 
-      context "slave" do
-        setup { @conf = @exploded_conf['test_shard_a_slave'] }
-        should "be exploded" do
+      describe "slave" do
+        before { @conf = @exploded_conf['test_shard_a_slave'] }
+        it "be exploded" do
           @conf["shard_names"] = @conf["shard_names"].to_set
           assert_equal({
             "adapter"     => "mysql",
@@ -59,10 +59,10 @@ class ConfigurationParserTest < ActiveSupport::TestCase
       end
     end
 
-    context "shard b" do
-      context "master" do
-        setup { @conf = @exploded_conf['test_shard_b'] }
-        should "be exploded" do
+    describe "shard b" do
+      describe "master" do
+        before { @conf = @exploded_conf['test_shard_b'] }
+        it "be exploded" do
           @conf["shard_names"] = @conf["shard_names"].to_set
           assert_equal({
             "adapter"     => "mysql",
@@ -77,9 +77,9 @@ class ConfigurationParserTest < ActiveSupport::TestCase
         end
       end
 
-      context "slave" do
-        setup { @conf = @exploded_conf['test_shard_b_slave'] }
-        should "be exploded" do
+      describe "slave" do
+        before { @conf = @exploded_conf['test_shard_b_slave'] }
+        it "be exploded" do
           @conf["shard_names"] = @conf["shard_names"].to_set
           assert_equal({
             "adapter"     => "mysql",

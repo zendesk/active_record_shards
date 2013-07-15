@@ -10,12 +10,12 @@ class CowardlyMigration < ActiveRecord::Migration
   end
 end
 
-class MigratorTest < ActiveSupport::TestCase
-  def setup
+describe ActiveRecord::Migrator do
+  before do
     init_schema
   end
 
-  def test_migrator
+  it "migrates" do
     migration_path = File.join(File.dirname(__FILE__), "/migrations")
     ActiveRecord::Migrator.migrate(migration_path)
     ActiveRecord::Base.on_all_shards do
@@ -57,7 +57,7 @@ class MigratorTest < ActiveSupport::TestCase
     end
   end
 
-  def test_bad_migration
+  it "does not migrate bad migrations" do
     migration_path = File.join(File.dirname(__FILE__), "/cowardly_migration")
     exception = nil
     begin
@@ -68,7 +68,7 @@ class MigratorTest < ActiveSupport::TestCase
     assert e
   end
 
-  def test_failing_migration
+  it "fails with failing migrations" do
     # like, if you have to break a migration in the middle somewhere.
     migration_path = File.join(File.dirname(__FILE__), "/failure_migration")
 
@@ -88,6 +88,7 @@ class MigratorTest < ActiveSupport::TestCase
   end
 
   private
+
   def failure_migration_pending?(migration_path)
     ActiveRecord::Migrator.new(:up, migration_path).pending_migrations.detect { |f| f.name == "FailureMigration" }
   end

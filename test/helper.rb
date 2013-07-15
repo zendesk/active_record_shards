@@ -13,7 +13,6 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 require 'active_record_shards'
 require 'logger'
-require 'shoulda'
 
 RAILS_ENV = "test"
 
@@ -33,7 +32,7 @@ init_schema
 require 'models'
 
 require 'active_support/test_case'
-class ActiveSupport::TestCase
+class Minitest::Spec
   def clear_databases
     ActiveRecord::Base.configurations.each do |name, conf|
       ActiveRecord::Base.establish_connection(name)
@@ -42,7 +41,7 @@ class ActiveSupport::TestCase
     end
     ActiveRecord::Base.establish_connection(RAILS_ENV)
   end
-  setup :clear_databases
+  before { clear_databases }
 
   def assert_using_master_db
     assert_using_database('ars_test')

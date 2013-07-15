@@ -1,8 +1,10 @@
 require_relative 'helper'
 
-class ConnectionSwitchingTest < ActiveSupport::TestCase
-  context "shard switching" do
-    should "only switch connection on sharded models" do
+describe "connection switching" do
+  i_suck_and_my_tests_are_order_dependent!
+
+  describe "shard switching" do
+    it "only switch connection on sharded models" do
       assert_using_database('ars_test', Ticket)
       assert_using_database('ars_test', Account)
 
@@ -12,7 +14,7 @@ class ConnectionSwitchingTest < ActiveSupport::TestCase
       end
     end
 
-    should "switch to shard and back" do
+    it "switch to shard and back" do
       assert_using_database('ars_test')
       ActiveRecord::Base.on_slave { assert_using_database('ars_test_slave') }
 
@@ -33,22 +35,22 @@ class ConnectionSwitchingTest < ActiveSupport::TestCase
       ActiveRecord::Base.on_slave { assert_using_database('ars_test_slave') }
     end
 
-    context "on_first_shard" do
-      should "use the first shard" do
+    describe "on_first_shard" do
+      it "use the first shard" do
         ActiveRecord::Base.on_first_shard {
           assert_using_database('ars_test_shard0')
         }
       end
     end
 
-    context "on_all_shards" do
-      setup do
+    describe "on_all_shards" do
+      before do
         @shard_0_master = ActiveRecord::Base.on_shard(0) {ActiveRecord::Base.connection}
         @shard_1_master = ActiveRecord::Base.on_shard(1) {ActiveRecord::Base.connection}
-        assert_not_equal(@shard_0_master.select_value("SELECT DATABASE()"), @shard_1_master.select_value("SELECT DATABASE()"))
+        refute_equal(@shard_0_master.select_value("SELECT DATABASE()"), @shard_1_master.select_value("SELECT DATABASE()"))
       end
 
-      should "execute the block on all shard masters" do
+      it "execute the block on all shard masters" do
         result = ActiveRecord::Base.on_all_shards do |shard|
           [ActiveRecord::Base.connection.select_value("SELECT DATABASE()"), shard]
         end
@@ -56,15 +58,15 @@ class ConnectionSwitchingTest < ActiveSupport::TestCase
         database_shards = result.map(&:last)
 
         assert_equal(2, database_names.size)
-        assert_contains(database_names, @shard_0_master.select_value("SELECT DATABASE()"))
-        assert_contains(database_names, @shard_1_master.select_value("SELECT DATABASE()"))
+        assert_includes(database_names, @shard_0_master.select_value("SELECT DATABASE()"))
+        assert_includes(database_names, @shard_1_master.select_value("SELECT DATABASE()"))
 
         assert_equal(2, database_shards.size)
-        assert_contains(database_shards, "0")
-        assert_contains(database_shards, "1")
+        assert_includes(database_shards, "0")
+        assert_includes(database_shards, "1")
       end
 
-      should "execute the block unsharded" do
+      it "execute the block unsharded" do
         ActiveRecord::Base.expects(:supports_sharding?).returns false
         result = ActiveRecord::Base.on_all_shards do |shard|
           [ActiveRecord::Base.connection.select_value("SELECT DATABASE()"), shard]
@@ -74,33 +76,33 @@ class ConnectionSwitchingTest < ActiveSupport::TestCase
     end
   end
 
-  context "default shard selection" do
-    context "of nil" do
-      setup do
+  describe "default shard selection" do
+    describe "of nil" do
+      before do
         ActiveRecord::Base.default_shard = nil
       end
 
-      should "use unsharded db for sharded models" do
+      it "use unsharded db for sharded models" do
         assert_using_database('ars_test', Ticket)
         assert_using_database('ars_test', Account)
       end
     end
 
-    context "value" do
-      setup do
+    describe "value" do
+      before do
         ActiveRecord::Base.default_shard = 0
       end
 
-      teardown do
+      after do
         ActiveRecord::Base.default_shard = nil
       end
 
-      should "use default shard db for sharded models" do
+      it "use default shard db for sharded models" do
         assert_using_database('ars_test_shard0', Ticket)
         assert_using_database('ars_test', Account)
       end
 
-      should "still be able to switch to shard nil" do
+      it "still be able to switch to shard nil" do
         ActiveRecord::Base.on_shard(nil) do
           assert_using_database('ars_test', Ticket)
           assert_using_database('ars_test', Account)
@@ -109,44 +111,44 @@ class ConnectionSwitchingTest < ActiveSupport::TestCase
     end
   end
 
-  context "ActiveRecord::Base.columns" do
-    setup do
+  describe "ActiveRecord::Base.columns" do
+    before do
       ActiveRecord::Base.default_shard = nil
     end
 
-    context "for unsharded models" do
-      should "use the non-sharded connection" do
+    describe "for unsharded models" do
+      it "use the non-sharded connection" do
         assert_using_database('ars_test', Account)
         Account.connection.execute("alter table accounts add column foo int")
 
         assert Account.column_names.include?('foo')
       end
 
-      teardown do
+      after do
         ActiveRecord::Base.connection.execute("alter table accounts drop column foo")
         Account.reset_column_information
       end
     end
 
-    context "for sharded models" do
-      setup do
+    describe "for sharded models" do
+      before do
         ActiveRecord::Base.on_first_shard do
           ActiveRecord::Base.connection.execute("alter table tickets add column foo int")
         end
       end
 
-      teardown do
+      after do
         ActiveRecord::Base.on_first_shard do
           ActiveRecord::Base.connection.execute("alter table tickets drop column foo")
           Ticket.reset_column_information
         end
       end
 
-      should "get colmns from the first shard" do
+      it "get colmns from the first shard" do
         assert Ticket.column_names.include?('foo')
       end
 
-      should "have correct from_shard" do
+      it "have correct from_shard" do
         ActiveRecord::Base.on_all_shards do |shard|
           assert_equal shard, Ticket.new.from_shard
         end
@@ -154,13 +156,13 @@ class ConnectionSwitchingTest < ActiveSupport::TestCase
     end
   end
 
-  context "ActiveRecord::Base.table_exists?" do
-    setup do
+  describe "ActiveRecord::Base.table_exists?" do
+    before do
       ActiveRecord::Base.default_shard = nil
     end
 
-    context "for unsharded models" do
-      should "use the unsharded connection" do
+    describe "for unsharded models" do
+      it "use the unsharded connection" do
         class UnshardedModel < ActiveRecord::Base
           not_sharded
         end
@@ -173,8 +175,8 @@ class ConnectionSwitchingTest < ActiveSupport::TestCase
       end
     end
 
-    context "for sharded models" do
-      should "try the first shard" do
+    describe "for sharded models" do
+      it "try the first shard" do
         class ShardedModel < ActiveRecord::Base
         end
 
@@ -187,31 +189,31 @@ class ConnectionSwitchingTest < ActiveSupport::TestCase
     end
   end
 
-  context "in an unsharded environment" do
-    setup do
+  describe "in an unsharded environment" do
+    before do
       silence_warnings { ::RAILS_ENV = 'test2' }
       ActiveRecord::Base.establish_connection(::RAILS_ENV)
       assert_using_database('ars_test2', Ticket)
     end
 
-    teardown do
+    after do
       silence_warnings { ::RAILS_ENV = 'test' }
       ActiveRecord::Base.establish_connection(::RAILS_ENV)
       assert_using_database('ars_test', Ticket)
     end
 
     if ActiveRecord::VERSION::MAJOR >= 3
-      should "be able to find by column" do
+      it "be able to find by column" do
         Account.where(:name => "peter").to_sql # does not blow up
       end
 
-      should "have correct engine" do
+      it "have correct engine" do
         assert_equal Account, Account.arel_engine
       end
     end
 
-    context "shard switching" do
-      should "just stay on the main db" do
+    describe "shard switching" do
+      it "just stay on the main db" do
         assert_using_database('ars_test2', Ticket)
         assert_using_database('ars_test2', Account)
 
@@ -222,31 +224,31 @@ class ConnectionSwitchingTest < ActiveSupport::TestCase
       end
     end
 
-    context "on_all_shards" do
-      setup do
+    describe "on_all_shards" do
+      before do
         @database_names = []
         ActiveRecord::Base.on_all_shards do
           @database_names << ActiveRecord::Base.connection.select_value("SELECT DATABASE()")
         end
       end
 
-      should "execute the block on all shard masters" do
+      it "execute the block on all shard masters" do
         @database_names
         assert_equal([ActiveRecord::Base.connection.select_value("SELECT DATABASE()")], @database_names)
       end
     end
   end
 
-  context "slave driving" do
-    context "without slave configuration" do
+  describe "slave driving" do
+    describe "without slave configuration" do
 
-      setup do
+      before do
         ActiveRecord::Base.configurations.delete('test_slave')
         ActiveRecord::Base.connection_handler.connection_pools.clear
         ActiveRecord::Base.establish_connection('test')
       end
 
-      should "default to the master database" do
+      it "default to the master database" do
         Account.create!
 
         ActiveRecord::Base.on_slave { assert_using_master_db }
@@ -254,7 +256,7 @@ class ConnectionSwitchingTest < ActiveSupport::TestCase
         Ticket.on_slave  { assert_using_master_db }
       end
 
-      should "successfully execute queries" do
+      it "successfully execute queries" do
         Account.create!
         assert_using_master_db
 
@@ -264,9 +266,9 @@ class ConnectionSwitchingTest < ActiveSupport::TestCase
 
     end
 
-    context "with slave configuration" do
+    describe "with slave configuration" do
 
-      should "successfully execute queries" do
+      it "successfully execute queries" do
         assert_using_master_db
         Account.create!
 
@@ -274,7 +276,7 @@ class ConnectionSwitchingTest < ActiveSupport::TestCase
         assert_equal(0, ActiveRecord::Base.on_slave { Account.count })
       end
 
-      should "support global on_slave blocks" do
+      it "support global on_slave blocks" do
         assert_using_master_db
         assert_using_master_db
 
@@ -287,7 +289,7 @@ class ConnectionSwitchingTest < ActiveSupport::TestCase
         assert_using_master_db
       end
 
-      should "support conditional methods" do
+      it "support conditional methods" do
         assert_using_master_db
 
         Account.on_slave_if(true) do
@@ -309,8 +311,8 @@ class ConnectionSwitchingTest < ActiveSupport::TestCase
         end
       end
 
-      context "a model loaded with the slave" do
-        setup do
+      describe "a model loaded with the slave" do
+        before do
           Account.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'master_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
           assert(Account.find(1000))
           assert_equal('master_name', Account.find(1000).name)
@@ -322,23 +324,23 @@ class ConnectionSwitchingTest < ActiveSupport::TestCase
           assert_equal('slave_name', @model.name)
         end
 
-        should "read from master on reload" do
+        it "read from master on reload" do
           @model.reload
           assert_equal('master_name', @model.name)
         end
 
-        should "be marked as read only" do
+        it "be marked as read only" do
           assert(@model.readonly?)
         end
 
-        should "be marked as comming from the slave" do
+        it "be marked as comming from the slave" do
           assert(@model.from_slave?)
         end
       end
 
-      context "a inherited model without cached columns hash" do
+      describe "a inherited model without cached columns hash" do
         # before columns -> with_scope -> type-condition -> columns == loop
-        should "not loop when on slave by default" do
+        it "not loop when on slave by default" do
           Person.on_slave_by_default = true
           assert User.on_slave_by_default?
           assert User.finder_needs_type_condition?
@@ -348,8 +350,8 @@ class ConnectionSwitchingTest < ActiveSupport::TestCase
         end
       end
 
-      context "a model loaded with the master" do
-        setup do
+      describe "a model loaded with the master" do
+        before do
           Account.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'master_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
           @model = Account.first
           assert(@model)
@@ -358,57 +360,57 @@ class ConnectionSwitchingTest < ActiveSupport::TestCase
 
         # TODO mocha raises stack level too deep on ActiveRecord 3.2+
         if ActiveRecord::VERSION::STRING < "3.2.0"
-          should "not unnecessary call with_scope" do
+          it "not unnecessary call with_scope" do
             Account.expects(:with_scope).never
             Account.on_master.first
           end
         end
 
-        should "not unset readonly" do
+        it "not unset readonly" do
           @model = Account.on_master.scoped(:readonly => true).first
           assert(@model.readonly?)
         end
 
-        should "not be marked as read only" do
+        it "not be marked as read only" do
           assert(!@model.readonly?)
         end
 
-        should "not be marked as comming from the slave" do
+        it "not be marked as comming from the slave" do
           assert(!@model.from_slave?)
         end
       end
 
       # TODO: make all this stuff rails 3 compatible.
-      context "with finds routed to the slave by default" do
-        setup do
+      describe "with finds routed to the slave by default" do
+        before do
           Account.on_slave_by_default = true
           Account.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'master_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
           Account.on_slave.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'slave_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
           Account.on_slave.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1001, 'slave_name2', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
         end
 
-        should "find() by default on the slave" do
+        it "find() by default on the slave" do
           account = Account.find(1000)
           assert_equal 'slave_name', account.name
         end
 
-        should "count() by default on the slave" do
+        it "count() by default on the slave" do
           count = Account.all.size
           assert_equal 2, count
         end
 
-        should "reload() on the master" do
+        it "reload() on the master" do
           account = Account.find(1000)
           assert_equal 'master_name', account.reload.name
         end
 
-        should "do exists? on the slave" do
+        it "do exists? on the slave" do
           if Account.respond_to?(:exists?)
             assert Account.exists?(1001)
           end
         end
 
-        should "count associations on the slave" do
+        it "count associations on the slave" do
           AccountThing.on_slave_by_default = true
           Account.on_slave.connection.execute("INSERT INTO account_things (id, account_id) VALUES(123123, 1000)")
           Account.on_slave.connection.execute("INSERT INTO account_things (id, account_id) VALUES(123124, 1000)")
@@ -416,40 +418,40 @@ class ConnectionSwitchingTest < ActiveSupport::TestCase
           AccountThing.on_slave_by_default = false
         end
 
-        should "Allow override using on_master" do
+        it "Allow override using on_master" do
           model = Account.on_master.find(1000)
           assert_equal "master_name", model.name
         end
 
-        should "not override on_master with on_slave" do
+        it "not override on_master with on_slave" do
           model = Account.on_master { Account.on_slave.find(1000) }
           assert_equal "master_name", model.name
         end
 
-        should "override on_slave with on_master" do
+        it "override on_slave with on_master" do
           model = Account.on_slave { Account.on_master.find(1000) }
           assert_equal "master_name", model.name
         end
 
-        should "propogate the default_slave setting to inherited classes" do
+        it "propogate the default_slave setting to inherited classes" do
           assert AccountInherited.on_slave_by_default?
         end
 
-        teardown do
+        after do
           Account.on_slave_by_default = false
         end
       end
     end
 
-    context "slave proxy" do
-      should "successfully execute queries" do
+    describe "slave proxy" do
+      it "successfully execute queries" do
         assert_using_master_db
         Account.create!
 
-        assert_not_equal Account.count, Account.on_slave.count
+        refute_equal Account.count, Account.on_slave.count
       end
 
-      should "work on association collections" do
+      it "work on association collections" do
         assert_using_master_db
         account = Account.create!
 
@@ -465,8 +467,8 @@ class ConnectionSwitchingTest < ActiveSupport::TestCase
     end
   end
 
-  context "alternative connections" do
-    should "not interfere with other connections" do
+  describe "alternative connections" do
+    it "not interfere with other connections" do
       assert_using_database('ars_test', Account)
       assert_using_database('ars_test', Ticket)
       assert_using_database('ars_test_alternative', Email)
