@@ -39,21 +39,32 @@ module ActiveRecord
 
     # list of pending migrations is any migrations that haven't run on all shards.
     def pending_migrations
-      migration_counts = Hash.new(0)
-      ActiveRecord::Base.on_shard(nil) do
-        migrated.each { |v| migration_counts[v] += 1 }
+      pending, missing = self.class.shard_status(migrations.map(&:version))
+      pending = pending.values.flatten
+      migrations.select { |m| pending.include?(m.version) }
+    end
+
+    # public
+    # list of pending and missing versions per shard
+    # [{1 => [1234567]}, {1 => [2345678]}]
+    def self.shard_status(versions)
+      pending = {}
+      missing = {}
+
+      collect = lambda do |shard|
+        migrated = get_all_versions
+
+        p = versions - migrated
+        pending[shard] = p if p.any?
+
+        m = migrated - versions
+        missing[shard] = m if m.any?
       end
 
-      shard_count = 1
-      ActiveRecord::Base.on_all_shards do
-        migrated.each { |v| migration_counts[v] += 1 }
-        shard_count += 1
-      end
+      ActiveRecord::Base.on_shard(nil) { collect.call(nil) }
+      ActiveRecord::Base.on_all_shards { |shard| collect.call(shard) }
 
-      migrations.select do |m|
-        count = migration_counts[m.version]
-        count.nil? || count < shard_count
-      end
+      return pending, missing
     end
   end
 end

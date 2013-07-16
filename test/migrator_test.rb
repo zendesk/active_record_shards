@@ -87,6 +87,20 @@ describe ActiveRecord::Migrator do
     end
   end
 
+  describe "#shard_status" do
+    it "shows nothing if everything is ok" do
+      ActiveRecord::Migrator.shard_status([1]).must_equal([{}, {}])
+    end
+
+    it "shows missing migrations" do
+      ActiveRecord::Migrator.shard_status([]).must_equal([{}, {nil => [1], "0" => [1], "1" => [1]}])
+    end
+
+    it "shows pending migrations" do
+      ActiveRecord::Migrator.shard_status([1, 2]).must_equal([{nil => [2], "0" => [2], "1" => [2]}, {}])
+    end
+  end
+
   private
 
   def failure_migration_pending?(migration_path)
