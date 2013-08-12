@@ -4,7 +4,6 @@ gemspec
 gem 'activerecord'
 gem 'appraisal'
 gem 'rake'
-gem 'mysql'
 gem 'mysql2'
 gem 'bump'
 gem 'minitest', '~> 4.7'
