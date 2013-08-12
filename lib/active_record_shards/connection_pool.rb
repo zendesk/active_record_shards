@@ -1,55 +1,32 @@
-ActiveRecord::ConnectionAdapters::ConnectionHandler.class_eval do
-  # The only difference here is that we use klass.connection_pool_name
-  # instead of klass.name as the pool key
-  def retrieve_connection_pool(klass)
-    pool = (@class_to_pool || @connection_pools)[klass.connection_pool_name]
-    return pool if pool
-    return nil if ActiveRecord::Base == klass
-    retrieve_connection_pool klass.superclass
-  end
+module ActiveRecordShards
+  ConnectionPoolNameDecorator = Struct.new(:name)
 
-  def remove_connection(klass)
-    # rails 2: @connection_pools is a hash of klass.name => pool
-    # rails 3: @connection_pools is a hash of pool.spec => pool
-    #          @class_to_pool is a hash of klass.name => pool
-    #
-    if @class_to_pool
-      pool = @class_to_pool.delete(klass.connection_pool_name)
-      @connection_pools.delete(pool.spec) if pool
-    else
-      pool = @connection_pools.delete(klass.connection_pool_name)
-      @connection_pools.delete_if { |key, value| value == pool }
-    end
-
-    return nil unless pool
-
-    pool.disconnect! if pool
-    pool.spec.config if pool
-  end
-end
-
-ActiveRecord::Base.singleton_class.class_eval do
-  def establish_connection_with_connection_pool_name(spec = nil)
-    case spec
-    when ActiveRecord::Base::ConnectionSpecification
-      connection_handler.establish_connection(connection_pool_name, spec)
-    else
-      establish_connection_without_connection_pool_name(spec)
-    end
-  end
-  alias_method_chain :establish_connection, :connection_pool_name
-end
-
-# old_code.sub('name', 'connection_pool_name')
-if ActiveRecord::VERSION::MAJOR == 3 && ActiveRecord::VERSION::MINOR == 0
-  class ActiveRecord::Base
-    def self.arel_engine
-      @arel_engine ||= begin
-        if self == ActiveRecord::Base
-          Arel::Table.engine
-        else
-          connection_handler.connection_pools[connection_pool_name] ? self : superclass.arel_engine
+  # It overrides given connection handler methods (they differ depend on
+  # Rails version).
+  #
+  # It takes the first argument, ActiveRecord::Base object or
+  # String (connection_pool_name), converts it in Struct object and
+  # passes to the original method.
+  #
+  # Example:
+  #   methods_to_override = [:establish_connection, :remove_connection]
+  #   ActiveRecordShards.override_connection_handler_methods(methods_to_override)
+  #
+  def self.override_connection_handler_methods(method_names)
+    method_names.each do |method_name|
+      ActiveRecord::ConnectionAdapters::ConnectionHandler.class_eval do
+        define_method("#{method_name}_with_connection_pool_name") do |*args|
+          unless args[0].is_a? ConnectionPoolNameDecorator
+            name = if args[0].is_a? String
+                     args[0]
+                   else
+                     args[0].connection_pool_name
+                   end
+            args[0] = ConnectionPoolNameDecorator.new(name)
+          end
+          send("#{method_name}_without_connection_pool_name", *args)
         end
+        alias_method_chain method_name, :connection_pool_name
       end
     end
   end

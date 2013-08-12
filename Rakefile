@@ -2,6 +2,8 @@ require 'bundler/setup'
 require "appraisal"
 require "bump/tasks"
 
+Bundler::GemHelper.install_tasks
+
 require 'rake/testtask'
 Rake::TestTask.new(:test) do |test|
   test.pattern = './test/**/*_test.rb'

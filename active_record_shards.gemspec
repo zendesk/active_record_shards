@@ -3,7 +3,7 @@ $:.push File.expand_path("../lib", __FILE__)
 
 Gem::Specification.new do |s|
   s.name        = "active_record_shards"
-  s.version     = "2.7.4"
+  s.version     = "2.7.5"
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Mick Staugaard", "Eric Chapweske", "Ben Osheroff"]
   s.email       = ["mick@staugaard.com", "eac@zendesk.com", "ben@gimbo.net"]
@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
   s.description = "Easily run queries on shard and slave databases."
   s.license     = "MIT"
 
-  s.add_runtime_dependency("activerecord",  ">= 2.3.5", "< 3.3")
+  s.add_runtime_dependency("activerecord",  ">= 2.3.5", "<= 4.1")
 
   s.files        = Dir.glob("lib/**/*") + %w(README.md)
   s.test_files   = Dir.glob("test/**/*") - ["test/test.log"]

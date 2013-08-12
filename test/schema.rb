@@ -9,6 +9,7 @@ ActiveRecord::Schema.define(:version => 1) do
 
   create_table "account_things", :force => true do |t|
     t.integer "account_id"
+    t.boolean "enabled", :default => true
   end
 
   create_table "emails", :force => true do |t|
