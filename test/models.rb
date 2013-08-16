@@ -8,6 +8,10 @@ end
 
 class AccountThing < ActiveRecord::Base
   not_sharded
+
+  if respond_to?(:where)
+    scope :enabled, where(:enabled => true)
+  end
 end
 
 class Email < ActiveRecord::Base
