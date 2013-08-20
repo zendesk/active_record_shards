@@ -411,13 +411,11 @@ describe "connection switching" do
         end
 
         it "does exists? on the slave with a named scope" do
-          if AccountThing.respond_to?(:where) && AccountThing.respond_to?(:exists?)
-            AccountThing.on_slave_by_default = true
-            Account.on_slave.connection.execute("INSERT INTO account_things (id, account_id) VALUES(123125, 1000)")
-            assert AccountThing.enabled.exists?(123125)
-            Account.on_slave.connection.execute("DELETE FROM account_things")
-            AccountThing.on_slave_by_default = false
-          end
+          AccountThing.on_slave_by_default = true
+          Account.on_slave.connection.execute("INSERT INTO account_things (id, account_id) VALUES(123125, 1000)")
+          assert AccountThing.enabled.exists?(123125)
+          Account.on_slave.connection.execute("DELETE FROM account_things")
+          AccountThing.on_slave_by_default = false
         end
 
         it "count associations on the slave" do
