@@ -410,6 +410,14 @@ describe "connection switching" do
           end
         end
 
+        it "does exists? on the slave with a named scope" do
+          AccountThing.on_slave_by_default = true
+          Account.on_slave.connection.execute("INSERT INTO account_things (id, account_id) VALUES(123125, 1000)")
+          assert AccountThing.enabled.exists?(123125)
+          Account.on_slave.connection.execute("DELETE FROM account_things")
+          AccountThing.on_slave_by_default = false
+        end
+
         it "count associations on the slave" do
           AccountThing.on_slave_by_default = true
           Account.on_slave.connection.execute("INSERT INTO account_things (id, account_id) VALUES(123123, 1000)")
