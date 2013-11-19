@@ -99,7 +99,7 @@ module ActiveRecordShards
       def self.included(base)
         base.send :alias_method_chain, :calculate, :default_slave
         base.send :alias_method_chain, :exists?, :default_slave
-        base.send :alias_method_chain, :pluck, :default_slave
+        base.send :alias_method_chain, :pluck, :default_slave if base.instance_methods.map(&:to_sym).include?(:pluck)
       end
 
       def on_slave_unless_tx
