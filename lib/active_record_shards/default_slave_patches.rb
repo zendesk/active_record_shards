@@ -99,6 +99,7 @@ module ActiveRecordShards
       def self.included(base)
         base.send :alias_method_chain, :calculate, :default_slave
         base.send :alias_method_chain, :exists?, :default_slave
+        base.send :alias_method_chain, :pluck, :default_slave if base.instance_methods.map(&:to_sym).include?(:pluck)
       end
 
       def on_slave_unless_tx
@@ -111,6 +112,10 @@ module ActiveRecordShards
 
       def exists_with_default_slave?(*args, &block)
         on_slave_unless_tx { exists_without_default_slave?(*args, &block) }
+      end
+
+      def pluck_with_default_slave(*args, &block)
+        on_slave_unless_tx { pluck_without_default_slave(*args, &block) }
       end
     end
   end

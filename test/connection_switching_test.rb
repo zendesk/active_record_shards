@@ -445,6 +445,12 @@ describe "connection switching" do
           assert AccountInherited.on_slave_by_default?
         end
 
+        if ActiveRecord::VERSION::MAJOR >= 3 && ActiveRecord::VERSION::MINOR >= 2
+          it "supports .pluck" do
+            assert_equal ["slave_name", "slave_name2"], Account.pluck(:name)
+          end
+        end
+
         after do
           Account.on_slave_by_default = false
         end
