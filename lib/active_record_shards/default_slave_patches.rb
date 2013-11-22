@@ -85,6 +85,7 @@ module ActiveRecordShards
       def self.included(base)
         ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(false, base, :calculate)
         ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(false, base, :exists?)
+        ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(false, base, :pluck)
       end
 
       def on_slave_unless_tx
