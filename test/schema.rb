@@ -12,6 +12,11 @@ ActiveRecord::Schema.define(:version => 1) do
     t.boolean "enabled", :default => true
   end
 
+  create_table "account_people", :force => true, :id => false do |t|
+    t.integer "account_id"
+    t.integer "person_id"
+  end
+
   create_table "emails", :force => true do |t|
     t.string   "from"
     t.string   "to"

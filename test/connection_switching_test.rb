@@ -380,13 +380,19 @@ describe "connection switching" do
         end
       end
 
-      # TODO: make all this stuff rails 3 compatible.
       describe "with finds routed to the slave by default" do
         before do
           Account.on_slave_by_default = true
+          Person.on_slave_by_default = true
           Account.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'master_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
           Account.on_slave.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'slave_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
           Account.on_slave.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1001, 'slave_name2', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
+
+          Person.connection.execute("REPLACE INTO people(id, name) VALUES(10, 'master person')")
+          Person.on_slave.connection.execute("REPLACE INTO people(id, name) VALUES(20, 'slave person')")
+
+          Account.connection.execute("INSERT INTO account_people(account_id, person_id) VALUES(1000, 10)")
+          Account.on_slave.connection.execute("INSERT INTO account_people(account_id, person_id) VALUES(1001, 20)")
         end
 
         it "find() by default on the slave" do
@@ -445,6 +451,12 @@ describe "connection switching" do
           assert AccountInherited.on_slave_by_default?
         end
 
+        it "will :include things via has_and_belongs associations correctly" do
+          a = Account.first(:conditions => "id = 1001", :include => :people)
+          assert a.people.size > 0
+          assert_equal 'slave person', a.people.first.name
+        end
+
         if ActiveRecord::VERSION::MAJOR >= 3 && ActiveRecord::VERSION::MINOR >= 2
           it "supports .pluck" do
             assert_equal ["slave_name", "slave_name2"], Account.pluck(:name)
@@ -453,6 +465,7 @@ describe "connection switching" do
 
         after do
           Account.on_slave_by_default = false
+          Person.on_slave_by_default = false
         end
       end
     end
