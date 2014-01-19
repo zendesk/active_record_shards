@@ -202,14 +202,12 @@ describe "connection switching" do
       assert_using_database('ars_test', Ticket)
     end
 
-    if ActiveRecord::VERSION::MAJOR >= 3
-      it "be able to find by column" do
-        Account.where(:name => "peter").to_sql # does not blow up
-      end
+    it "be able to find by column" do
+      Account.where(:name => "peter").to_sql # does not blow up
+    end
 
-      it "have correct engine" do
-        assert_equal Account, Account.arel_engine
-      end
+    it "have correct engine" do
+      assert_equal Account, Account.arel_engine
     end
 
     describe "shard switching" do
