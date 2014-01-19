@@ -173,13 +173,8 @@ module ActiveRecordShards
       # note that since we're subverting the standard establish_connection path, we have to handle the funky autoloading of the
       # connection adapter ourselves.
       specification_cache[name] ||= begin
-        if ActiveRecord::VERSION::STRING >= "3.2.0"
-          resolver = ActiveRecord::Base::ConnectionSpecification::Resolver.new spec, configurations
-          resolver.spec
-        else
-          autoload_adapter(spec['adapter'])
-          ActiveRecord::Base::ConnectionSpecification.new(spec, "#{spec['adapter']}_connection")
-        end
+        resolver = ActiveRecord::Base::ConnectionSpecification::Resolver.new spec, configurations
+        resolver.spec
       end
 
       connection_handler.establish_connection(connection_pool_name, specification_cache[name])
@@ -190,11 +185,7 @@ module ActiveRecordShards
     end
 
     def connection_pool_key
-      if ActiveRecord::VERSION::STRING >= "3.1.0"
-        specification_cache[connection_pool_name]
-      else
-        connection_pool_name
-      end
+      specification_cache[connection_pool_name]
     end
 
     def connected_to_shard?

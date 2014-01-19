@@ -106,18 +106,11 @@ end
 ActiveRecord::Migration.class_eval do
   extend ActiveRecordShards::MigrationClassExtension
 
-  if ActiveRecord::VERSION::STRING >= "3.1.0"
-    include ActiveRecordShards::ActualMigrationExtension
-    define_method :migration_shard do
-      self.class.migration_shard
-    end
-    alias_method_chain :migrate, :forced_shard
-  else
-    extend ActiveRecordShards::ActualMigrationExtension
-    class << self
-      alias_method_chain :migrate, :forced_shard
-    end
+  include ActiveRecordShards::ActualMigrationExtension
+  define_method :migration_shard do
+    self.class.migration_shard
   end
+  alias_method_chain :migrate, :forced_shard
 end
 
 ActiveRecord::MigrationProxy.delegate :migration_shard, :to => :migration

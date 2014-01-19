@@ -3,6 +3,5 @@ rvm:
   - 2.0.0
   - 2.1.0
 gemfile:
-  - gemfiles/rails30.gemfile
   - gemfiles/rails32.gemfile
 script: "bundle exec rake test"
