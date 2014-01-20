@@ -10,7 +10,7 @@ gem 'minitest-reporters'
 gem 'mocha', "~> 0.13.0", :require => "mocha/setup"
 
 group :development do
-  gem 'debugger', :platform => :ruby_19
+  gem 'debugger'
 end
 
 gemspec
