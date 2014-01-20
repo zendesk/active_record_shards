@@ -35,6 +35,10 @@ if ActiveRecord.const_defined?(:Relation)
   ActiveRecord::Relation.send(:include, ActiveRecordShards::DefaultSlavePatches::ActiveRelationPatches)
 end
 
+if ActiveRecord::Associations.const_defined?(:Preloader)
+  ActiveRecord::Associations::Preloader::HasAndBelongsToMany.send(:include, ActiveRecordShards::DefaultSlavePatches::HasAndBelongsToManyPreloaderPatches)
+end
+
 if ActiveRecord::VERSION::STRING >= "3.1.0"
   ActiveRecord::Associations::CollectionProxy.send(:include, ActiveRecordShards::AssociationCollectionConnectionSelection)
 else
