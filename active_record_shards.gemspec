@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
   s.description = "Easily run queries on shard and slave databases."
   s.license     = "MIT"
 
-  s.add_runtime_dependency("activerecord",  ">= 2.3.5", "< 3.3")
+  s.add_runtime_dependency("activerecord",  ">= 2.3.5", "<= 4.1")
 
   s.files        = Dir.glob("lib/**/*") + %w(README.md)
   s.test_files   = Dir.glob("test/**/*") - ["test/test.log"]

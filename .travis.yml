@@ -1,3 +1,4 @@
+bundler_args: --without development
 rvm:
   - 1.9.3
   - 2.0
@@ -5,6 +6,7 @@ gemfile:
   - gemfiles/rails2.gemfile
   - gemfiles/rails30.gemfile
   - gemfiles/rails32.gemfile
+  - gemfiles/rails4.gemfile
 matrix:
   exclude:
     - rvm: 2.0
