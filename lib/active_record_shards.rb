@@ -8,10 +8,7 @@ require 'active_record_shards/association_collection_connection_selection'
 require 'active_record_shards/connection_pool'
 require 'active_record_shards/migration'
 require 'active_record_shards/default_slave_patches'
-
-if ActiveRecord::VERSION::STRING >= "3.2.0"
-  require 'active_record_shards/connection_specification'
-end
+require 'active_record_shards/connection_specification'
 
 ActiveRecord::Base.extend(ActiveRecordShards::ConfigurationParser)
 ActiveRecord::Base.extend(ActiveRecordShards::Model)
@@ -26,11 +23,7 @@ if ActiveRecord::Associations.const_defined?(:Preloader)
   ActiveRecord::Associations::Preloader::HasAndBelongsToMany.send(:include, ActiveRecordShards::DefaultSlavePatches::HasAndBelongsToManyPreloaderPatches)
 end
 
-if ActiveRecord::VERSION::STRING >= "3.1.0"
-  ActiveRecord::Associations::CollectionProxy.send(:include, ActiveRecordShards::AssociationCollectionConnectionSelection)
-else
-  ActiveRecord::Associations::AssociationCollection.send(:include, ActiveRecordShards::AssociationCollectionConnectionSelection)
-end
+ActiveRecord::Associations::CollectionProxy.send(:include, ActiveRecordShards::AssociationCollectionConnectionSelection)
 
 module ActiveRecordShards
   def self.rails_env

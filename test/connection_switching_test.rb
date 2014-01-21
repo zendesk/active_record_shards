@@ -202,14 +202,12 @@ describe "connection switching" do
       assert_using_database('ars_test', Ticket)
     end
 
-    if ActiveRecord::VERSION::MAJOR >= 3
-      it "be able to find by column" do
-        Account.where(:name => "peter").to_sql # does not blow up
-      end
+    it "be able to find by column" do
+      Account.where(:name => "peter").to_sql # does not blow up
+    end
 
-      it "have correct engine" do
-        assert_equal Account, Account.arel_engine
-      end
+    it "have correct engine" do
+      assert_equal Account, Account.arel_engine
     end
 
     describe "shard switching" do
@@ -358,14 +356,6 @@ describe "connection switching" do
           assert_equal('master_name', @model.name)
         end
 
-        # TODO mocha raises stack level too deep on ActiveRecord 3.2+
-        if ActiveRecord::VERSION::STRING < "3.2.0"
-          it "not unnecessary call with_scope" do
-            Account.expects(:with_scope).never
-            Account.on_master.first
-          end
-        end
-
         it "not unset readonly" do
           @model = Account.on_master.scoped(:readonly => true).first
           assert(@model.readonly?)
@@ -457,10 +447,8 @@ describe "connection switching" do
           assert_equal 'slave person', a.people.first.name
         end
 
-        if ActiveRecord::VERSION::MAJOR >= 3 && ActiveRecord::VERSION::MINOR >= 2
-          it "supports .pluck" do
-            assert_equal ["slave_name", "slave_name2"], Account.pluck(:name)
-          end
+        it "supports .pluck" do
+          assert_equal ["slave_name", "slave_name2"], Account.pluck(:name)
         end
 
         after do

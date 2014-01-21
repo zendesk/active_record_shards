@@ -2,7 +2,7 @@ require 'bundler/setup'
 Bundler.require
 
 require 'minitest/autorun'
-MiniTest::Reporters.use! MiniTest::Reporters::DefaultReporter.new
+require 'minitest/rg'
 
 if defined?(Debugger)
   ::Debugger.start

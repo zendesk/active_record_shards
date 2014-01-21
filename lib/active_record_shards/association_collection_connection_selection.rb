@@ -33,12 +33,7 @@ module ActiveRecordShards
       def method_missing(method, *args, &block)
         # would love to not rely on version here, unfortunately @association_collection
         # is a sensitive little bitch of an object.
-        if ActiveRecord::VERSION::STRING >= "3.1.0"
-          reflection = @association_collection.proxy_association.reflection
-        else
-          reflection = @association_collection.proxy_reflection
-        end
-
+        reflection = @association_collection.proxy_association.reflection
         reflection.klass.on_cx_switch_block(@which) { @association_collection.send(method, *args, &block) }
       end
     end
