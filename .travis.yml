@@ -7,4 +7,5 @@ matrix:
     - rvm: 2.1.0 # mocha segfaults
 gemfile:
   - gemfiles/rails32.gemfile
+  - gemfiles/rails40.gemfile
 script: "bundle exec rake test"

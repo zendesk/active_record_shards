@@ -95,7 +95,7 @@ module ActiveRecordShards
       if self == ActiveRecord::Base || !switch_to_slave || options[:construct_ro_scope] == false
         yield
       else
-        with_scope({:find => {:readonly => true}}, &block)
+        readonly.scoping(&block)
       end
     ensure
       @disallow_slave -= 1 if which == :master
@@ -173,7 +173,7 @@ module ActiveRecordShards
       # note that since we're subverting the standard establish_connection path, we have to handle the funky autoloading of the
       # connection adapter ourselves.
       specification_cache[name] ||= begin
-        resolver = ActiveRecord::Base::ConnectionSpecification::Resolver.new spec, configurations
+        resolver = ActiveRecordShards::ConnectionSpecification::Resolver.new spec, configurations
         resolver.spec
       end
 
@@ -189,7 +189,13 @@ module ActiveRecordShards
     end
 
     def connected_to_shard?
-      connection_handler.connection_pools.has_key?(connection_pool_key)
+      if ActiveRecord::VERSION::MAJOR >= 4
+        specs_to_pools = Hash[connection_handler.connection_pool_list.map { |pool| [pool.spec, pool] }]
+      else
+        specs_to_pools = connection_handler.connection_pools
+      end
+
+      specs_to_pools.has_key?(connection_pool_key)
     end
 
     def columns_with_default_shard

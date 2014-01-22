@@ -6,7 +6,7 @@ Gem::Specification.new "active_record_shards", "2.8.0" do |s|
   s.description = "Easily run queries on shard and slave databases."
   s.license     = "MIT"
 
-  s.add_runtime_dependency("activerecord",  ">= 3.2.16", "< 3.3")
+  s.add_runtime_dependency("activerecord",  ">= 3.2.16", "<= 4.1")
 
   s.files        = Dir["lib/**/*"] + ["README.md"]
 end

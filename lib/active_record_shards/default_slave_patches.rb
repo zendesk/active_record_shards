@@ -101,6 +101,10 @@ module ActiveRecordShards
       def on_slave_unless_tx
         klass.on_slave_unless_tx { yield }
       end
+
+      def exists_with_default_slave?(*args, &block)
+        on_slave_unless_tx { exists_without_default_slave?(*args, &block) }
+      end
     end
   end
 end
