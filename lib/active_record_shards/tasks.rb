@@ -1,7 +1,7 @@
 require 'active_record_shards'
 
 %w[db:drop db:create db:abort_if_pending_migrations db:reset].each do |name|
-  Rake.application.instance_variable_get(:@tasks).delete(name) || warn("could not delete #{name} task, potential load-order problem")
+  Rake::Task[name].clean
 end
 
 namespace :db do
