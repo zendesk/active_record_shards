@@ -1,4 +1,3 @@
-#This is to recreate the deleted onetime payment for DealFish
 class ShardMigration < ActiveRecord::Migration
   shard :all
 
