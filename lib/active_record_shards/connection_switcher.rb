@@ -177,7 +177,11 @@ module ActiveRecordShards
         resolver.spec
       end
 
-      connection_handler.establish_connection(connection_pool_name, specification_cache[name])
+      if ActiveRecord::VERSION::MAJOR >= 4
+        connection_handler.establish_connection(self, specification_cache[name])
+      else
+        connection_handler.establish_connection(connection_pool_name, specification_cache[name])
+      end
     end
 
     def specification_cache
