@@ -360,7 +360,7 @@ describe "connection switching" do
         end
 
         it "not unset readonly" do
-          @model = Account.on_master.scoped(:readonly => true).first
+          @model = Account.on_master.readonly.first
           assert(@model.readonly?)
         end
 
@@ -445,7 +445,7 @@ describe "connection switching" do
         end
 
         it "will :include things via has_and_belongs associations correctly" do
-          a = Account.first(:conditions => "id = 1001", :include => :people)
+          a = Account.where(:id => 1001).includes(:people).first
           assert a.people.size > 0
           assert_equal 'slave person', a.people.first.name
         end
