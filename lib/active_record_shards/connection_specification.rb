@@ -11,7 +11,8 @@ class ActiveRecord::Base
     specification_cache[connection_pool_name] = spec
 
     if ActiveRecord::VERSION::MAJOR >= 4
-      connection_handler.establish_connection self, spec
+      new_pool_name = ActiveRecordShards::ConnectionPoolNameDecorator.new(connection_pool_name)
+      connection_handler.establish_connection new_pool_name, spec
     else
       connection_handler.establish_connection connection_pool_name, spec
     end
