@@ -178,7 +178,8 @@ module ActiveRecordShards
       end
 
       if ActiveRecord::VERSION::MAJOR >= 4
-        connection_handler.establish_connection(self, specification_cache[name])
+        new_pool_name = ConnectionPoolNameDecorator.new(connection_pool_name)
+        connection_handler.establish_connection(new_pool_name, specification_cache[name])
       else
         connection_handler.establish_connection(connection_pool_name, specification_cache[name])
       end

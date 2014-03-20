@@ -1,18 +1,18 @@
 require 'active_record'
 require 'active_record/base'
 require 'active_record_shards/configuration_parser'
+require 'active_record_shards/connection_pool'
 require 'active_record_shards/model'
 require 'active_record_shards/shard_selection'
 require 'active_record_shards/connection_switcher'
 require 'active_record_shards/association_collection_connection_selection'
-require 'active_record_shards/connection_pool'
 require 'active_record_shards/migration'
 require 'active_record_shards/default_slave_patches'
 require 'active_record_shards/connection_handler'
 require 'active_record_shards/connection_specification'
 
 if ActiveRecord::VERSION::MAJOR >= 4
-  methods_to_override = [:establish_connection, :remove_connection, :pool_for,
+  methods_to_override = [:remove_connection, :pool_for,
                          :pool_from_any_process_for]
   ActiveRecordShards::ConnectionSpecification = ActiveRecord::ConnectionAdapters::ConnectionSpecification
 else
