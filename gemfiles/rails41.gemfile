@@ -10,6 +10,6 @@ gem "minitest"
 gem "minitest-rg"
 gem "mocha", "~> 0.13.0", :require=>"mocha/setup"
 gem "debugger"
-gem "activerecord", "~> 3.2.15"
+gem "activerecord", "~> 4.1"
 
 gemspec :path=>"../"

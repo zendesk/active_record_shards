@@ -8,4 +8,5 @@ matrix:
 gemfile:
   - gemfiles/rails32.gemfile
   - gemfiles/rails40.gemfile
+  - gemfiles/rails41.gemfile
 script: "bundle exec rake test"
