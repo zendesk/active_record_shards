@@ -2,8 +2,8 @@ PATH
   remote: ../
   specs:
     active_record_shards (3.1.0)
-      activerecord (>= 3.2.16, <= 4.1)
-      activesupport (>= 3.2.16, <= 4.1)
+      activerecord (>= 3.2.16, < 4.2)
+      activesupport (>= 3.2.16, < 4.2)
 
 GEM
   remote: https://rubygems.org/
@@ -55,8 +55,8 @@ DEPENDENCIES
   activerecord (~> 4.0.10)
   bump
   byebug
-  minitest (~> 4.7)
-  minitest-rg (~> 1.1.1)
+  minitest
+  minitest-rg
   mocha (~> 0.13.0)
   mysql2
   rake
