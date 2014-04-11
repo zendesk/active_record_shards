@@ -104,7 +104,8 @@ describe ActiveRecord::Migrator do
   private
 
   def failure_migration_pending?(migration_path)
-    ActiveRecord::Migrator.new(:up, migration_path).pending_migrations.detect { |f| f.name == "FailureMigration" }
+    migrations = ActiveRecord::Migrator.migrations(migration_path)
+    ActiveRecord::Migrator.new(:up, migrations).pending_migrations.detect { |f| f.name == "FailureMigration" }
   end
 
   def table_has_column?(table, column)

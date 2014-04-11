@@ -10,10 +10,8 @@ end
 class AccountThing < ActiveRecord::Base
   not_sharded
 
-  if respond_to?(:where)
-    scope :enabled, where(:enabled => true)
-  else
-    named_scope :enabled, :conditions => {:enabled => true}
+  def self.enabled
+    where(:enabled => true)
   end
 end
 

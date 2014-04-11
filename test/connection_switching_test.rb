@@ -360,7 +360,11 @@ describe "connection switching" do
         end
 
         it "not unset readonly" do
-          @model = Account.on_master.scoped(:readonly => true).first
+          if ActiveRecord::VERSION::MAJOR >= 4
+            @model = Account.on_master.readonly(true).first
+          else
+            @model = Account.on_master.scoped(:readonly => true).first
+          end
           assert(@model.readonly?)
         end
 
@@ -404,9 +408,7 @@ describe "connection switching" do
         end
 
         it "do exists? on the slave" do
-          if Account.respond_to?(:exists?)
-            assert Account.exists?(1001)
-          end
+          assert Account.exists?(1001)
         end
 
         it "does exists? on the slave with a named scope" do
@@ -445,7 +447,7 @@ describe "connection switching" do
         end
 
         it "will :include things via has_and_belongs associations correctly" do
-          a = Account.first(:conditions => "id = 1001", :include => :people)
+          a = Account.includes(:people).where("id = 1001").first
           assert a.people.size > 0
           assert_equal 'slave person', a.people.first.name
         end
