@@ -31,7 +31,7 @@ end
 def init_schema
   recreate_databases
   ActiveRecord::Base.configurations.each do |name, conf|
-    ActiveRecord::Base.establish_connection(name)
+    ActiveRecord::Base.establish_connection(name.to_sym)
     load(File.dirname(__FILE__) + "/schema.rb")
   end
 end
@@ -43,11 +43,11 @@ require 'active_support/test_case'
 class Minitest::Spec
   def clear_databases
     ActiveRecord::Base.configurations.each do |name, conf|
-      ActiveRecord::Base.establish_connection(name)
+      ActiveRecord::Base.establish_connection(name.to_sym)
       ActiveRecord::Base.connection.execute("DELETE FROM accounts")
       ActiveRecord::Base.connection.execute("DELETE FROM tickets")
     end
-    ActiveRecord::Base.establish_connection(RAILS_ENV)
+    ActiveRecord::Base.establish_connection(RAILS_ENV.to_sym)
   end
 
   def show_databases(config)
