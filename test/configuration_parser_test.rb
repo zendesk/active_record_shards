@@ -7,7 +7,7 @@ describe ActiveRecordShards::ConfigurationParser do
     end
 
     describe "main slave" do
-      before { @conf = @exploded_conf['test_slave'] }
+      before { @conf = @exploded_conf[:test_slave] }
       it "be exploded" do
         @conf["shard_names"] = @conf["shard_names"].to_set
         assert_equal({
@@ -25,7 +25,7 @@ describe ActiveRecordShards::ConfigurationParser do
 
     describe "shard a" do
       describe "master" do
-        before { @conf = @exploded_conf['test_shard_a'] }
+        before { @conf = @exploded_conf[:test_shard_a] }
         it "be exploded" do
           @conf["shard_names"] = @conf["shard_names"].to_set
           assert_equal({
@@ -42,7 +42,7 @@ describe ActiveRecordShards::ConfigurationParser do
       end
 
       describe "slave" do
-        before { @conf = @exploded_conf['test_shard_a_slave'] }
+        before { @conf = @exploded_conf[:test_shard_a_slave] }
         it "be exploded" do
           @conf["shard_names"] = @conf["shard_names"].to_set
           assert_equal({
@@ -61,7 +61,7 @@ describe ActiveRecordShards::ConfigurationParser do
 
     describe "shard b" do
       describe "master" do
-        before { @conf = @exploded_conf['test_shard_b'] }
+        before { @conf = @exploded_conf[:test_shard_b] }
         it "be exploded" do
           @conf["shard_names"] = @conf["shard_names"].to_set
           assert_equal({
@@ -78,7 +78,7 @@ describe ActiveRecordShards::ConfigurationParser do
       end
 
       describe "slave" do
-        before { @conf = @exploded_conf['test_shard_b_slave'] }
+        before { @conf = @exploded_conf[:test_shard_b_slave] }
         it "be exploded" do
           @conf["shard_names"] = @conf["shard_names"].to_set
           assert_equal({

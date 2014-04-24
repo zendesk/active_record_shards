@@ -192,13 +192,13 @@ describe "connection switching" do
   describe "in an unsharded environment" do
     before do
       silence_warnings { ::RAILS_ENV = 'test2' }
-      ActiveRecord::Base.establish_connection(::RAILS_ENV)
+      ActiveRecord::Base.establish_connection(::RAILS_ENV.to_sym)
       assert_using_database('ars_test2', Ticket)
     end
 
     after do
       silence_warnings { ::RAILS_ENV = 'test' }
-      ActiveRecord::Base.establish_connection(::RAILS_ENV)
+      ActiveRecord::Base.establish_connection(::RAILS_ENV.to_sym)
       assert_using_database('ars_test', Ticket)
     end
 
@@ -246,7 +246,7 @@ describe "connection switching" do
         else
           ActiveRecord::Base.connection_handler.connection_pools.clear
         end
-        ActiveRecord::Base.establish_connection('test')
+        ActiveRecord::Base.establish_connection(:test)
       end
 
       it "default to the master database" do
