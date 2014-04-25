@@ -1,7 +1,7 @@
 require 'active_record_shards'
 
 %w[db:drop db:create db:abort_if_pending_migrations db:reset].each do |name|
-  Rake::Task[name].clean
+  Rake::Task[name].clear
 end
 
 namespace :db do
