@@ -203,7 +203,7 @@ module ActiveRecordShards
     end
 
     def columns_with_default_shard
-      if is_sharded? && current_shard_id.nil?
+      if is_sharded? && current_shard_id.nil? && table_name != ActiveRecord::Migrator.schema_migrations_table_name
         on_first_shard { columns_without_default_shard }
       else
         columns_without_default_shard

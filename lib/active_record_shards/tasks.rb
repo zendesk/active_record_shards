@@ -5,13 +5,17 @@ require 'active_record_shards'
 end
 
 namespace :db do
-  desc 'Drops the database for the current RAILS_ENV including shards and slaves'
+  desc 'Drops the database for the current RAILS_ENV including shards'
   task :drop => :load_config do
     env_name = defined?(Rails.env) ? Rails.env : RAILS_ENV || 'development'
     ActiveRecord::Base.configurations.each do |key, conf|
       if key.starts_with?(env_name) && !key.ends_with?("_slave")
         begin
-          drop_database(conf)
+          if ActiveRecord::VERSION::MAJOR >= 4
+            ActiveRecord::Tasks::DatabaseTasks.drop(conf)
+          else
+            drop_database(conf)
+          end
         rescue Exception => e
           puts "Couldn't drop #{conf['database']} : #{e.inspect}"
         end
@@ -24,14 +28,19 @@ namespace :db do
     Rake::Task["db:setup"].invoke
   end
 
-  desc "Create the database defined in config/database.yml for the current RAILS_ENV including shards and slaves"
+  desc "Create the database defined in config/database.yml for the current RAILS_ENV including shards"
   task :create => :load_config do
     env_name = defined?(Rails.env) ? Rails.env : RAILS_ENV || 'development'
     ActiveRecord::Base.configurations.each do |key, conf|
       if key.starts_with?(env_name) && !key.ends_with?("_slave")
-        create_database(conf)
+        if ActiveRecord::VERSION::MAJOR >= 4
+          ActiveRecord::Tasks::DatabaseTasks.create(conf)
+        else
+          create_database(conf)
+        end
       end
     end
+    ActiveRecord::Base.establish_connection(env_name)
   end
 
   desc "Raises an error if there are pending migrations"

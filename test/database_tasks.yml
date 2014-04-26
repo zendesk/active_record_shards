@@ -1,0 +1,14 @@
+test:
+  adapter: mysql2
+  encoding: utf8
+  database: ars_tasks_test
+  username: root
+  password:
+  host: 127.0.0.1
+  slave:
+    database: ars_tasks_test_slave
+  shards:
+    a:
+      database: ars_tasks_test_shard_a
+    b:
+      database: ars_tasks_test_shard_b
