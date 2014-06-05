@@ -1,7 +1,6 @@
 source "https://rubygems.org"
 
 gemspec
-gem 'activerecord'
 gem 'appraisal'
 gem 'rake'
 gem 'mysql2'

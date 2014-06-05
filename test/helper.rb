@@ -41,7 +41,18 @@ class Minitest::Spec
     end
     ActiveRecord::Base.establish_connection(RAILS_ENV)
   end
-  before { clear_databases }
+
+  def show_databases(config)
+    client = Mysql2::Client.new(host: config['test']['host'],
+      username: config['test']['username'])
+    databases = client.query("SHOW DATABASES")
+    databases.map{ |d| d['Database'] }
+  end
+
+  def rake(name)
+    Rake::Task[name].reenable
+    Rake::Task[name].invoke
+  end
 
   def assert_using_master_db
     assert_using_database('ars_test')
@@ -53,5 +64,9 @@ class Minitest::Spec
 
   def assert_using_database(db_name, model = ActiveRecord::Base)
     assert_equal(db_name, model.connection.current_database)
+  end
+
+  def table_has_column?(table, column)
+    !ActiveRecord::Base.connection.select_values("desc #{table}").grep(column).empty?
   end
 end

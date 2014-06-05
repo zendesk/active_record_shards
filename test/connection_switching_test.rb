@@ -3,6 +3,10 @@ require_relative 'helper'
 describe "connection switching" do
   i_suck_and_my_tests_are_order_dependent!
 
+  before do
+    clear_databases
+  end
+
   describe "shard switching" do
     it "only switch connection on sharded models" do
       assert_using_database('ars_test', Ticket)
@@ -152,6 +156,24 @@ describe "connection switching" do
         ActiveRecord::Base.on_all_shards do |shard|
           assert_equal shard, Ticket.new.from_shard
         end
+      end
+    end
+
+    describe "for SchemaMigration" do
+      before do
+        ActiveRecord::Base.on_shard(nil) do
+          ActiveRecord::Base.connection.execute("alter table schema_migrations add column foo int")
+        end
+      end
+
+      after do
+        ActiveRecord::Base.on_shard(nil) do
+          ActiveRecord::Base.connection.execute("alter table schema_migrations drop column foo")
+        end
+      end
+
+      it "doesn't switch to shard" do
+        table_has_column?('schema_migrations', 'foo')
       end
     end
   end

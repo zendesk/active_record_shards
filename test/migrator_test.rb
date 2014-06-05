@@ -111,8 +111,4 @@ describe ActiveRecord::Migrator do
       ActiveRecord::Migrator.new(:up, migration_path).pending_migrations.detect { |f| f.name == "FailureMigration" }
     end
   end
-
-  def table_has_column?(table, column)
-    !ActiveRecord::Base.connection.select_values("desc #{table}").grep(column).empty?
-  end
 end

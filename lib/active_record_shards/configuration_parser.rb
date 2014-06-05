@@ -1,8 +1,12 @@
+require 'active_support/core_ext'
+
 module ActiveRecordShards
   module ConfigurationParser
     module_function
 
     def explode(conf)
+      conf = conf.deep_dup
+
       conf.to_a.each do |env_name, env_config|
         if shards = env_config.delete('shards')
           env_config['shard_names'] = shards.keys

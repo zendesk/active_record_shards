@@ -11,5 +11,13 @@ Rake::TestTask.new(:test) do |test|
 end
 
 task :default do
-  sh "rake appraisal:install && rake appraisal test"
+  sh "appraisal install && appraisal rake test"
+end
+
+task :console do
+  require 'irb'
+  require 'irb/completion'
+  require 'active_record_shards'
+  ARGV.clear
+  IRB.start
 end
