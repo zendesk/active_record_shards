@@ -8,4 +8,4 @@ gem 'bump'
 gem 'minitest', '~> 4.7'
 gem 'minitest-rg', '~> 1.1.1'
 gem 'mocha', "~> 0.13.0", :require => "mocha/setup"
-gem 'debugger'
+gem 'byebug'
