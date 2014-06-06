@@ -3,5 +3,5 @@ appraise "rails32" do
 end
 
 appraise "rails40" do
-  gem "activerecord", "~> 4.0"
+  gem "activerecord", "~> 4.0.0"
 end
