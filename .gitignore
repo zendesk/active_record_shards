@@ -4,3 +4,4 @@ pkg/*
 *.log
 gemfiles/*.lock
 Gemfile.lock
+.tags*
