@@ -1,6 +1,6 @@
 require_relative 'helper'
 
-if ActiveRecord::VERSION::MAJOR >= 4
+if ActiveRecord::VERSION::MAJOR >= 4 && RUBY_VERSION >= '2'
   describe ActiveRecordShards::SchemaDumperExtension do
     describe "schema dump" do
 
