@@ -1,9 +1,15 @@
 require_relative 'helper'
 
 describe "connection switching" do
+  schema_initialized = false
+
   i_suck_and_my_tests_are_order_dependent!
 
   before do
+    if !schema_initialized
+      init_schema
+      schema_initialized = true
+    end
     clear_databases
   end
 

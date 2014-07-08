@@ -10,6 +10,7 @@ require 'active_record_shards/migration'
 require 'active_record_shards/default_slave_patches'
 require 'active_record_shards/connection_handler'
 require 'active_record_shards/connection_specification'
+require 'active_record_shards/schema_dumper_extension'
 
 if ActiveRecord::VERSION::MAJOR >= 4
   methods_to_override = [:establish_connection, :remove_connection, :pool_for,
@@ -36,6 +37,10 @@ if ActiveRecord::Associations.const_defined?(:Preloader)
 end
 
 ActiveRecord::Associations::CollectionProxy.send(:include, ActiveRecordShards::AssociationCollectionConnectionSelection)
+
+if ActiveRecord::VERSION::MAJOR >= 4 && RUBY_VERSION >= '2'
+  ActiveRecord::SchemaDumper.send(:prepend, ActiveRecordShards::SchemaDumperExtension)
+end
 
 module ActiveRecordShards
   def self.rails_env

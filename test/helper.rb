@@ -19,10 +19,16 @@ RAILS_ENV = "test"
 ActiveRecord::Base.logger = Logger.new(File.dirname(__FILE__) + "/test.log")
 ActiveRecord::Base.configurations = YAML::load(IO.read(File.dirname(__FILE__) + '/database.yml'))
 
-def init_schema
+def recreate_databases
   ActiveRecord::Base.configurations.each do |name, conf|
     `echo "drop DATABASE if exists #{conf['database']}" | mysql --user=#{conf['username']}`
     `echo "create DATABASE #{conf['database']}" | mysql --user=#{conf['username']}`
+  end
+end
+
+def init_schema
+  recreate_databases
+  ActiveRecord::Base.configurations.each do |name, conf|
     ActiveRecord::Base.establish_connection(name)
     load(File.dirname(__FILE__) + "/schema.rb")
   end
