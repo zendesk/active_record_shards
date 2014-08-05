@@ -1,4 +1,4 @@
-require_relative 'helper'
+require File.expand_path('../helper', __FILE__)
 
 describe ActiveRecordShards::ConfigurationParser do
   describe "exploding the database.yml" do

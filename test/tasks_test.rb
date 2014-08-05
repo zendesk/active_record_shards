@@ -1,4 +1,4 @@
-require_relative 'helper'
+require File.expand_path('../helper', __FILE__)
 
 # ActiveRecordShards overrides some of the ActiveRecord tasks, so
 # ActiveRecord needs to be loaded first.
