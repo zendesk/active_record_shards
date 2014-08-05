@@ -49,8 +49,8 @@ class Minitest::Spec
   end
 
   def show_databases(config)
-    client = Mysql2::Client.new(host: config['test']['host'],
-      username: config['test']['username'])
+    client = Mysql2::Client.new(:host => config['test']['host'],
+      :username => config['test']['username'])
     databases = client.query("SHOW DATABASES")
     databases.map{ |d| d['Database'] }
   end
