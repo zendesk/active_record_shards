@@ -1,4 +1,4 @@
-require_relative 'helper'
+require File.expand_path('../helper', __FILE__)
 
 if ActiveRecord::VERSION::MAJOR >= 4 && RUBY_VERSION >= '2'
   describe ActiveRecordShards::SchemaDumperExtension do
