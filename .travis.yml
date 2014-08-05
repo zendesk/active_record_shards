@@ -1,9 +1,12 @@
 rvm:
-  - 1.8.7
   - 1.9.3
   - 2.0.0
   - 2.1.1
 gemfile:
   - gemfiles/rails32.gemfile
   - gemfiles/rails40.gemfile
+matrix:
+  include:
+    - rvm: ree
+      gemfile: gemfiles/rails32.gemfile
 script: "bundle exec rake test"
