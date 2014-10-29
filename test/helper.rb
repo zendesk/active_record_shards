@@ -46,8 +46,8 @@ class Minitest::Spec
 
     ActiveRecord::Base.configurations.each do |name, conf|
       ActiveRecord::Base.establish_connection(name.to_sym)
-      ActiveRecord::Base.connection.execute("DELETE FROM accounts")
-      ActiveRecord::Base.connection.execute("DELETE FROM tickets")
+      ActiveRecord::Base.connection.execute("DELETE FROM accounts") rescue nil
+      ActiveRecord::Base.connection.execute("DELETE FROM tickets") rescue nil
     end
     ActiveRecord::Base.establish_connection(RAILS_ENV.to_sym)
   end

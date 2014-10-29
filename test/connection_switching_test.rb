@@ -142,6 +142,7 @@ describe "connection switching" do
       before do
         ActiveRecord::Base.on_first_shard do
           ActiveRecord::Base.connection.execute("alter table tickets add column foo int")
+          Ticket.reset_column_information
         end
       end
 
