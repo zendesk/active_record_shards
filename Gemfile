@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 
 gemspec
-gem 'appraisal'
+
 gem 'rake'
 gem 'mysql2'
 gem 'bump'

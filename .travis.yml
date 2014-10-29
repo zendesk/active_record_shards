@@ -9,4 +9,5 @@ matrix:
   include:
     - rvm: ree
       gemfile: gemfiles/rails32.gemfile
+bundler_args: --no-deployment
 script: "bundle exec rake test"

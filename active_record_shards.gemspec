@@ -8,5 +8,7 @@ Gem::Specification.new "active_record_shards", "3.1.0" do |s|
 
   s.add_runtime_dependency("activerecord",  ">= 3.2.16", "<= 4.1")
 
+  s.add_development_dependency("wwtd")
+
   s.files        = Dir["lib/**/*"] + ["README.md"]
 end

@@ -1,6 +1,6 @@
 require 'bundler/setup'
-require "appraisal"
 require "bump/tasks"
+require "wwtd/tasks"
 
 Bundler::GemHelper.install_tasks
 
@@ -10,9 +10,7 @@ Rake::TestTask.new(:test) do |test|
   test.verbose = true
 end
 
-task :default do
-  sh "appraisal install && appraisal rake test"
-end
+task :default => "wwtd:local"
 
 task :console do
   require 'irb'
