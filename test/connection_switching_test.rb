@@ -3,8 +3,6 @@ require File.expand_path('../helper', __FILE__)
 describe "connection switching" do
   schema_initialized = false
 
-  i_suck_and_my_tests_are_order_dependent!
-
   before do
     if !schema_initialized
       init_schema
@@ -266,7 +264,6 @@ describe "connection switching" do
 
   describe "slave driving" do
     describe "without slave configuration" do
-
       before do
         ActiveRecord::Base.configurations.delete('test_slave')
         if ActiveRecord::VERSION::MAJOR >= 4

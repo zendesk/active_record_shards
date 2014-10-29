@@ -34,6 +34,7 @@ def init_schema
     load(File.dirname(__FILE__) + "/schema.rb")
   end
 end
+
 init_schema
 
 require 'models'
@@ -41,6 +42,8 @@ require 'models'
 require 'active_support/test_case'
 class Minitest::Spec
   def clear_databases
+    ActiveRecord::Base.configurations = YAML::load(IO.read(File.dirname(__FILE__) + '/database.yml'))
+
     ActiveRecord::Base.configurations.each do |name, conf|
       ActiveRecord::Base.establish_connection(name.to_sym)
       ActiveRecord::Base.connection.execute("DELETE FROM accounts")
