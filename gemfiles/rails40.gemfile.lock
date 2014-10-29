@@ -51,7 +51,7 @@ PLATFORMS
 
 DEPENDENCIES
   active_record_shards!
-  activerecord (~> 4.0.0)
+  activerecord (~> 4.0.10)
   bump
   byebug
   minitest (~> 4.7)

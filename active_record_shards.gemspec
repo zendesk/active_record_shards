@@ -6,9 +6,15 @@ Gem::Specification.new "active_record_shards", "3.1.0" do |s|
   s.description = "Easily run queries on shard and slave databases."
   s.license     = "MIT"
 
-  s.add_runtime_dependency("activerecord",  ">= 3.2.16", "<= 4.1")
+  s.add_runtime_dependency("activerecord", ">= 3.2.16", "<= 4.1")
 
   s.add_development_dependency("wwtd")
+  s.add_development_dependency("rake")
+  s.add_development_dependency("mysql2")
+  s.add_development_dependency("bump")
+  s.add_development_dependency("minitest", "~> 4.7")
+  s.add_development_dependency("minitest-rg", "~> 1.1.1")
+  s.add_development_dependency("mocha", "~> 0.13.0")
 
   s.files        = Dir["lib/**/*"] + ["README.md"]
 end

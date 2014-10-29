@@ -4,6 +4,8 @@ Bundler.require
 require 'minitest/autorun'
 require 'minitest/rg'
 
+require 'mocha/setup'
+
 if defined?(Debugger)
   ::Debugger.start
   ::Debugger.settings[:autoeval] = true if ::Debugger.respond_to?(:settings)
