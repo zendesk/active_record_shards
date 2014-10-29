@@ -128,7 +128,7 @@ describe "connection switching" do
       it "use the non-sharded connection" do
         assert_using_database('ars_test', Account)
         Account.connection.execute("alter table accounts add column foo int")
-
+        Account.reset_column_information
         assert Account.column_names.include?('foo')
       end
 
