@@ -1,0 +1,58 @@
+PATH
+  remote: ../
+  specs:
+    active_record_shards (3.1.0)
+      activerecord (>= 3.2.16, <= 4.1)
+      activesupport (>= 3.2.16, <= 4.1)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    activemodel (3.2.19)
+      activesupport (= 3.2.19)
+      builder (~> 3.0.0)
+    activerecord (3.2.19)
+      activemodel (= 3.2.19)
+      activesupport (= 3.2.19)
+      arel (~> 3.0.2)
+      tzinfo (~> 0.3.29)
+    activesupport (3.2.19)
+      i18n (~> 0.6, >= 0.6.4)
+      multi_json (~> 1.0)
+    arel (3.0.3)
+    builder (3.0.4)
+    bump (0.5.0)
+    byebug (3.5.1)
+      columnize (~> 0.8)
+      debugger-linecache (~> 1.2)
+      slop (~> 3.6)
+    columnize (0.8.9)
+    debugger-linecache (1.2.0)
+    i18n (0.6.11)
+    metaclass (0.0.4)
+    minitest (4.7.5)
+    minitest-rg (1.1.1)
+      minitest (< 5.0)
+    mocha (0.13.3)
+      metaclass (~> 0.0.1)
+    multi_json (1.10.1)
+    mysql2 (0.3.16)
+    rake (10.3.2)
+    slop (3.6.0)
+    tzinfo (0.3.42)
+    wwtd (0.5.5)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  active_record_shards!
+  activerecord (~> 3.2.19)
+  bump
+  byebug
+  minitest (~> 4.7)
+  minitest-rg (~> 1.1.1)
+  mocha (~> 0.13.0)
+  mysql2
+  rake
+  wwtd
