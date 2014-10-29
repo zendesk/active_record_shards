@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-
-rvm ree,1.9.2 rake test
-
-# would be needed to cleanup after rbx
-# find . -name '*.rbc' -print0 | xargs -0 rm
