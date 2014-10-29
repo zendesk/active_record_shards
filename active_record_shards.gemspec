@@ -7,6 +7,7 @@ Gem::Specification.new "active_record_shards", "3.1.0" do |s|
   s.license     = "MIT"
 
   s.add_runtime_dependency("activerecord", ">= 3.2.16", "<= 4.1")
+  s.add_runtime_dependency("activesupport", ">= 3.2.16", "<= 4.1")
 
   s.add_development_dependency("wwtd")
   s.add_development_dependency("rake")
