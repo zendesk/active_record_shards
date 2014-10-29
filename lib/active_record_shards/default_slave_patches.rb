@@ -108,5 +108,24 @@ module ActiveRecordShards
         on_slave_unless_tx { exists_without_default_slave?(*args, &block) }
       end
     end
+
+    # in rails 4.1+, they create a join class that's used to pull in records for HABTM.
+    # this simplifies the hell out of our existence, because all we have to do is inerit on-slave-by-default
+    # down from the parent now.
+    module Rails41HasAndBelongsToManyBuilderExtension
+      def self.included(base)
+        base.class_eval do
+          alias_method_chain :through_model, :inherit_default_slave_from_lhs
+        end
+      end
+
+      def through_model_with_inherit_default_slave_from_lhs
+        model = through_model_without_inherit_default_slave_from_lhs
+        def model.on_slave_by_default?
+          left_reflection.klass.on_slave_by_default?
+        end
+        model
+      end
+    end
   end
 end
