@@ -1,10 +1,9 @@
 require 'bundler/setup'
-Bundler.require
-
 require 'minitest/autorun'
 require 'minitest/rg'
 
-require 'mocha/setup'
+require 'mocha/mini_test'
+Bundler.require
 
 if defined?(Debugger)
   ::Debugger.start

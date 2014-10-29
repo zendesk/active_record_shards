@@ -15,7 +15,7 @@ Gem::Specification.new "active_record_shards", "3.1.0" do |s|
   s.add_development_dependency("bump")
   s.add_development_dependency("minitest")
   s.add_development_dependency("minitest-rg")
-  s.add_development_dependency("mocha", "~> 0.13.0")
+  s.add_development_dependency("mocha")
 
   s.files        = Dir["lib/**/*"] + ["README.md"]
 end

@@ -36,7 +36,7 @@ GEM
     minitest (5.4.2)
     minitest-rg (5.1.0)
       minitest (~> 5.0)
-    mocha (0.13.3)
+    mocha (1.1.0)
       metaclass (~> 0.0.1)
     mysql2 (0.3.16)
     rake (10.3.2)
@@ -56,7 +56,7 @@ DEPENDENCIES
   byebug
   minitest
   minitest-rg
-  mocha (~> 0.13.0)
+  mocha
   mysql2
   rake
   wwtd

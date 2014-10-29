@@ -37,7 +37,7 @@ GEM
     minitest (4.7.5)
     minitest-rg (1.1.1)
       minitest (< 5.0)
-    mocha (0.13.3)
+    mocha (1.1.0)
       metaclass (~> 0.0.1)
     multi_json (1.10.1)
     mysql2 (0.3.16)
@@ -57,7 +57,7 @@ DEPENDENCIES
   byebug
   minitest
   minitest-rg
-  mocha (~> 0.13.0)
+  mocha
   mysql2
   rake
   wwtd
