@@ -173,7 +173,7 @@ module ActiveRecordShards
       # note that since we're subverting the standard establish_connection path, we have to handle the funky autoloading of the
       # connection adapter ourselves.
       specification_cache[name] ||= begin
-        if ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR == 1
+        if ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR >= 1
           resolver = ActiveRecordShards::ConnectionSpecification::Resolver.new configurations
           resolver.spec(spec)
         else
