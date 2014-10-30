@@ -15,6 +15,7 @@ if ActiveRecord::VERSION::MAJOR >= 4 && RUBY_VERSION >= '2'
 
       after do
         schema_file.unlink
+        init_schema
       end
 
       it "includes the sharded tables" do

@@ -3,8 +3,6 @@ require File.expand_path('../helper', __FILE__)
 describe "connection switching" do
   schema_initialized = false
 
-  i_suck_and_my_tests_are_order_dependent!
-
   before do
     if !schema_initialized
       init_schema
@@ -130,7 +128,7 @@ describe "connection switching" do
       it "use the non-sharded connection" do
         assert_using_database('ars_test', Account)
         Account.connection.execute("alter table accounts add column foo int")
-
+        Account.reset_column_information
         assert Account.column_names.include?('foo')
       end
 
@@ -144,6 +142,7 @@ describe "connection switching" do
       before do
         ActiveRecord::Base.on_first_shard do
           ActiveRecord::Base.connection.execute("alter table tickets add column foo int")
+          Ticket.reset_column_information
         end
       end
 
@@ -220,13 +219,13 @@ describe "connection switching" do
   describe "in an unsharded environment" do
     before do
       silence_warnings { ::RAILS_ENV = 'test2' }
-      ActiveRecord::Base.establish_connection(::RAILS_ENV)
+      ActiveRecord::Base.establish_connection(::RAILS_ENV.to_sym)
       assert_using_database('ars_test2', Ticket)
     end
 
     after do
       silence_warnings { ::RAILS_ENV = 'test' }
-      ActiveRecord::Base.establish_connection(::RAILS_ENV)
+      ActiveRecord::Base.establish_connection(::RAILS_ENV.to_sym)
       assert_using_database('ars_test', Ticket)
     end
 
@@ -266,7 +265,6 @@ describe "connection switching" do
 
   describe "slave driving" do
     describe "without slave configuration" do
-
       before do
         ActiveRecord::Base.configurations.delete('test_slave')
         if ActiveRecord::VERSION::MAJOR >= 4
@@ -274,7 +272,7 @@ describe "connection switching" do
         else
           ActiveRecord::Base.connection_handler.connection_pools.clear
         end
-        ActiveRecord::Base.establish_connection('test')
+        ActiveRecord::Base.establish_connection(:test)
       end
 
       it "default to the master database" do

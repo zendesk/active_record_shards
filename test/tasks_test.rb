@@ -17,6 +17,9 @@ describe "Database rake tasks" do
 
     if ActiveRecord::VERSION::MAJOR >= 4
       ActiveRecord::Tasks::DatabaseTasks.database_configuration = config
+      ActiveRecord::Tasks::DatabaseTasks.env = 'test'
+      ActiveRecord::Tasks::DatabaseTasks.migrations_paths = '/'
+
     else
       # It uses Rails.application.config to config ActiveRecord
       Rake::Task['db:load_config'].clear
