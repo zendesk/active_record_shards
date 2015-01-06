@@ -6,5 +6,6 @@ gemfile:
   - gemfiles/rails32.gemfile
   - gemfiles/rails40.gemfile
   - gemfiles/rails41.gemfile
+  - gemfiles/rails42.gemfile
 bundler_args: --no-deployment
 script: "bundle exec rake test"

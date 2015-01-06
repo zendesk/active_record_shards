@@ -12,6 +12,7 @@ end
 
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
+require 'active_support'
 require 'active_record_shards'
 require 'logger'
 
@@ -19,6 +20,7 @@ RAILS_ENV = "test"
 
 ActiveRecord::Base.logger = Logger.new(File.dirname(__FILE__) + "/test.log")
 ActiveRecord::Base.configurations = YAML::load(IO.read(File.dirname(__FILE__) + '/database.yml'))
+ActiveSupport.test_order = :sorted if ActiveSupport.respond_to?(:test_order=)
 
 def recreate_databases
   ActiveRecord::Base.configurations.each do |name, conf|
