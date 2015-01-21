@@ -519,9 +519,6 @@ describe "connection switching" do
         end
 
         it "will :include things via has_and_belongs associations correctly" do
-          if ActiveRecord::VERSION::MAJOR >= 4 && ActiveRecord::VERSION::MINOR >= 2
-            skip("There's a bug with Rails 4.2")
-          end
           a = Account.where(:id => 1001).includes(:people).first
           assert a.people.size > 0
           assert_equal 'slave person', a.people.first.name
@@ -529,7 +526,7 @@ describe "connection switching" do
 
         it "sets up has and belongs to many sharded-ness correctly" do
           if ActiveRecord::VERSION::MAJOR >= 4 && ActiveRecord::VERSION::MINOR >= 1
-            assert_equal false, !!Account::HABTM_People.is_sharded?
+            refute Account::HABTM_People.is_sharded?
           end
         end
 
