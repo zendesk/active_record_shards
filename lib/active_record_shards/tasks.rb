@@ -46,7 +46,11 @@ namespace :db do
   desc "Raises an error if there are pending migrations"
   task :abort_if_pending_migrations => :environment do
     if defined? ActiveRecord
-      pending_migrations = ActiveRecord::Base.on_shard(nil) { ActiveRecord::Migrator.new(:up, 'db/migrate').pending_migrations }
+      if Rails::VERSION::MAJOR >= 4
+        pending_migrations = ActiveRecord::Base.on_shard(nil) { ActiveRecord::Migrator.open(ActiveRecord::Migrator.migrations_paths).pending_migrations }
+      else
+        pending_migrations = ActiveRecord::Base.on_shard(nil) { ActiveRecord::Migrator.new(:up, 'db/migrate').pending_migrations }
+      end
 
       if pending_migrations.any?
         puts "You have #{pending_migrations.size} pending migrations:"
