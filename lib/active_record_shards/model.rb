@@ -11,7 +11,11 @@ module ActiveRecordShards
       if self == ActiveRecord::Base
         true
       elsif self == base_class
-        @sharded != false
+        if self.name.start_with?("HABTM_")
+          self.reflections[:left_side].klass.is_sharded?
+        else
+          @sharded != false
+        end
       else
         base_class.is_sharded?
       end
