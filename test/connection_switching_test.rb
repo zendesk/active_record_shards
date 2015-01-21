@@ -524,6 +524,12 @@ describe "connection switching" do
           assert_equal 'slave person', a.people.first.name
         end
 
+        it "sets up has and belongs to many sharded-ness correctly" do
+          if ActiveRecord::VERSION::MAJOR >= 4 && ActiveRecord::VERSION::MINOR >= 1
+            refute Account::HABTM_People.is_sharded?
+          end
+        end
+
         it "supports .pluck" do
           assert_equal ["slave_name", "slave_name2"], Account.pluck(:name)
         end

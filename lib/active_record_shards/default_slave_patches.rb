@@ -124,6 +124,9 @@ module ActiveRecordShards
         def model.on_slave_by_default?
           left_reflection.klass.on_slave_by_default?
         end
+
+        # also transfer the sharded-ness of the left table to the join model
+        model.not_sharded if !model.left_reflection.klass.is_sharded?
         model
       end
     end
