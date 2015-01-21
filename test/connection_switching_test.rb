@@ -528,7 +528,7 @@ describe "connection switching" do
         end
 
         it "sets up has and belongs to many sharded-ness correctly" do
-          if Object.const_defined?('Account::HABTM_People')
+          if ActiveRecord::VERSION::MAJOR >= 4 && ActiveRecord::VERSION::MINOR >= 1
             assert_equal false, !!Account::HABTM_People.is_sharded?
           end
         end
