@@ -61,4 +61,12 @@ namespace :db do
       end
     end
   end
+
+  namespace :test do
+    desc 'Purges the test databases by dropping and creating'
+    task :purge do
+      Rake::Task['db:drop'].invoke
+      Rake::Task['db:create'].invoke
+    end
+  end
 end

@@ -3,7 +3,7 @@
 ActiveRecord Shards is an extension for ActiveRecord that provides support for sharded database and slaves. Basically it is just a nice way to
 switch between database connections. We've made the implementation very small, and have tried not to reinvent any wheels already present in ActiveRecord.
 
-ActiveRecord Shards has used and tested on Rails 3.0.x, 3.2.x, and 4.1.x and has in some form or another been used in production on a large rails app for
+ActiveRecord Shards has used and tested on Rails 3.0.x, 3.2.x, 4.0.x, and 4.1.x and has in some form or another been used in production on a large rails app for
 more than a year.
 
 ## Installation
@@ -43,7 +43,7 @@ basically connections inherit configuration from the parent configuration file.
 ## Usage
 
 Normally you have some models that live on a shared database, and you might need to query this data in order to know what shard to switch to.
-All the model that live on the shared database must be marked as not\_sharded:
+All the models that live on the shared database must be marked as not\_sharded:
 
     class Account < ActiveRecord::Base
       not_sharded
@@ -55,7 +55,7 @@ All the model that live on the shared database must be marked as not\_sharded:
       belongs_to :account
     end
 
-So in this setup the accounts live on the shared database, but the projects are sharded. If accounts had a shard\_id column, you could lookup the account
+So in this setup the accounts live on the shared database, but the projects are sharded. If accounts have a shard\_id column, you could lookup the account
 in a rack middleware and switch to the right shard:
 
     class AccountMiddleware
@@ -80,7 +80,7 @@ in a rack middleware and switch to the right shard:
       end
     end
 
-Any where in your app, you can switch to the slave databases, by wrapping you code an on\_slave block:
+You can switch to the slave databases at any point by wrapping your code in an on\_slave block:
 
     ActiveRecord::Base.on_slave do
       Account.find_by_big_expensive_query
