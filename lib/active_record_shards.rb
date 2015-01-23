@@ -48,7 +48,7 @@ end
 
 module ActiveRecordShards
   def self.rails_env
-    env = Rails.env if Object.const_defined?(:Rails)
+    env = Rails.env if defined?(Rails.env)
     env ||= RAILS_ENV if Object.const_defined?(:RAILS_ENV)
     env ||= ENV['RAILS_ENV']
   end
