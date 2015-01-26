@@ -66,12 +66,14 @@ namespace :db do
   namespace :test do
     desc 'Purges the test databases by dropping and creating'
     task :purge do
-      saved_env = Rails.env
-      Rails.env = 'test'
-      Rake::Task['db:drop'].invoke
-      Rake::Task['db:create'].invoke
-    ensure
-      Rails.env = saved_env
+      begin
+        saved_env = Rails.env
+        Rails.env = 'test'
+        Rake::Task['db:drop'].invoke
+        Rake::Task['db:create'].invoke
+      ensure
+        Rails.env = saved_env
+      end
     end
   end
 end
