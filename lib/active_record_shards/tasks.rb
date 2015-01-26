@@ -12,7 +12,8 @@ namespace :db do
       if key.starts_with?(env_name) && !key.ends_with?("_slave")
         begin
           if ActiveRecord::VERSION::MAJOR >= 4
-            ActiveRecord::Tasks::DatabaseTasks.drop(conf)
+            connection = ActiveRecord::Base.mysql2_connection(conf.merge('database' => nil))
+            connection.drop_database(conf['database'])
           else
             drop_database(conf)
           end
@@ -65,8 +66,12 @@ namespace :db do
   namespace :test do
     desc 'Purges the test databases by dropping and creating'
     task :purge do
+      saved_env = Rails.env
+      Rails.env = 'test'
       Rake::Task['db:drop'].invoke
       Rake::Task['db:create'].invoke
+    ensure
+      Rails.env = saved_env
     end
   end
 end
