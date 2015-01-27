@@ -12,7 +12,7 @@ namespace :db do
       if key.starts_with?(env_name) && !key.ends_with?("_slave")
         begin
           if ActiveRecord::VERSION::MAJOR >= 4
-            connection = ActiveRecord::Base.mysql2_connection(conf.merge('database' => nil))
+            connection = ActiveRecord::Base.send("#{conf['adapter']}_connection", conf.merge('database' => nil))
             connection.drop_database(conf['database'])
           else
             drop_database(conf)
