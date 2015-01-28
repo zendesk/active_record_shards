@@ -1,6 +1,6 @@
 require 'active_record_shards'
 
-%w[db:drop db:create db:abort_if_pending_migrations db:reset].each do |name|
+%w[db:drop db:create db:abort_if_pending_migrations db:reset db:test:purge].each do |name|
   Rake::Task[name].clear
 end
 
@@ -12,7 +12,8 @@ namespace :db do
       if key.starts_with?(env_name) && !key.ends_with?("_slave")
         begin
           if ActiveRecord::VERSION::MAJOR >= 4
-            ActiveRecord::Tasks::DatabaseTasks.drop(conf)
+            connection = ActiveRecord::Base.send("#{conf['adapter']}_connection", conf.merge('database' => nil))
+            connection.drop_database(conf['database'])
           else
             drop_database(conf)
           end
@@ -58,6 +59,20 @@ namespace :db do
           puts '  %4d %s' % [pending_migration.version, pending_migration.name]
         end
         abort %{Run "rake db:migrate" to update your database then try again.}
+      end
+    end
+  end
+
+  namespace :test do
+    desc 'Purges the test databases by dropping and creating'
+    task :purge do
+      begin
+        saved_env = Rails.env
+        Rails.env = 'test'
+        Rake::Task['db:drop'].invoke
+        Rake::Task['db:create'].invoke
+      ensure
+        Rails.env = saved_env
       end
     end
   end
