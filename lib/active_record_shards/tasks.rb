@@ -4,10 +4,13 @@ require 'active_record_shards'
   Rake::Task[name].clear
 end
 
+def env_name
+  defined?(Rails.env) ? Rails.env : RAILS_ENV || 'development'
+end
+
 namespace :db do
   desc 'Drops the database for the current RAILS_ENV including shards'
   task :drop => :load_config do
-    env_name = defined?(Rails.env) ? Rails.env : RAILS_ENV || 'development'
     ActiveRecord::Base.configurations.each do |key, conf|
       if key.starts_with?(env_name) && !key.ends_with?("_slave")
         begin
@@ -31,11 +34,19 @@ namespace :db do
 
   desc "Create the database defined in config/database.yml for the current RAILS_ENV including shards"
   task :create => :load_config do
-    env_name = defined?(Rails.env) ? Rails.env : RAILS_ENV || 'development'
     ActiveRecord::Base.configurations.each do |key, conf|
       if key.starts_with?(env_name) && !key.ends_with?("_slave")
         if ActiveRecord::VERSION::MAJOR >= 4
-          ActiveRecord::Tasks::DatabaseTasks.create(conf)
+          begin
+            connection = ActiveRecord::Base.send("#{conf['adapter']}_connection", conf.merge('database' => nil))
+            connection.create_database(conf['database'])
+          rescue ActiveRecord::StatementInvalid => ex
+            if ex.message.match('database exists')
+              $stderr.puts "#{conf['database']} already exists"
+            else
+              raise ex
+            end
+          end
         else
           create_database(conf)
         end
