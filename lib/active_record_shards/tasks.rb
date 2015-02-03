@@ -8,6 +8,10 @@ def env_name
   defined?(Rails.env) ? Rails.env : RAILS_ENV || 'development'
 end
 
+def root_connection(conf)
+  ActiveRecord::Base.send("#{conf['adapter']}_connection", conf.merge('database' => nil))
+end
+
 namespace :db do
   desc 'Drops the database for the current RAILS_ENV including shards'
   task :drop => :load_config do
@@ -15,8 +19,7 @@ namespace :db do
       if key.starts_with?(env_name) && !key.ends_with?("_slave")
         begin
           if ActiveRecord::VERSION::MAJOR >= 4
-            connection = ActiveRecord::Base.send("#{conf['adapter']}_connection", conf.merge('database' => nil))
-            connection.drop_database(conf['database'])
+            root_connection(conf).drop_database(conf['database'])
           else
             drop_database(conf)
           end
@@ -38,8 +41,7 @@ namespace :db do
       if key.starts_with?(env_name) && !key.ends_with?("_slave")
         if ActiveRecord::VERSION::MAJOR >= 4
           begin
-            connection = ActiveRecord::Base.send("#{conf['adapter']}_connection", conf.merge('database' => nil))
-            connection.create_database(conf['database'])
+            root_connection(conf).create_database(conf['database'])
           rescue ActiveRecord::StatementInvalid => ex
             if ex.message.match('database exists')
               $stderr.puts "#{conf['database']} already exists"
