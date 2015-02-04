@@ -4,22 +4,14 @@ require 'active_record_shards'
   Rake::Task[name].clear
 end
 
-def env_name
-  defined?(Rails.env) ? Rails.env : RAILS_ENV || 'development'
-end
-
-def root_connection(conf)
-  ActiveRecord::Base.send("#{conf['adapter']}_connection", conf.merge('database' => nil))
-end
-
 namespace :db do
   desc 'Drops the database for the current RAILS_ENV including shards'
   task :drop => :load_config do
     ActiveRecord::Base.configurations.each do |key, conf|
-      if key.starts_with?(env_name) && !key.ends_with?("_slave")
+      if key.starts_with?(ActiveRecordShards::Tasks.env_name) && !key.ends_with?("_slave")
         begin
           if ActiveRecord::VERSION::MAJOR >= 4
-            root_connection(conf).drop_database(conf['database'])
+            ActiveRecordShards::Tasks.root_connection(conf).drop_database(conf['database'])
           else
             drop_database(conf)
           end
@@ -38,13 +30,13 @@ namespace :db do
   desc "Create the database defined in config/database.yml for the current RAILS_ENV including shards"
   task :create => :load_config do
     ActiveRecord::Base.configurations.each do |key, conf|
-      if key.starts_with?(env_name) && !key.ends_with?("_slave")
+      if key.starts_with?(ActiveRecordShards::Tasks.env_name) && !key.ends_with?("_slave")
         if ActiveRecord::VERSION::MAJOR >= 4
           begin
-            root_connection(conf).create_database(conf['database'])
+            ActiveRecordShards::Tasks.root_connection(conf).create_database(conf['database'])
           rescue ActiveRecord::StatementInvalid => ex
-            if ex.message.match('database exists')
-              $stderr.puts "#{conf['database']} already exists"
+            if ex.message.include?('database exists')
+              puts "#{conf['database']} already exists"
             else
               raise ex
             end
@@ -54,7 +46,7 @@ namespace :db do
         end
       end
     end
-    ActiveRecord::Base.establish_connection(env_name)
+    ActiveRecord::Base.establish_connection(ActiveRecordShards::Tasks.env_name)
   end
 
   desc "Raises an error if there are pending migrations"
@@ -87,6 +79,18 @@ namespace :db do
       ensure
         Rails.env = saved_env
       end
+    end
+  end
+end
+
+module ActiveRecordShards
+  module Tasks
+    def self.env_name
+      defined?(Rails.env) ? Rails.env : RAILS_ENV || 'development'
+    end
+
+    def self.root_connection(conf)
+      ActiveRecord::Base.send("#{conf['adapter']}_connection", conf.merge('database' => nil))
     end
   end
 end
