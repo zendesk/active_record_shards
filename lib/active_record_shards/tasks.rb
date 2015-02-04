@@ -86,7 +86,7 @@ end
 module ActiveRecordShards
   module Tasks
     def self.env_name
-      defined?(Rails.env) ? Rails.env : RAILS_ENV || 'development'
+      ActiveRecordShards.rails_env || 'development'
     end
 
     def self.root_connection(conf)
