@@ -8,7 +8,7 @@ namespace :db do
   desc 'Drops the database for the current RAILS_ENV including shards'
   task :drop => :load_config do
     ActiveRecord::Base.configurations.each do |key, conf|
-      if key.starts_with?(ActiveRecordShards::Tasks.env_name) && !key.ends_with?("_slave")
+      if key.starts_with?(ActiveRecordShards.rails_env) && !key.ends_with?("_slave")
         begin
           if ActiveRecord::VERSION::MAJOR >= 4
             ActiveRecordShards::Tasks.root_connection(conf).drop_database(conf['database'])
@@ -30,7 +30,7 @@ namespace :db do
   desc "Create the database defined in config/database.yml for the current RAILS_ENV including shards"
   task :create => :load_config do
     ActiveRecord::Base.configurations.each do |key, conf|
-      if key.starts_with?(ActiveRecordShards::Tasks.env_name) && !key.ends_with?("_slave")
+      if key.starts_with?(ActiveRecordShards.rails_env) && !key.ends_with?("_slave")
         if ActiveRecord::VERSION::MAJOR >= 4
           begin
             ActiveRecordShards::Tasks.root_connection(conf).create_database(conf['database'])
@@ -46,7 +46,7 @@ namespace :db do
         end
       end
     end
-    ActiveRecord::Base.establish_connection(ActiveRecordShards::Tasks.env_name)
+    ActiveRecord::Base.establish_connection(ActiveRecordShards.rails_env)
   end
 
   desc "Raises an error if there are pending migrations"
@@ -85,10 +85,6 @@ end
 
 module ActiveRecordShards
   module Tasks
-    def self.env_name
-      ActiveRecordShards.rails_env || 'development'
-    end
-
     def self.root_connection(conf)
       ActiveRecord::Base.send("#{conf['adapter']}_connection", conf.merge('database' => nil))
     end
