@@ -74,8 +74,8 @@ namespace :db do
       begin
         saved_env = Rails.env
         Rails.env = 'test'
-        Rake::Task['db:drop'].invoke
-        Rake::Task['db:create'].invoke
+        Rake::Task['db:drop'].execute
+        Rake::Task['db:create'].execute
       ensure
         Rails.env = saved_env
       end
