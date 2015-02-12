@@ -34,7 +34,7 @@ module ActiveRecordShards
 
       # Tradeoff: An Array is a slower Hash key, but joining its elements into
       # one string would generate 3 new String objects needing GC later.
-      key = [the_shard, try_slave, @on_slave]
+      key = [ActiveRecordShards.rails_env, the_shard, try_slave, @on_slave]
 
       @shard_names      ||= {}
       @shard_names[key] ||= begin
