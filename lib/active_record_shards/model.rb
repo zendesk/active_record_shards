@@ -9,7 +9,7 @@ module ActiveRecordShards
 
     def is_sharded?
       if self == ActiveRecord::Base
-        true
+        supports_sharding?
       elsif self == base_class
         @sharded != false
       else
