@@ -75,7 +75,7 @@ describe "connection switching" do
       end
 
       it "execute the block unsharded" do
-        ActiveRecord::Base.expects(:supports_sharding?).returns false
+        ActiveRecord::Base.expects(:supports_sharding?).at_least_once.returns false
         result = ActiveRecord::Base.on_all_shards do |shard|
           [ActiveRecord::Base.connection.select_value("SELECT DATABASE()"), shard]
         end
