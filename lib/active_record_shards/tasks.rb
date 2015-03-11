@@ -70,7 +70,7 @@ namespace :db do
 
   namespace :test do
     desc 'Purges the test databases by dropping and creating'
-    task :purge do
+    task :purge => :load_config do
       begin
         saved_env = Rails.env
         Rails.env = 'test'
