@@ -11,7 +11,11 @@ module ActiveRecordShards
       if self == ActiveRecord::Base
         supports_sharding?
       elsif self == base_class
-        @sharded != false
+        if @sharded.nil?
+          ActiveRecord::Base.is_sharded?
+        else
+          @sharded != false
+        end
       else
         base_class.is_sharded?
       end
