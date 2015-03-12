@@ -1,7 +1,7 @@
 module ActiveRecordShards
   module Model
     def not_sharded
-      if self == ActiveRecord::Base || self != base_class
+      if self != ActiveRecord::Base && self != base_class
         raise "You should only call not_sharded on direct descendants of ActiveRecord::Base"
       end
       @sharded = false
@@ -9,7 +9,7 @@ module ActiveRecordShards
 
     def is_sharded?
       if self == ActiveRecord::Base
-        supports_sharding?
+        @sharded != false && supports_sharding?
       elsif self == base_class
         if @sharded.nil?
           ActiveRecord::Base.is_sharded?
