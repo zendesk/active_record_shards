@@ -22,9 +22,9 @@ namespace :db do
     end
   end
 
-  task :reset => :load_config do
-    Rake::Task["db:drop"].invoke rescue nil
-    Rake::Task["db:setup"].invoke
+  task :reset => :load_config do |t|
+    Rake.application.lookup('db:drop', t.scope).invoke rescue nil
+    Rake.application.lookup('db:setup', t.scope).invoke
   end
 
   desc "Create the database defined in config/database.yml for the current RAILS_ENV including shards"
@@ -70,12 +70,12 @@ namespace :db do
 
   namespace :test do
     desc 'Purges the test databases by dropping and creating'
-    task :purge => :load_config do
+    task :purge => :load_config do |t|
       begin
         saved_env = Rails.env
         Rails.env = 'test'
-        Rake::Task['db:drop'].execute
-        Rake::Task['db:create'].execute
+        Rake.application.lookup('db:drop', t.scope).execute
+        Rake.application.lookup('db:create', t.scope).execute
       ensure
         Rails.env = saved_env
       end
