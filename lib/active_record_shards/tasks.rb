@@ -10,11 +10,7 @@ namespace :db do
     ActiveRecord::Base.configurations.each do |key, conf|
       if key.starts_with?(ActiveRecordShards.rails_env) && !key.ends_with?("_slave")
         begin
-          if ActiveRecord::VERSION::MAJOR >= 4
-            ActiveRecordShards::Tasks.root_connection(conf).drop_database(conf['database'])
-          else
-            drop_database(conf)
-          end
+          ActiveRecordShards::Tasks.root_connection(conf).drop_database(conf['database'])
         rescue Exception => e
           puts "Couldn't drop #{conf['database']} : #{e.inspect}"
         end
