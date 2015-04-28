@@ -29,7 +29,7 @@ namespace :db do
       if key.starts_with?(ActiveRecordShards.rails_env) && !key.ends_with?("_slave")
         if ActiveRecord::VERSION::MAJOR >= 4
           begin
-            ActiveRecordShards::Tasks.root_connection(conf).create_database(conf['database'])
+            ActiveRecordShards::Tasks.root_connection(conf).create_database(conf['database'], conf)
           rescue ActiveRecord::StatementInvalid => ex
             if ex.message.include?('database exists')
               puts "#{conf['database']} already exists"
