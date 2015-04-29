@@ -29,6 +29,8 @@ namespace :db do
       if key.starts_with?(ActiveRecordShards.rails_env) && !key.ends_with?("_slave")
         if ActiveRecord::VERSION::MAJOR >= 4
           begin
+            # MysqlAdapter takes charset instead of encoding in Rails 4
+            # https://github.com/rails/rails/commit/78b30fed9336336694fb2cb5d2825f95800b541c
             symbolized_configuration = conf.symbolize_keys
             symbolized_configuration[:charset] = symbolized_configuration[:encoding]
 
