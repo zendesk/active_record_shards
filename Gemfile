@@ -2,4 +2,6 @@ source "https://rubygems.org"
 
 gemspec
 
-gem "byebug", :platforms => [:ruby_20, :ruby_21]
+platform :mri do
+  gem "byebug"
+end
