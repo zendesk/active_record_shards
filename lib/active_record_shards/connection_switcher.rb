@@ -2,9 +2,28 @@ require 'active_record_shards/shard_support'
 
 module ActiveRecordShards
   module ConnectionSwitcher
+    module PrependMethods
+      def columns
+        if is_sharded? && current_shard_id.nil? && table_name != ActiveRecord::Migrator.schema_migrations_table_name
+          on_first_shard { super }
+        else
+          super
+        end
+      end
+
+      def table_exists?
+        result = super()
+
+        if !result && is_sharded? && (shard_name = shard_names.first)
+          result = on_shard(shard_name) { super }
+        end
+
+        result
+      end
+    end
+
     def self.extended(klass)
-      klass.singleton_class.alias_method_chain :columns, :default_shard
-      klass.singleton_class.alias_method_chain :table_exists?, :default_shard
+      klass.singleton_class.send(:prepend, ActiveRecordShards::ConnectionSwitcher::PrependMethods)
     end
 
     def default_shard=(new_default_shard)
@@ -179,7 +198,7 @@ module ActiveRecordShards
       # note that since we're subverting the standard establish_connection path, we have to handle the funky autoloading of the
       # connection adapter ourselves.
       specification_cache[name] ||= begin
-        if ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR >= 1
+        if ActiveRecord::VERSION::STRING >= '4.1.0'
           resolver = ActiveRecordShards::ConnectionSpecification::Resolver.new configurations
           resolver.spec(spec)
         else
@@ -211,24 +230,6 @@ module ActiveRecordShards
       end
 
       specs_to_pools.has_key?(connection_pool_key)
-    end
-
-    def columns_with_default_shard
-      if is_sharded? && current_shard_id.nil? && table_name != ActiveRecord::Migrator.schema_migrations_table_name
-        on_first_shard { columns_without_default_shard }
-      else
-        columns_without_default_shard
-      end
-    end
-
-    def table_exists_with_default_shard?
-      result = table_exists_without_default_shard?
-
-      if !result && is_sharded? && (shard_name = shard_names.first)
-        result = on_shard(shard_name) { table_exists_without_default_shard? }
-      end
-
-      result
     end
 
     def autoload_adapter(adapter_name)
