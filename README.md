@@ -3,7 +3,7 @@
 ActiveRecord Shards is an extension for ActiveRecord that provides support for sharded database and slaves. Basically it is just a nice way to
 switch between database connections. We've made the implementation very small, and have tried not to reinvent any wheels already present in ActiveRecord.
 
-ActiveRecord Shards has used and tested on Rails 3.0.x, 3.2.x, 4.0.x, and 4.1.x and has in some form or another been used in production on a large rails app for
+ActiveRecord Shards has used and tested on Rails 3.2.x, 4.x, and 5.0 and has in some form or another been used in production on a large rails app for
 more than a year.
 
 ## Installation
@@ -47,10 +47,10 @@ All the models that live on the shared database must be marked as not\_sharded:
 
     class Account < ActiveRecord::Base
       not_sharded
-      
+
       has_many :projects
     end
-    
+
     class Project < ActiveRecord::Base
       belongs_to :account
     end
@@ -62,10 +62,10 @@ in a rack middleware and switch to the right shard:
       def initialize(app)
         @app = app
       end
-      
+
       def call(env)
         account = lookup_account(env)
-        
+
         if account
           ActiveRecord::Base.on_shard(account.shard_id) do
             @app.call(env)
@@ -74,7 +74,7 @@ in a rack middleware and switch to the right shard:
           @app.call(env)
         end
       end
-      
+
       def lookup_account(env)
         ...
       end
@@ -98,4 +98,3 @@ Copyright (c) 2011 Zendesk. See LICENSE for details.
 Mick Staugaard, Eric Chapweske
 
 [![Build Status](https://secure.travis-ci.org/osheroff/active_record_shards.png)](http://travis-ci.org/osheroff/active_record_shards)
-

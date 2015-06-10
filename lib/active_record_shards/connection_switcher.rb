@@ -2,19 +2,38 @@ require 'active_record_shards/shard_support'
 
 module ActiveRecordShards
   module ConnectionSwitcher
+    module PrependMethods
+      def columns
+        if is_sharded? && current_shard_id.nil? && table_name != ActiveRecord::Migrator.schema_migrations_table_name
+          on_first_shard { super }
+        else
+          super
+        end
+      end
+
+      def table_exists?
+        result = super()
+
+        if !result && is_sharded? && (shard_name = shard_names.first)
+          result = on_shard(shard_name) { super }
+        end
+
+        result
+      end
+    end
+
     def self.extended(klass)
-      klass.singleton_class.alias_method_chain :columns, :default_shard
-      klass.singleton_class.alias_method_chain :table_exists?, :default_shard
+      klass.singleton_class.send(:prepend, ActiveRecordShards::ConnectionSwitcher::PrependMethods)
     end
 
     def default_shard=(new_default_shard)
       ActiveRecordShards::ShardSelection.default_shard = new_default_shard
-      switch_connection(:shard => new_default_shard)
+      switch_connection(shard: new_default_shard)
     end
 
     def on_shard(shard, &block)
       old_options = current_shard_selection.options
-      switch_connection(:shard => shard) if supports_sharding?
+      switch_connection(shard: shard) if supports_sharding?
       yield
     ensure
       switch_connection(old_options)
@@ -33,7 +52,7 @@ module ActiveRecordShards
       old_options = current_shard_selection.options
       if supports_sharding?
         shard_names.map do |shard|
-          switch_connection(:shard => shard)
+          switch_connection(shard: shard)
           yield(shard)
         end
       else
@@ -92,7 +111,7 @@ module ActiveRecordShards
     def on_cx_switch_block(which, options = {}, &block)
       old_options = current_shard_selection.options
       switch_to_slave = (which == :slave && (@disallow_slave.nil? || @disallow_slave == 0))
-      switch_connection(:slave => switch_to_slave)
+      switch_connection(slave: switch_to_slave)
 
       @disallow_slave = (@disallow_slave || 0) + 1 if which == :master
 
@@ -179,7 +198,7 @@ module ActiveRecordShards
       # note that since we're subverting the standard establish_connection path, we have to handle the funky autoloading of the
       # connection adapter ourselves.
       specification_cache[name] ||= begin
-        if ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR >= 1
+        if ActiveRecord::VERSION::STRING >= '4.1.0'
           resolver = ActiveRecordShards::ConnectionSpecification::Resolver.new configurations
           resolver.spec(spec)
         else
@@ -211,24 +230,6 @@ module ActiveRecordShards
       end
 
       specs_to_pools.has_key?(connection_pool_key)
-    end
-
-    def columns_with_default_shard
-      if is_sharded? && current_shard_id.nil? && table_name != ActiveRecord::Migrator.schema_migrations_table_name
-        on_first_shard { columns_without_default_shard }
-      else
-        columns_without_default_shard
-      end
-    end
-
-    def table_exists_with_default_shard?
-      result = table_exists_without_default_shard?
-
-      if !result && is_sharded? && (shard_name = shard_names.first)
-        result = on_shard(shard_name) { table_exists_without_default_shard? }
-      end
-
-      result
     end
 
     def autoload_adapter(adapter_name)
