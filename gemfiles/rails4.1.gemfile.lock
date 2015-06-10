@@ -2,8 +2,8 @@ PATH
   remote: ../
   specs:
     active_record_shards (3.4.3)
-      activerecord (>= 3.2.16, < 5.0)
-      activesupport (>= 3.2.16, < 5.0)
+      activerecord (>= 3.2, < 5.1)
+      activesupport (>= 3.2, < 5.1)
 
 GEM
   remote: https://rubygems.org/
