@@ -113,4 +113,4 @@ ActiveRecord::Migration.class_eval do
   alias_method_chain :migrate, :forced_shard
 end
 
-ActiveRecord::MigrationProxy.delegate :migration_shard, :to => :migration
+ActiveRecord::MigrationProxy.delegate :migration_shard, to: :migration

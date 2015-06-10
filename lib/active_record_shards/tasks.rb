@@ -6,7 +6,7 @@ end
 
 namespace :db do
   desc 'Drops the database for the current RAILS_ENV including shards'
-  task :drop => :load_config do
+  task drop: :load_config do
     ActiveRecord::Base.configurations.each do |key, conf|
       if key.starts_with?(ActiveRecordShards.rails_env) && !key.ends_with?("_slave")
         begin
@@ -18,13 +18,13 @@ namespace :db do
     end
   end
 
-  task :reset => :load_config do |t|
+  task reset: :load_config do |t|
     Rake.application.lookup('db:drop', t.scope).invoke rescue nil
     Rake.application.lookup('db:setup', t.scope).invoke
   end
 
   desc "Create the database defined in config/database.yml for the current RAILS_ENV including shards"
-  task :create => :load_config do
+  task create: :load_config do
     ActiveRecord::Base.configurations.each do |key, conf|
       if key.starts_with?(ActiveRecordShards.rails_env) && !key.ends_with?("_slave")
         if ActiveRecord::VERSION::MAJOR >= 4
@@ -51,7 +51,7 @@ namespace :db do
   end
 
   desc "Raises an error if there are pending migrations"
-  task :abort_if_pending_migrations => :environment do
+  task abort_if_pending_migrations: :environment do
     if defined? ActiveRecord
       if Rails::VERSION::MAJOR >= 4
         pending_migrations = ActiveRecord::Base.on_shard(nil) { ActiveRecord::Migrator.open(ActiveRecord::Migrator.migrations_paths).pending_migrations }
@@ -71,7 +71,7 @@ namespace :db do
 
   namespace :test do
     desc 'Purges the test databases by dropping and creating'
-    task :purge => :load_config do |t|
+    task purge: :load_config do |t|
       begin
         saved_env = Rails.env
         Rails.env = 'test'

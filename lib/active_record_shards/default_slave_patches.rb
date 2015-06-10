@@ -47,7 +47,7 @@ module ActiveRecordShards
               read_columns_form = :master
             end
 
-            on_cx_switch_block(read_columns_from, :construct_ro_scope => false) { columns_without_default_slave(*args, &block) }
+            on_cx_switch_block(read_columns_from, construct_ro_scope: false) { columns_without_default_slave(*args, &block) }
           end
           alias_method_chain :columns, :default_slave
         end
