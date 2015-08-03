@@ -2,6 +2,8 @@ require 'active_record_shards/shard_support'
 
 module ActiveRecordShards
   module ConnectionSwitcher
+    SHARD_NAMES_CONFIG_KEY = 'shard_names'.freeze
+
     def self.extended(klass)
       klass.singleton_class.alias_method_chain :columns, :default_shard
       klass.singleton_class.alias_method_chain :table_exists?, :default_shard
@@ -144,7 +146,7 @@ module ActiveRecordShards
       unless config = configurations[shard_env]
         raise "Did not find #{shard_env} in configurations, did you forget to add it to your database.yml ? (configurations: #{configurations.inspect})"
       end
-      config['shard_names'] || []
+      config[SHARD_NAMES_CONFIG_KEY] || []
     end
 
     private
