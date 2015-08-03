@@ -12,7 +12,7 @@ module ActiveRecordShards
         if @shard == NO_SHARD
           nil
         else
-          (@shard || self.class.default_shard).to_s
+          @shard || self.class.default_shard
         end
       end
     end
