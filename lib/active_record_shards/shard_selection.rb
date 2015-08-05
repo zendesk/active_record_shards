@@ -32,12 +32,10 @@ module ActiveRecordShards
     def shard_name(klass = nil, try_slave = true)
       the_shard = shard(klass)
 
-      # Tradeoff: An Array is a slower Hash key, but joining its elements into
-      # one string would generate 3 new String objects needing GC later.
-      key = [ActiveRecordShards.rails_env, the_shard, try_slave, @on_slave]
-
-      @shard_names      ||= {}
-      @shard_names[key] ||= begin
+      @shard_names ||= {}
+      @shard_names[the_shard] ||= {}
+      @shard_names[the_shard][try_slave] ||= {}
+      @shard_names[the_shard][try_slave][@on_slave] ||= begin
         s = ActiveRecordShards.rails_env.dup
         s << "_shard_#{the_shard}" if the_shard
         s << "_slave"              if @on_slave && try_slave
