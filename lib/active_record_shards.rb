@@ -34,9 +34,7 @@ ActiveRecord::Associations::Builder::HasAndBelongsToMany.send(:include, ActiveRe
 
 ActiveRecord::Associations::CollectionProxy.send(:include, ActiveRecordShards::AssociationCollectionConnectionSelection)
 
-if RUBY_VERSION >= '2'
-  ActiveRecord::SchemaDumper.send(:prepend, ActiveRecordShards::SchemaDumperExtension)
-end
+ActiveRecord::SchemaDumper.send(:prepend, ActiveRecordShards::SchemaDumperExtension)
 
 module ActiveRecordShards
   def self.rails_env
