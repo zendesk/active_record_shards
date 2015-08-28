@@ -13,6 +13,5 @@ script: "bundle exec rake test"
 sudo: false
 cache:
   bundler: true
-
 branches:
-  only: "master"
+  only: master

@@ -1,6 +1,6 @@
 require 'bundler/setup'
-require "bump/tasks"
-require "wwtd/tasks"
+require 'bump/tasks'
+require 'wwtd/tasks'
 
 Bundler::GemHelper.install_tasks
 
