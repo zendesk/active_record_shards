@@ -4,7 +4,6 @@ rvm:
   - 2.1.5
   - rbx-2
 gemfile:
-  - gemfiles/rails32.gemfile
   - gemfiles/rails40.gemfile
   - gemfiles/rails41.gemfile
   - gemfiles/rails42.gemfile

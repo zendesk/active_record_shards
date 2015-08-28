@@ -311,11 +311,7 @@ describe "connection switching" do
     describe "without slave configuration" do
       before do
         ActiveRecord::Base.configurations.delete('test_slave')
-        if ActiveRecord::VERSION::MAJOR >= 4
-          ActiveRecord::Base.connection_handler.connection_pool_list.clear
-        else
-          ActiveRecord::Base.connection_handler.connection_pools.clear
-        end
+        ActiveRecord::Base.connection_handler.connection_pool_list.clear
         ActiveRecord::Base.establish_connection(:test)
       end
 

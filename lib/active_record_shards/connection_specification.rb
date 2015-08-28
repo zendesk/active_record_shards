@@ -3,10 +3,10 @@ class ActiveRecord::Base
     if ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR >= 1
       spec ||= ActiveRecord::ConnectionHandling::DEFAULT_ENV.call
       spec = spec.to_sym if spec.is_a?(String)
-      resolver = ActiveRecordShards::ConnectionSpecification::Resolver.new configurations
+      resolver = ActiveRecord::ConnectionAdapters::ConnectionSpecification::Resolver.new configurations
       spec = resolver.spec(spec)
     else
-      resolver = ActiveRecordShards::ConnectionSpecification::Resolver.new spec, configurations
+      resolver = ActiveRecord::ConnectionAdapters::ConnectionSpecification::Resolver.new spec, configurations
       spec = resolver.spec
     end
 
@@ -17,10 +17,6 @@ class ActiveRecord::Base
     remove_connection
     specification_cache[connection_pool_name] = spec
 
-    if ActiveRecord::VERSION::MAJOR >= 4
-      connection_handler.establish_connection self, spec
-    else
-      connection_handler.establish_connection connection_pool_name, spec
-    end
+    connection_handler.establish_connection self, spec
   end
 end
