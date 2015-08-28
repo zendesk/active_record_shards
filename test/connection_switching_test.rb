@@ -521,9 +521,7 @@ describe "connection switching" do
         end
 
         it "sets up has and belongs to many sharded-ness correctly" do
-          if ActiveRecord::VERSION::MAJOR >= 4 && ActiveRecord::VERSION::MINOR >= 1
-            refute Account::HABTM_People.is_sharded?
-          end
+          refute Account::HABTM_People.is_sharded?
         end
 
         it "supports .pluck" do
