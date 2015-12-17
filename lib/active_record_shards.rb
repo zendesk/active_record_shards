@@ -12,14 +12,8 @@ require 'active_record_shards/connection_handler'
 require 'active_record_shards/connection_specification'
 require 'active_record_shards/schema_dumper_extension'
 
-if ActiveRecord::VERSION::MAJOR >= 4
-  methods_to_override = [:establish_connection, :remove_connection, :pool_for,
-                         :pool_from_any_process_for]
-  ActiveRecordShards::ConnectionSpecification = ActiveRecord::ConnectionAdapters::ConnectionSpecification
-else
-  methods_to_override = [:remove_connection]
-  ActiveRecordShards::ConnectionSpecification = ActiveRecord::Base::ConnectionSpecification
-end
+methods_to_override = [:establish_connection, :remove_connection, :pool_for,
+                       :pool_from_any_process_for]
 
 ActiveRecordShards.override_connection_handler_methods(methods_to_override)
 
@@ -36,15 +30,11 @@ if ActiveRecord::Associations.const_defined?(:Preloader) && ActiveRecord::Associ
   ActiveRecord::Associations::Preloader::HasAndBelongsToMany.send(:include, ActiveRecordShards::DefaultSlavePatches::HasAndBelongsToManyPreloaderPatches)
 end
 
-if ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR >= 1
-  ActiveRecord::Associations::Builder::HasAndBelongsToMany.send(:include, ActiveRecordShards::DefaultSlavePatches::Rails41HasAndBelongsToManyBuilderExtension)
-end
+ActiveRecord::Associations::Builder::HasAndBelongsToMany.send(:include, ActiveRecordShards::DefaultSlavePatches::Rails41HasAndBelongsToManyBuilderExtension)
 
 ActiveRecord::Associations::CollectionProxy.send(:include, ActiveRecordShards::AssociationCollectionConnectionSelection)
 
-if ActiveRecord::VERSION::MAJOR >= 4 && RUBY_VERSION >= '2'
-  ActiveRecord::SchemaDumper.send(:prepend, ActiveRecordShards::SchemaDumperExtension)
-end
+ActiveRecord::SchemaDumper.send(:prepend, ActiveRecordShards::SchemaDumperExtension)
 
 module ActiveRecordShards
   def self.rails_env
@@ -58,7 +48,7 @@ end
 ActiveRecord::Base.singleton_class.class_eval do
   def establish_connection_with_connection_pool_name(spec = nil)
     case spec
-    when ActiveRecordShards::ConnectionSpecification
+    when ActiveRecord::ConnectionAdapters::ConnectionSpecification
       connection_handler.establish_connection(connection_pool_name, spec)
     else
       establish_connection_without_connection_pool_name(spec)

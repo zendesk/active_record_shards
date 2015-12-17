@@ -175,26 +175,14 @@ module ActiveRecordShards
 
       raise ActiveRecord::AdapterNotSpecified.new("No database defined by #{name} in database.yml") if spec.nil?
 
-      # in 3.2 rails is asking for a connection pool in a map of these ConnectionSpecifications.  If we want to re-use connections,
-      # we need to re-use specs.
-
       # note that since we're subverting the standard establish_connection path, we have to handle the funky autoloading of the
       # connection adapter ourselves.
       specification_cache[name] ||= begin
-        if ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR >= 1
-          resolver = ActiveRecordShards::ConnectionSpecification::Resolver.new configurations
-          resolver.spec(spec)
-        else
-          resolver = ActiveRecordShards::ConnectionSpecification::Resolver.new spec, configurations
-          resolver.spec
-        end
+        resolver = ActiveRecord::ConnectionAdapters::ConnectionSpecification::Resolver.new configurations
+        resolver.spec(spec)
       end
 
-      if ActiveRecord::VERSION::MAJOR >= 4
-        connection_handler.establish_connection(self, specification_cache[name])
-      else
-        connection_handler.establish_connection(connection_pool_name, specification_cache[name])
-      end
+      connection_handler.establish_connection(self, specification_cache[name])
     end
 
     def specification_cache
@@ -206,11 +194,7 @@ module ActiveRecordShards
     end
 
     def connected_to_shard?
-      if ActiveRecord::VERSION::MAJOR >= 4
-        specs_to_pools = Hash[connection_handler.connection_pool_list.map { |pool| [pool.spec, pool] }]
-      else
-        specs_to_pools = connection_handler.connection_pools
-      end
+      specs_to_pools = Hash[connection_handler.connection_pool_list.map { |pool| [pool.spec, pool] }]
 
       specs_to_pools.has_key?(connection_pool_key)
     end
