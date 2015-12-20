@@ -33,16 +33,16 @@ if ActiveRecord.const_defined?(:Relation)
 end
 
 if ActiveRecord::Associations.const_defined?(:Preloader) && ActiveRecord::Associations::Preloader.const_defined?(:HasAndBelongsToMany)
-  ActiveRecord::Associations::Preloader::HasAndBelongsToMany.send(:include, ActiveRecordShards::DefaultSlavePatches::HasAndBelongsToManyPreloaderPatches)
+  ActiveRecord::Associations::Preloader::HasAndBelongsToMany.send(:prepend, ActiveRecordShards::DefaultSlavePatches::HasAndBelongsToManyPreloaderPatches)
 end
 
 if ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR >= 1
-  ActiveRecord::Associations::Builder::HasAndBelongsToMany.send(:include, ActiveRecordShards::DefaultSlavePatches::Rails41HasAndBelongsToManyBuilderExtension)
+  ActiveRecord::Associations::Builder::HasAndBelongsToMany.send(:prepend, ActiveRecordShards::DefaultSlavePatches::Rails41HasAndBelongsToManyBuilderExtension)
 end
 
 ActiveRecord::Associations::CollectionProxy.send(:include, ActiveRecordShards::AssociationCollectionConnectionSelection)
 
-if ActiveRecord::VERSION::MAJOR >= 4 && RUBY_VERSION >= '2'
+if ActiveRecord::VERSION::MAJOR >= 4
   ActiveRecord::SchemaDumper.send(:prepend, ActiveRecordShards::SchemaDumperExtension)
 end
 
@@ -53,16 +53,17 @@ module ActiveRecordShards
     env ||= ENV['RAILS_ENV']
     env ||= 'development'
   end
-end
 
-ActiveRecord::Base.singleton_class.class_eval do
-  def establish_connection_with_connection_pool_name(spec = nil)
-    case spec
-    when ActiveRecordShards::ConnectionSpecification
-      connection_handler.establish_connection(connection_pool_name, spec)
-    else
-      establish_connection_without_connection_pool_name(spec)
+  module ActiveRecordConnectionPoolName
+    def establish_connection(spec = nil)
+      case spec
+      when ActiveRecordShards::ConnectionSpecification
+        connection_handler.establish_connection(connection_pool_name, spec)
+      else
+        super
+      end
     end
   end
-  alias_method_chain :establish_connection, :connection_pool_name
 end
+
+ActiveRecord::Base.singleton_class.send(:prepend, ActiveRecordShards::ActiveRecordConnectionPoolName)
