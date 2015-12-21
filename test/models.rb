@@ -36,5 +36,3 @@ end
 
 class User < Person
 end
-
-
