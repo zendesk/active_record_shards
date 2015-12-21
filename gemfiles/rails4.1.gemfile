@@ -1,7 +1,4 @@
-source "https://rubygems.org"
+eval_gemfile 'gemfiles/common.rb'
 
-gemspec :path => "../"
-
-gem "byebug", :platforms => [:mri_20, :mri_21]
-gem "activerecord", "~> 4.1.0"
-gem "mysql2", "~> 0.3.0"
+gem 'activerecord', '~> 4.1.0'
+gem 'mysql2', '~> 0.3.0'

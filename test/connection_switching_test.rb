@@ -401,7 +401,7 @@ describe "connection switching" do
         end
 
         it "be marked as read only" do
-          if ActiveRecord::VERSION::MAJOR >= 4 && ActiveRecord::VERSION::MINOR >= 2
+          if ActiveRecord::VERSION::STRING >= '4.2.0'
             skip("Readonly scope on finder method is complicated on Rails 4.2")
           end
 
@@ -525,8 +525,8 @@ describe "connection switching" do
         end
 
         it "sets up has and belongs to many sharded-ness correctly" do
-          if ActiveRecord::VERSION::MAJOR >= 4 && ActiveRecord::VERSION::MINOR >= 1
-            refute Account::HABTM_People.is_sharded?
+          if ActiveRecord::VERSION::STRING >= '4.1.0'
+            refute Account.const_get(:HABTM_People).is_sharded?
           end
         end
 

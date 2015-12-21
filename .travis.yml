@@ -1,13 +1,14 @@
 rvm:
   - 2.0.0
-  - 2.1.6
-  - 2.2.2
+  - 2.1.7
+  - 2.2.3
   - rbx-2
 gemfile:
   - gemfiles/rails3.2.gemfile
   - gemfiles/rails4.0.gemfile
   - gemfiles/rails4.1.gemfile
   - gemfiles/rails4.2.gemfile
+  - gemfiles/rails5.0.gemfile
 bundler_args: --no-deployment
 script: "bundle exec rake test"
 sudo: false
@@ -15,3 +16,12 @@ cache:
   bundler: true
 branches:
   only: master
+matrix:
+  exclude:
+    - rvm: 2.0.0
+      gemfile: gemfiles/rails5.0.gemfile
+    - rvm: 2.1.7
+      gemfile: gemfiles/rails5.0.gemfile
+  allow_failures:
+    - rvm: rbx-2
+      gemfile: gemfiles/rails5.0.gemfile
