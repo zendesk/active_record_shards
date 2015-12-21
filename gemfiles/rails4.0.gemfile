@@ -4,3 +4,4 @@ gemspec :path => "../"
 
 gem "byebug", :platforms => [:mri_20, :mri_21]
 gem "activerecord", "~> 4.0.10"
+gem "mysql2", "~> 0.3.0"
