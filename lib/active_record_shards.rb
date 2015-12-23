@@ -36,7 +36,7 @@ if ActiveRecord::Associations.const_defined?(:Preloader) && ActiveRecord::Associ
   ActiveRecord::Associations::Preloader::HasAndBelongsToMany.send(:prepend, ActiveRecordShards::DefaultSlavePatches::HasAndBelongsToManyPreloaderPatches)
 end
 
-if ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR >= 1
+if ActiveRecord::VERSION::STRING >= '4.1.0'
   ActiveRecord::Associations::Builder::HasAndBelongsToMany.send(:prepend, ActiveRecordShards::DefaultSlavePatches::Rails41HasAndBelongsToManyBuilderExtension)
 end
 

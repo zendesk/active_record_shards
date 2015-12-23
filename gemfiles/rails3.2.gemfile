@@ -1,8 +1,5 @@
-source "https://rubygems.org"
+eval_gemfile 'gemfiles/common.rb'
 
-gemspec :path => "../"
-
-gem "byebug", :platforms => [:mri_20, :mri_21]
-gem "activerecord", "~> 3.2.19"
-gem "mysql2", "~> 0.3.0"
-gem "test-unit-minitest"
+gem 'activerecord', '~> 3.2.19'
+gem 'mysql2', '~> 0.3.0'
+gem 'test-unit-minitest'

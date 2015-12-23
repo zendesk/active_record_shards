@@ -10,7 +10,7 @@ if ActiveRecord::VERSION::MAJOR >= 4
 
         # create shard-specific columns
         ActiveRecord::Migrator.migrations_paths = [File.join(File.dirname(__FILE__), "/migrations")]
-        ActiveRecord::Migrator.migrate(ActiveRecord::Migrator.migrations_path)
+        ActiveRecord::Migrator.migrate(ActiveRecord::Migrator.migrations_paths)
       end
 
       after do

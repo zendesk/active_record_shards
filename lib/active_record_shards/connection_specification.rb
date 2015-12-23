@@ -1,6 +1,6 @@
 class ActiveRecord::Base
   def self.establish_connection(spec = ENV["DATABASE_URL"])
-    if ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR >= 1
+    if ActiveRecord::VERSION::STRING >= '4.1.0'
       spec ||= ActiveRecord::ConnectionHandling::DEFAULT_ENV.call
       spec = spec.to_sym if spec.is_a?(String)
       resolver = ActiveRecordShards::ConnectionSpecification::Resolver.new configurations
