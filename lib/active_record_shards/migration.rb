@@ -101,16 +101,17 @@ module ActiveRecordShards
 
       migrate_without_forced_shard(direction)
     end
+
+    def migration_shard
+      self.class.migration_shard
+    end
   end
 end
 
 ActiveRecord::Migration.class_eval do
   extend ActiveRecordShards::MigrationClassExtension
-
   include ActiveRecordShards::ActualMigrationExtension
-  define_method :migration_shard do
-    self.class.migration_shard
-  end
+
   alias_method :migrate_without_forced_shard, :migrate
   alias_method :migrate, :migrate_with_forced_shard
 end
