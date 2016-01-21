@@ -13,20 +13,21 @@ module ActiveRecordShards
   #   ActiveRecordShards.override_connection_handler_methods(methods_to_override)
   #
   def self.override_connection_handler_methods(method_names)
-    injected_module = Module.new
     method_names.each do |method_name|
-      injected_module.send(:define_method, method_name) do |*args|
-        unless args[0].is_a? ConnectionPoolNameDecorator
-          name = if args[0].is_a? String
-                   args[0]
-                 else
-                   args[0].connection_pool_name
-                 end
-          args[0] = ConnectionPoolNameDecorator.new(name)
+      ActiveRecord::ConnectionAdapters::ConnectionHandler.class_eval do
+        define_method("#{method_name}_with_connection_pool_name") do |*args|
+          unless args[0].is_a? ConnectionPoolNameDecorator
+            name = if args[0].is_a? String
+                     args[0]
+                   else
+                     args[0].connection_pool_name
+                   end
+            args[0] = ConnectionPoolNameDecorator.new(name)
+          end
+          send("#{method_name}_without_connection_pool_name", *args)
         end
-        super(*args)
+        alias_method_chain method_name, :connection_pool_name
       end
     end
-    ActiveRecord::ConnectionAdapters::ConnectionHandler.send(:prepend, injected_module)
   end
 end
