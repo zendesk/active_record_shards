@@ -42,7 +42,7 @@ end
 
 ActiveRecord::Associations::CollectionProxy.send(:include, ActiveRecordShards::AssociationCollectionConnectionSelection)
 
-if ActiveRecord::VERSION::MAJOR >= 4 && RUBY_VERSION >= '2'
+if ActiveRecord::VERSION::MAJOR >= 4
   ActiveRecord::SchemaDumper.send(:prepend, ActiveRecordShards::SchemaDumperExtension)
 end
 
@@ -64,5 +64,6 @@ ActiveRecord::Base.singleton_class.class_eval do
       establish_connection_without_connection_pool_name(spec)
     end
   end
-  alias_method_chain :establish_connection, :connection_pool_name
+  alias_method :establish_connection_without_connection_pool_name, :establish_connection
+  alias_method :establish_connection, :establish_connection_with_connection_pool_name
 end

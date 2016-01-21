@@ -26,7 +26,8 @@ module ActiveRecordShards
           end
           send("#{method_name}_without_connection_pool_name", *args)
         end
-        alias_method_chain method_name, :connection_pool_name
+        alias_method :"#{method_name}_without_connection_pool_name", method_name
+        alias_method method_name, :"#{method_name}_with_connection_pool_name"
       end
     end
   end

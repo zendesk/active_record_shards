@@ -10,7 +10,8 @@ module ActiveRecord
             self.send("#{m}_without_sharding", *args)
           end
         end
-        alias_method_chain m.to_sym, :sharding
+        alias_method :"#{m}_without_sharding", m.to_sym
+        alias_method m.to_sym, :"#{m}_with_sharding"
       end
 
       def bootstrap_migrations_from_nil_shard(migrations_path, this_migration=nil)
@@ -110,7 +111,8 @@ ActiveRecord::Migration.class_eval do
   define_method :migration_shard do
     self.class.migration_shard
   end
-  alias_method_chain :migrate, :forced_shard
+  alias_method :migrate_without_forced_shard, :migrate
+  alias_method :migrate, :migrate_with_forced_shard
 end
 
 ActiveRecord::MigrationProxy.delegate :migration_shard, :to => :migration

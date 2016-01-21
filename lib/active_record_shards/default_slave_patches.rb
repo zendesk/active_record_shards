@@ -18,7 +18,8 @@ module ActiveRecordShards
             end
           end
 
-          alias_method_chain :#{method}#{punctuation}, :default_slave
+          alias_method :#{method}_without_default_slave#{punctuation}, :#{method}#{punctuation}
+          alias_method :#{method}#{punctuation}, :#{method}_with_default_slave#{punctuation}
         #{class_method ? "end" : ""}
       RUBY
     end
@@ -37,7 +38,8 @@ module ActiveRecordShards
         def reload_with_slave_off(*args, &block)
           self.class.on_master { reload_without_slave_off(*args, &block) }
         end
-        alias_method_chain :reload, :slave_off
+        alias_method :reload_without_slave_off, :reload
+        alias_method :reload, :reload_with_slave_off
 
         class << self
           def columns_with_default_slave(*args, &block)
@@ -49,7 +51,8 @@ module ActiveRecordShards
 
             on_cx_switch_block(read_columns_from, :construct_ro_scope => false) { columns_without_default_slave(*args, &block) }
           end
-          alias_method_chain :columns, :default_slave
+          alias_method :columns_without_default_slave, :columns
+          alias_method :columns, :columns_with_default_slave
         end
 
         class << self
@@ -66,7 +69,8 @@ module ActiveRecordShards
             end
           end
 
-          alias_method_chain :transaction, :slave_off
+          alias_method :transaction_without_slave_off, :transaction
+          alias_method :transaction, :transaction_with_slave_off
         end
       end
       if ActiveRecord::Associations.const_defined?(:HasAndBelongsToManyAssociation)
@@ -115,7 +119,8 @@ module ActiveRecordShards
     module Rails41HasAndBelongsToManyBuilderExtension
       def self.included(base)
         base.class_eval do
-          alias_method_chain :through_model, :inherit_default_slave_from_lhs
+          alias_method :through_model_without_inherit_default_slave_from_lhs, :through_model
+          alias_method :through_model, :through_model_with_inherit_default_slave_from_lhs
         end
       end
 
