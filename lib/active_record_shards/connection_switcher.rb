@@ -4,12 +4,12 @@ module ActiveRecordShards
   module ConnectionSwitcher
     SHARD_NAMES_CONFIG_KEY = 'shard_names'.freeze
 
-    def self.extended(klass)
-      klass.singleton_class.send(:alias_method, :columns_without_default_shard, :columns)
-      klass.singleton_class.send(:alias_method, :columns, :columns_with_default_shard)
+    def self.extended(base)
+      base.singleton_class.send(:alias_method, :columns_without_default_shard, :columns)
+      base.singleton_class.send(:alias_method, :columns, :columns_with_default_shard)
 
-      klass.singleton_class.send(:alias_method, :table_exists_without_default_shard?, :table_exists?)
-      klass.singleton_class.send(:alias_method, :table_exists?, :table_exists_with_default_shard?)
+      base.singleton_class.send(:alias_method, :table_exists_without_default_shard?, :table_exists?)
+      base.singleton_class.send(:alias_method, :table_exists?, :table_exists_with_default_shard?)
     end
 
     def default_shard=(new_default_shard)

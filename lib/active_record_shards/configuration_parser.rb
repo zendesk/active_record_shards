@@ -39,12 +39,12 @@ module ActiveRecordShards
       self.configurations_without_shard_explosion = explode(conf)
     end
 
-    def ConfigurationParser.extended(klass)
-      klass.singleton_class.send(:alias_method, :configurations_without_shard_explosion=, :configurations=)
-      klass.singleton_class.send(:alias_method, :configurations=, :configurations_with_shard_explosion=)
-      klass.singleton_class.send(:public, :configurations=)
+    def self.extended(base)
+      base.singleton_class.send(:alias_method, :configurations_without_shard_explosion=, :configurations=)
+      base.singleton_class.send(:alias_method, :configurations=, :configurations_with_shard_explosion=)
+      base.singleton_class.send(:public, :configurations=)
 
-      klass.configurations = klass.configurations if klass.configurations.present?
+      base.configurations = base.configurations if base.configurations.present?
     end
   end
 end
