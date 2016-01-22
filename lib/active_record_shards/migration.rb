@@ -1,23 +1,19 @@
-module ActiveRecordShards
-  module Migrator
-    [:up, :down, :run].each do |m|
-      define_method(m) do |*args|
-        ActiveRecord::Base.on_shard(nil) do
-          super(*args)
-        end
-        ActiveRecord::Base.on_all_shards do
-          super(*args)
-        end
-      end
-    end
-  end
-end
-
-ActiveRecord::Migrator.singleton_class.send(:prepend, ActiveRecordShards::Migrator)
-
 module ActiveRecord
   class Migrator
     class << self
+      [:up, :down, :run].each do |m|
+        define_method("#{m}_with_sharding") do |*args|
+          ActiveRecord::Base.on_shard(nil) do
+            self.send("#{m}_without_sharding", *args)
+          end
+          ActiveRecord::Base.on_all_shards do
+            self.send("#{m}_without_sharding", *args)
+          end
+        end
+        alias_method :"#{m}_without_sharding", m.to_sym
+        alias_method m.to_sym, :"#{m}_with_sharding"
+      end
+
       def bootstrap_migrations_from_nil_shard(migrations_path, this_migration=nil)
         migrations = nil
         ActiveRecord::Base.on_shard(nil) do
@@ -88,7 +84,7 @@ module ActiveRecordShards
   # migration, where it should have been.  But this makes our monkey patch incompatible.
   # So we're forced to *either* include or extend this.
   module ActualMigrationExtension
-    def migrate(direction)
+    def migrate_with_forced_shard(direction)
       if migration_shard.blank?
         raise RuntimeError, "#{self.name}: Can't run migrations without a shard spec: this may be :all, :none,
                  or a specific shard (for data-fixups).  please call shard(arg) in your migration."
@@ -103,7 +99,7 @@ module ActiveRecordShards
         return if migration_shard != :all && migration_shard.to_s != shard.to_s
       end
 
-      super
+      migrate_without_forced_shard(direction)
     end
   end
 end
@@ -111,10 +107,12 @@ end
 ActiveRecord::Migration.class_eval do
   extend ActiveRecordShards::MigrationClassExtension
 
-  prepend ActiveRecordShards::ActualMigrationExtension
+  include ActiveRecordShards::ActualMigrationExtension
   define_method :migration_shard do
     self.class.migration_shard
   end
+  alias_method :migrate_without_forced_shard, :migrate
+  alias_method :migrate, :migrate_with_forced_shard
 end
 
 ActiveRecord::MigrationProxy.delegate :migration_shard, :to => :migration

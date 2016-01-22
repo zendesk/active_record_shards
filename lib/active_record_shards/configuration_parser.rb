@@ -35,14 +35,15 @@ module ActiveRecordShards
       end
     end
 
-    module PrependMethods
-      def configurations=(conf)
-        super(explode(conf))
-      end
+    def configurations_with_shard_explosion=(conf)
+      self.configurations_without_shard_explosion = explode(conf)
     end
 
     def ConfigurationParser.extended(klass)
-      klass.singleton_class.send(:prepend, PrependMethods)
+      klass.singleton_class.send(:alias_method, :configurations_without_shard_explosion=, :configurations=)
+      klass.singleton_class.send(:alias_method, :configurations=, :configurations_with_shard_explosion=)
+      klass.singleton_class.send(:public, :configurations=)
+
       klass.configurations = klass.configurations if klass.configurations.present?
     end
   end

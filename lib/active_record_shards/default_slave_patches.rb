@@ -9,59 +9,70 @@ module ActiveRecordShards
       end
 
       return unless base_methods.include?(method)
-      injected_module = Module.new
-      injected_module.send(:define_method, method) do |*args, &block|
-        on_slave_unless_tx do
-          super(*args, &block)
-        end
-      end
-      (class_method ? base.singleton_class : base).send(:prepend, injected_module)
+      _, method, punctuation = method.to_s.match(/^(.*?)([\?\!]?)$/).to_a
+      base.class_eval <<-RUBY, __FILE__, __LINE__ + 1
+        #{class_method ? "class << self" : ""}
+          def #{method}_with_default_slave#{punctuation}(*args, &block)
+            on_slave_unless_tx do
+              #{method}_without_default_slave#{punctuation}(*args, &block)
+            end
+          end
+
+          alias_method :#{method}_without_default_slave#{punctuation}, :#{method}#{punctuation}
+          alias_method :#{method}#{punctuation}, :#{method}_with_default_slave#{punctuation}
+        #{class_method ? "end" : ""}
+      RUBY
     end
 
     CLASS_SLAVE_METHODS = [ :find_by_sql, :count_by_sql,  :calculate, :find_one, :find_some, :find_every, :quote_value, :sanitize_sql_hash_for_conditions, :exists?, :table_exists? ]
 
-    module PrependClassMethods
-      def columns
-        if on_slave_by_default? && !Thread.current[:_active_record_shards_slave_off]
-          read_columns_from = :slave
-        else
-          read_columns_form = :master
-        end
-
-        on_cx_switch_block(read_columns_from, construct_ro_scope: false) { super }
-      end
-
-      def transaction(*args, &block)
-        if on_slave_by_default?
-          old_val = Thread.current[:_active_record_shards_slave_off]
-          Thread.current[:_active_record_shards_slave_off] = true
-        end
-
-        super(*args, &block)
-      ensure
-        if on_slave_by_default?
-          Thread.current[:_active_record_shards_slave_off] = old_val
-        end
-      end
-    end
-
-    module PrependMethods
-      # fix ActiveRecord to do the right thing, and use our aliased quote_value
-      def quote_value(*args, &block)
-        self.class.quote_value(*args, &block)
-      end
-
-      def reload(*args, &block)
-        self.class.on_master { super(*args, &block) }
-      end
-    end
-
     def self.extended(base)
-      base.send(:prepend, PrependMethods)
-      base.singleton_class.send(:prepend, PrependClassMethods)
-
       CLASS_SLAVE_METHODS.each { |m| ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(true, base, m) }
 
+      base.class_eval do
+        # fix ActiveRecord to do the right thing, and use our aliased quote_value
+        def quote_value(*args, &block)
+          self.class.quote_value(*args, &block)
+        end
+
+        def reload_with_slave_off(*args, &block)
+          self.class.on_master { reload_without_slave_off(*args, &block) }
+        end
+        alias_method :reload_without_slave_off, :reload
+        alias_method :reload, :reload_with_slave_off
+
+        class << self
+          def columns_with_default_slave(*args, &block)
+            if on_slave_by_default? && !Thread.current[:_active_record_shards_slave_off]
+              read_columns_from = :slave
+            else
+              read_columns_form = :master
+            end
+
+            on_cx_switch_block(read_columns_from, :construct_ro_scope => false) { columns_without_default_slave(*args, &block) }
+          end
+          alias_method :columns_without_default_slave, :columns
+          alias_method :columns, :columns_with_default_slave
+        end
+
+        class << self
+          def transaction_with_slave_off(*args, &block)
+            if on_slave_by_default?
+              old_val = Thread.current[:_active_record_shards_slave_off]
+              Thread.current[:_active_record_shards_slave_off] = true
+            end
+
+            transaction_without_slave_off(*args, &block)
+          ensure
+            if on_slave_by_default?
+              Thread.current[:_active_record_shards_slave_off] = old_val
+            end
+          end
+
+          alias_method :transaction_without_slave_off, :transaction
+          alias_method :transaction, :transaction_with_slave_off
+        end
+      end
       if ActiveRecord::Associations.const_defined?(:HasAndBelongsToManyAssociation)
         ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(false, ActiveRecord::Associations::HasAndBelongsToManyAssociation, :construct_sql)
         ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(false, ActiveRecord::Associations::HasAndBelongsToManyAssociation, :construct_find_options!)
@@ -89,7 +100,7 @@ module ActiveRecordShards
     end
 
     module HasAndBelongsToManyPreloaderPatches
-      def self.prepended(base)
+      def self.included(base)
         ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(false, base, :records_for) rescue nil
       end
 
@@ -97,8 +108,8 @@ module ActiveRecordShards
         klass.on_slave_unless_tx { yield }
       end
 
-      def exists?(*args, &block)
-        on_slave_unless_tx { super(*args, &block) }
+      def exists_with_default_slave?(*args, &block)
+        on_slave_unless_tx { exists_without_default_slave?(*args, &block) }
       end
     end
 
@@ -106,8 +117,15 @@ module ActiveRecordShards
     # this simplifies the hell out of our existence, because all we have to do is inerit on-slave-by-default
     # down from the parent now.
     module Rails41HasAndBelongsToManyBuilderExtension
-      def through_model
-        model = super
+      def self.included(base)
+        base.class_eval do
+          alias_method :through_model_without_inherit_default_slave_from_lhs, :through_model
+          alias_method :through_model, :through_model_with_inherit_default_slave_from_lhs
+        end
+      end
+
+      def through_model_with_inherit_default_slave_from_lhs
+        model = through_model_without_inherit_default_slave_from_lhs
         def model.on_slave_by_default?
           left_reflection.klass.on_slave_by_default?
         end
