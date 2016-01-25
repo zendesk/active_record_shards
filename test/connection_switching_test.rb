@@ -1,14 +1,14 @@
 require File.expand_path('../helper', __FILE__)
 
 describe "connection switching" do
-  schema_initialized = false
-
   before do
-    if !schema_initialized
-      init_schema
-      schema_initialized = true
-    end
-    clear_databases
+    Phenix.rise!(with_schema: true)
+    ActiveRecord::Base.establish_connection(RAILS_ENV)
+    require 'models'
+  end
+
+  after do
+    Phenix.burn!
   end
 
   describe "shard switching" do

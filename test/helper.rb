@@ -1,6 +1,7 @@
 require 'bundler/setup'
 require 'minitest/autorun'
 require 'minitest/rg'
+require 'rake'
 
 require 'mocha/mini_test'
 Bundler.require
@@ -15,28 +16,13 @@ $LOAD_PATH.unshift(File.dirname(__FILE__))
 require 'active_support'
 require 'active_record_shards'
 require 'logger'
+require 'phenix'
 
 RAILS_ENV = "test"
 
 ActiveRecord::Base.logger = Logger.new(File.dirname(__FILE__) + "/test.log")
-ActiveRecord::Base.configurations = YAML::load(IO.read(File.dirname(__FILE__) + '/database.yml'))
 ActiveSupport.test_order = :sorted if ActiveSupport.respond_to?(:test_order=)
 ActiveSupport::Deprecation.behavior = :raise
-
-def recreate_databases
-  ActiveRecord::Base.configurations.each do |name, conf|
-    `echo "drop DATABASE if exists #{conf['database']}" | mysql --user=#{conf['username']}`
-    `echo "create DATABASE #{conf['database']}" | mysql --user=#{conf['username']}`
-  end
-end
-
-def init_schema
-  recreate_databases
-  ActiveRecord::Base.configurations.each do |name, conf|
-    ActiveRecord::Base.establish_connection(name.to_sym)
-    load(File.dirname(__FILE__) + "/schema.rb")
-  end
-end
 
 def connection_exist_method
   ActiveRecord::VERSION::MAJOR == 5 ? :data_source_exists? : :table_exists?
@@ -44,26 +30,17 @@ end
 
 BaseMigration = (ActiveRecord::VERSION::MAJOR >= 5 ? ActiveRecord::Migration[4.2] : ActiveRecord::Migration)
 
-init_schema
-
-require 'models'
+Phenix.configure
 
 require 'active_support/test_case'
 class Minitest::Spec
-  def clear_databases
-    ActiveRecord::Base.configurations = YAML::load(IO.read(File.dirname(__FILE__) + '/database.yml'))
-
-    ActiveRecord::Base.configurations.each do |name, conf|
-      ActiveRecord::Base.establish_connection(name.to_sym)
-      ActiveRecord::Base.connection.execute("DELETE FROM accounts") rescue nil
-      ActiveRecord::Base.connection.execute("DELETE FROM tickets") rescue nil
-    end
-    ActiveRecord::Base.establish_connection(RAILS_ENV.to_sym)
-  end
-
   def show_databases(config)
-    client = Mysql2::Client.new(:host => config['test']['host'],
-      :username => config['test']['username'])
+    client = Mysql2::Client.new(
+      :host => config['test']['host'],
+      :port => config['test']['port'],
+      :username => config['test']['username'],
+      :password => config['test']['password']
+    )
     databases = client.query("SHOW DATABASES")
     databases.map{ |d| d['Database'] }
   end

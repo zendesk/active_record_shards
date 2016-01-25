@@ -12,7 +12,11 @@ end
 
 describe ActiveRecord::Migrator do
   before do
-    init_schema
+    Phenix.rise!(with_schema: true)
+  end
+
+  after do
+    Phenix.burn!
   end
 
   it "migrates" do

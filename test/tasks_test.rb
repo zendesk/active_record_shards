@@ -6,34 +6,26 @@ Rake::Application.new.rake_require("active_record/railties/databases")
 require 'active_record_shards/tasks'
 
 describe "Database rake tasks" do
-  let(:config) { YAML.load(File.read('./test/database_tasks.yml')) }
+  let(:config) { Phenix.load_database_config('test/database_tasks.yml') }
   let(:master_name) { config['test']['database'] }
   let(:slave_name) { config['test']['slave']['database'] }
   let(:shard_names) { config['test']['shards'].values.map { |v| v['database'] } }
   let(:database_names) { shard_names + [master_name, slave_name] }
 
   before do
-    @old_config = ActiveRecord::Base.configurations
-
     if ActiveRecord::VERSION::MAJOR >= 4
       ActiveRecord::Tasks::DatabaseTasks.database_configuration = config
-      ActiveRecord::Tasks::DatabaseTasks.env = 'test'
+      ActiveRecord::Tasks::DatabaseTasks.env = RAILS_ENV
       ActiveRecord::Tasks::DatabaseTasks.migrations_paths = '/'
-
     else
       # It uses Rails.application.config to config ActiveRecord
       Rake::Task['db:load_config'].clear
+      ActiveRecord::Base.configurations = config
     end
-
-    ActiveRecord::Base.configurations = config
   end
 
   after do
-    database_names.each do |name|
-      `echo "drop DATABASE if exists #{name}" | mysql --user=#{config['test']['username']}`
-    end
-
-    ActiveRecord::Base.configurations = @old_config
+    Phenix.burn!
   end
 
   describe "db:create" do
