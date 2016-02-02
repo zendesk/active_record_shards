@@ -33,9 +33,10 @@ module ActiveRecordShards
       the_shard = shard(klass)
 
       @shard_names ||= {}
-      @shard_names[the_shard] ||= {}
-      @shard_names[the_shard][try_slave] ||= {}
-      @shard_names[the_shard][try_slave][@on_slave] ||= begin
+      @shard_names[ActiveRecordShards.rails_env] ||= {}
+      @shard_names[ActiveRecordShards.rails_env][the_shard] ||= {}
+      @shard_names[ActiveRecordShards.rails_env][the_shard][try_slave] ||= {}
+      @shard_names[ActiveRecordShards.rails_env][the_shard][try_slave][@on_slave] ||= begin
         s = ActiveRecordShards.rails_env.dup
         s << "_shard_#{the_shard}" if the_shard
         s << "_slave"              if @on_slave && try_slave
