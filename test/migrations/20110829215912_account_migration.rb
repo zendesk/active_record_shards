@@ -1,4 +1,4 @@
-class AccountMigration < ActiveRecord::Migration
+class AccountMigration < BaseMigration
   shard :none
 
   def self.up

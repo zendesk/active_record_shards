@@ -21,6 +21,7 @@ RAILS_ENV = "test"
 ActiveRecord::Base.logger = Logger.new(File.dirname(__FILE__) + "/test.log")
 ActiveRecord::Base.configurations = YAML::load(IO.read(File.dirname(__FILE__) + '/database.yml'))
 ActiveSupport.test_order = :sorted if ActiveSupport.respond_to?(:test_order=)
+ActiveSupport::Deprecation.behavior = :raise
 
 def recreate_databases
   ActiveRecord::Base.configurations.each do |name, conf|
@@ -36,6 +37,12 @@ def init_schema
     load(File.dirname(__FILE__) + "/schema.rb")
   end
 end
+
+def connection_exist_method
+  ActiveRecord::VERSION::MAJOR == 5 ? :data_source_exists? : :table_exists?
+end
+
+BaseMigration = (ActiveRecord::VERSION::MAJOR >= 5 ? ActiveRecord::Migration[4.2] : ActiveRecord::Migration)
 
 init_schema
 

@@ -1,7 +1,1 @@
-source "https://rubygems.org"
-
-gemspec
-
-platform :mri do
-  gem "byebug"
-end
+eval_gemfile 'gemfiles/rails5.0.gemfile'

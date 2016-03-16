@@ -237,11 +237,12 @@ describe "connection switching" do
         class UnshardedModel < ActiveRecord::Base
           not_sharded
         end
+
         UnshardedModel.connection.execute("create table unsharded_models (id int)")
-        assert(UnshardedModel.table_exists?)
+        assert UnshardedModel.table_exists?
 
         ActiveRecord::Base.on_all_shards do
-          assert !ActiveRecord::Base.connection.table_exists?("unsharded_models")
+          refute ActiveRecord::Base.connection.public_send(connection_exist_method, "unsharded_models")
         end
       end
     end

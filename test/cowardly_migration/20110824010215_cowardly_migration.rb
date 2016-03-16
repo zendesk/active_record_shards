@@ -1,4 +1,4 @@
-class CowardlyMigration < ActiveRecord::Migration
+class CowardlyMigration < BaseMigration
   def self.up
     # shouldn't get here.  must fail.
   end

@@ -70,7 +70,7 @@ module ActiveRecordShards
       else
         MasterSlaveProxy.new(self, which)
       end
-   end
+    end
 
     # Executes queries using the slave database. Fails over to master if no slave is found.
     # if you want to execute a block of code on the slave you can go:
@@ -238,7 +238,6 @@ module ActiveRecordShards
 
     def autoload_adapter(adapter_name)
       begin
-        require 'rubygems'
         gem "activerecord-#{adapter_name}-adapter"
         require "active_record/connection_adapters/#{adapter_name}_adapter"
       rescue LoadError
@@ -249,7 +248,6 @@ module ActiveRecordShards
         end
       end
 
-      adapter_method = "#{adapter_name}_connection"
       if !ActiveRecord::Base.respond_to?(adapter_name + "_connection")
         raise AdapterNotFound, "database configuration specifies nonexistent #{adapter_name} adapter"
       end
