@@ -1,4 +1,4 @@
-class ShardMigration < ActiveRecord::Migration
+class ShardMigration < BaseMigration
   shard :all
 
   def self.up

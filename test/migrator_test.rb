@@ -1,6 +1,6 @@
 require File.expand_path('../helper', __FILE__)
 
-class CowardlyMigration < ActiveRecord::Migration
+class CowardlyMigration < BaseMigration
   def self.up
     "not gonna happen"
   end
@@ -19,8 +19,8 @@ describe ActiveRecord::Migrator do
     migration_path = File.join(File.dirname(__FILE__), "/migrations")
     ActiveRecord::Migrator.migrate(migration_path)
     ActiveRecord::Base.on_all_shards do
-      assert ActiveRecord::Base.connection.table_exists?(:schema_migrations), "Schema Migrations doesn't exist"
-      assert ActiveRecord::Base.connection.table_exists?(:accounts)
+      assert ActiveRecord::Base.connection.public_send(connection_exist_method, :schema_migrations), "Schema Migrations doesn't exist"
+      assert ActiveRecord::Base.connection.public_send(connection_exist_method, :accounts)
       assert ActiveRecord::Base.connection.select_value("select version from schema_migrations where version = '20110824010216'")
       assert ActiveRecord::Base.connection.select_value("select version from schema_migrations where version = '20110829215912'")
     end

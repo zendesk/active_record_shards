@@ -43,10 +43,10 @@ module ActiveRecordShards
 
         class << self
           def columns_with_default_slave(*args, &block)
-            if on_slave_by_default? && !Thread.current[:_active_record_shards_slave_off]
-              read_columns_from = :slave
+            read_columns_from = if on_slave_by_default? && !Thread.current[:_active_record_shards_slave_off]
+              :slave
             else
-              read_columns_form = :master
+              :master
             end
 
             on_cx_switch_block(read_columns_from, :construct_ro_scope => false) { columns_without_default_slave(*args, &block) }
