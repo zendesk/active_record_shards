@@ -89,9 +89,9 @@ module ActiveRecordShards
 
     module ActiveRelationPatches
       def self.included(base)
-        ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(false, base, :calculate)
-        ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(false, base, :exists?)
-        ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(false, base, :pluck)
+        [:calculate, :exists?, :pluck, :find_with_associations].each do |m|
+          ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(false, base, m)
+        end
       end
 
       def on_slave_unless_tx

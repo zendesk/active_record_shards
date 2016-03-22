@@ -535,6 +535,17 @@ describe "connection switching" do
           assert_equal ["slave_name", "slave_name2"], Account.pluck(:name)
         end
 
+        it "supports implicit joins" do
+          accounts = Account.includes(:tickets)
+          accounts = accounts.references(:tickets) if ActiveRecord::VERSION::MAJOR >= 4
+          assert_equal ["slave_name", "slave_name2"], accounts.order('tickets.id').map(&:name).sort
+        end
+
+        it "supports joins" do
+          accounts = Account.joins('LEFT OUTER JOIN tickets ON tickets.account_id = accounts.id').map(&:name).sort
+          assert_equal ["slave_name", "slave_name2"], accounts
+        end
+
         after do
           Account.on_slave_by_default = false
           Person.on_slave_by_default = false
