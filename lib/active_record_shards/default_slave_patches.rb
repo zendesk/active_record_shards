@@ -1,11 +1,10 @@
 module ActiveRecordShards
   module DefaultSlavePatches
     def self.wrap_method_in_on_slave(class_method, base, method)
-
-      if class_method
-        base_methods = (base.methods | base.private_methods).map(&:to_sym)
+      base_methods = if class_method
+        base.methods + base.private_methods
       else
-        base_methods = (base.instance_methods | base.private_instance_methods).map(&:to_sym)
+        base.instance_methods + base.private_instance_methods
       end
 
       return unless base_methods.include?(method)
