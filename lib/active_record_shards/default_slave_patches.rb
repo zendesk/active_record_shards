@@ -23,7 +23,7 @@ module ActiveRecordShards
       RUBY
     end
 
-    CLASS_SLAVE_METHODS = [ :find_by_sql, :count_by_sql,  :calculate, :find_one, :find_some, :find_every, :quote_value, :sanitize_sql_hash_for_conditions, :exists?, :table_exists? ]
+    CLASS_SLAVE_METHODS = [ :find_by_sql, :count_by_sql,  :calculate, :find_one, :find_some, :find_every, :exists?, :table_exists? ]
 
     def self.extended(base)
       CLASS_SLAVE_METHODS.each { |m| ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(true, base, m) }
