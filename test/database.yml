@@ -1,73 +1,47 @@
-test:
-  adapter: mysql2
+<% mysql = URI(ENV['MYSQL_URL'] || 'mysql://root@127.0.0.1:3306') %>
+
+mysql: &MYSQL
   encoding: utf8
+  adapter: mysql2
+  username: <%= mysql.user %>
+  host: <%= mysql.host %>
+  port: <%= mysql.port %>
+  password: <%= mysql.password %>
+
+test:
+  <<: *MYSQL
   database: ars_test
-  username: root
-  password:
-  host: 127.0.0.1
   shard_names: ['0', '1']
 
 test_slave:
-  adapter: mysql2
-  encoding: utf8
+  <<: *MYSQL
   database: ars_test_slave
-  username: root
-  password:
-  host: 127.0.0.1
 
 test_shard_0:
-  adapter: mysql2
-  encoding: utf8
+  <<: *MYSQL
   database: ars_test_shard0
-  username: root
-  password:
-  host: 127.0.0.1
 
 test_shard_0_slave:
-  adapter: mysql2
-  encoding: utf8
+  <<: *MYSQL
   database: ars_test_shard0_slave
-  username: root
-  password:
-  host: 127.0.0.1
 
 test_shard_1:
-  adapter: mysql2
-  encoding: utf8
+  <<: *MYSQL
   database: ars_test_shard1
-  username: root
-  password:
-  host: 127.0.0.1
 
 test_shard_1_slave:
-  adapter: mysql2
-  encoding: utf8
+  <<: *MYSQL
   database: ars_test_shard1_slave
-  username: root
-  password:
-  host: 127.0.0.1
 
 test2:
-  adapter: mysql2
-  encoding: utf8
+  <<: *MYSQL
   database: ars_test2
-  username: root
-  password:
-  host: 127.0.0.1
 
 test2_slave:
-  adapter: mysql2
-  encoding: utf8
+  <<: *MYSQL
   database: ars_test2_slave
-  username: root
-  password:
-  host: 127.0.0.1
 
 alternative:
-  adapter: mysql2
-  encoding: utf8
+  <<: *MYSQL
   database: ars_test_alternative
-  username: root
-  password:
-  host: 127.0.0.1
   shard_names: ['0', '1']

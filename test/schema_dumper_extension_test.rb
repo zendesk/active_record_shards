@@ -6,7 +6,7 @@ if ActiveRecord::VERSION::MAJOR >= 4
 
       let(:schema_file) { Tempfile.new('active_record_shards_schema.rb') }
       before do
-        init_schema
+        Phenix.rise!(with_schema: true)
 
         # create shard-specific columns
         ActiveRecord::Migrator.migrations_paths = [File.join(File.dirname(__FILE__), "/migrations")]
@@ -15,14 +15,14 @@ if ActiveRecord::VERSION::MAJOR >= 4
 
       after do
         schema_file.unlink
-        init_schema
+        Phenix.burn!
       end
 
       it "includes the sharded tables" do
         ActiveRecord::SchemaDumper.dump(ActiveRecord::Base.connection, schema_file)
         schema_file.close
 
-        recreate_databases
+        Phenix.rise! # Recreate the database without loading the schema
         load(schema_file)
 
         ActiveRecord::Base.on_all_shards do

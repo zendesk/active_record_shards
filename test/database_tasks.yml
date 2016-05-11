@@ -1,10 +1,12 @@
+<% mysql = URI(ENV['MYSQL_URL'] || 'mysql://root@127.0.0.1:3306') %>
 test:
   adapter: mysql2
   encoding: utf8
   database: ars_tasks_test
-  username: root
-  password:
-  host: 127.0.0.1
+  username: <%= mysql.user %>
+  password: <%= mysql.password %>
+  host: <%= mysql.host %>
+  port: <%= mysql.port %>
   slave:
     database: ars_tasks_test_slave
   shards:
