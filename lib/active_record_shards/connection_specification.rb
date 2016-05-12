@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 class ActiveRecord::Base
   def self.establish_connection(spec = ENV["DATABASE_URL"])
     if ActiveRecord::VERSION::STRING >= '4.1.0'

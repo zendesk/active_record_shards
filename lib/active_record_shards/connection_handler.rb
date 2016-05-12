@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 ActiveRecord::ConnectionAdapters::ConnectionHandler.class_eval do
   if ActiveRecord::VERSION::MAJOR >= 4
     def retrieve_connection_pool(klass)

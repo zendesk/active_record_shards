@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'active_record'
 require 'active_record/base'
 require 'active_record_shards/configuration_parser'
