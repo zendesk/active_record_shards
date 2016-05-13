@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require File.expand_path('../helper', __FILE__)
 
 # ActiveRecordShards overrides some of the ActiveRecord tasks, so
