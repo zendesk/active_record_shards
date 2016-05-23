@@ -4,7 +4,7 @@ require File.expand_path('../helper', __FILE__)
 describe "connection switching" do
   before do
     Phenix.rise!(with_schema: true)
-    ActiveRecord::Base.establish_connection(RAILS_ENV)
+    ActiveRecord::Base.establish_connection(RAILS_ENV.to_sym)
     require 'models'
   end
 
@@ -346,7 +346,9 @@ describe "connection switching" do
         Account.create!
 
         assert_equal(1, Account.count)
-        assert_equal(0, ActiveRecord::Base.on_slave { Account.count })
+        assert_equal(0, ActiveRecord::Base.on_slave {
+          Account.count
+        })
       end
 
       it "support global on_slave blocks" do

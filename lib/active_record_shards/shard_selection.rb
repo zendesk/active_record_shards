@@ -33,6 +33,10 @@ module ActiveRecordShards
     def shard_name(klass = nil, try_slave = true)
       the_shard = shard(klass)
 
+      if !the_shard && (!@on_slave && try_slave)
+        return "primary"
+      end
+
       @shard_names ||= {}
       @shard_names[ActiveRecordShards.rails_env] ||= {}
       @shard_names[ActiveRecordShards.rails_env][the_shard] ||= {}
