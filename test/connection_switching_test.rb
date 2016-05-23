@@ -312,13 +312,19 @@ describe "connection switching" do
   describe "slave driving" do
     describe "without slave configuration" do
       before do
-        ActiveRecord::Base.configurations.delete('test_slave')
+        @saved_config = ActiveRecord::Base.configurations.delete('test_slave')
+        Thread.current[:shard_selection] = nil # drop caches
+
         if ActiveRecord::VERSION::MAJOR >= 4
           ActiveRecord::Base.connection_handler.connection_pool_list.clear
         else
           ActiveRecord::Base.connection_handler.connection_pools.clear
         end
         ActiveRecord::Base.establish_connection(:test)
+      end
+
+      after do
+        ActiveRecord::Base.configurations['test_slave'] = @saved_config
       end
 
       it "default to the master database" do
@@ -455,6 +461,7 @@ describe "connection switching" do
         before do
           Account.on_slave_by_default = true
           Person.on_slave_by_default = true
+
           Account.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'master_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
           Account.on_slave.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'slave_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
           Account.on_slave.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1001, 'slave_name2', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
@@ -583,34 +590,6 @@ describe "connection switching" do
           puts "Failed in #{__LINE__}##{retried}"
           retry if retried < 3
         end
-      end
-    end
-  end
-
-  describe "alternative connections" do
-    it "not interfere with other connections" do
-      assert_using_database('ars_test', Account)
-      assert_using_database('ars_test', Ticket)
-      assert_using_database('ars_test_alternative', Email)
-
-      ActiveRecord::Base.on_shard(0) do
-        assert_using_database('ars_test', Account)
-        assert_using_database('ars_test_shard0', Ticket)
-        assert_using_database('ars_test_alternative', Email)
-      end
-
-      assert_using_database('ars_test', Account)
-      assert_using_database('ars_test', Ticket)
-      assert_using_database('ars_test_alternative', Email)
-    end
-  end
-
-  it "raises an exception if a connection is not found" do
-    ActiveRecord::Base.on_shard(0) do
-      ActiveRecord::Base.connection_handler.remove_connection(Ticket)
-      assert_raises(ActiveRecord::ConnectionNotEstablished) do
-        ActiveRecord::Base.connection_handler.retrieve_connection_pool(Ticket)
-        assert_using_database('ars_test_shard0', Ticket)
       end
     end
   end

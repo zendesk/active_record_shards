@@ -138,10 +138,7 @@ module ActiveRecordShards
     end
 
     def connection_specification_name
-      name = current_shard_selection.shard_name
-      if !configurations[name] && current_shard_selection.on_slave?
-        name = current_shard_selection.shard_name(self, false) # fallback to master if no slave configured
-      end
+      name = current_shard_selection.resolve_connection_name(sharded: is_sharded?, configurations: self.configurations)
 
       raise "No configuration found for #{name}" unless configurations[name] || name == "primary"
       name

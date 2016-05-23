@@ -8,13 +8,11 @@ module ActiveRecordShards
       @on_slave = false
     end
 
-    def shard(klass = nil)
-      if (@shard || self.class.default_shard) && (klass.nil? || klass.is_sharded?)
-        if @shard == NO_SHARD
-          nil
-        else
-          @shard || self.class.default_shard
-        end
+    def shard
+      if @shard.nil? || @shard == NO_SHARD
+        nil
+      else
+        @shard || self.class.default_shard
       end
     end
 
@@ -30,21 +28,24 @@ module ActiveRecordShards
       @on_slave = (new_slave == true)
     end
 
-    def shard_name(klass = nil, try_slave = true)
-      the_shard = shard(klass)
+    PRIMARY = "primary".freeze
+    def resolve_connection_name(sharded:, configurations:)
+      resolved_shard = sharded ? shard : nil
 
-      if !the_shard && (!@on_slave && try_slave)
-        return "primary"
+      if !resolved_shard && !@on_slave
+        return PRIMARY
       end
 
       @shard_names ||= {}
       @shard_names[ActiveRecordShards.rails_env] ||= {}
-      @shard_names[ActiveRecordShards.rails_env][the_shard] ||= {}
-      @shard_names[ActiveRecordShards.rails_env][the_shard][try_slave] ||= {}
-      @shard_names[ActiveRecordShards.rails_env][the_shard][try_slave][@on_slave] ||= begin
+      @shard_names[ActiveRecordShards.rails_env][resolved_shard] ||= {}
+      @shard_names[ActiveRecordShards.rails_env][resolved_shard][@on_slave] ||= begin
         s = ActiveRecordShards.rails_env.dup
-        s << "_shard_#{the_shard}" if the_shard
-        s << "_slave"              if @on_slave && try_slave
+        s << "_shard_#{resolved_shard}" if resolved_shard
+
+        if @on_slave && configurations["#{s}_slave"] # fall back to master connection
+          s << "_slave"
+        end
         s
       end
     end
