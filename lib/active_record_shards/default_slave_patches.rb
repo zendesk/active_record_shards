@@ -47,20 +47,25 @@ module ActiveRecordShards
       end
     end
 
+    module InstanceMethods
+      # fix ActiveRecord to do the right thing, and use our aliased quote_value
+      def quote_value(*args, &block)
+        self.class.quote_value(*args, &block)
+      end
+
+      def reload_with_slave_off(*args, &block)
+        self.class.on_master { reload_without_slave_off(*args, &block) }
+      end
+    end
+
     CLASS_SLAVE_METHODS = [ :find_by_sql, :count_by_sql,  :calculate, :find_one, :find_some, :find_every, :exists?, :table_exists? ]
 
     def self.extended(base)
       CLASS_SLAVE_METHODS.each { |m| ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(true, base, m) }
 
       base.class_eval do
-        # fix ActiveRecord to do the right thing, and use our aliased quote_value
-        def quote_value(*args, &block)
-          self.class.quote_value(*args, &block)
-        end
+        include InstanceMethods
 
-        def reload_with_slave_off(*args, &block)
-          self.class.on_master { reload_without_slave_off(*args, &block) }
-        end
         alias_method :reload_without_slave_off, :reload
         alias_method :reload, :reload_with_slave_off
 
