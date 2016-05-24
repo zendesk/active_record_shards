@@ -20,7 +20,6 @@ end
 
 class Email < ActiveRecord::Base
   not_sharded
-  establish_connection_override :alternative
 end
 
 class AccountInherited < Account
