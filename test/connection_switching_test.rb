@@ -325,6 +325,7 @@ describe "connection switching" do
 
       after do
         ActiveRecord::Base.configurations['test_slave'] = @saved_config
+        Thread.current[:shard_selection] = nil # drop caches
       end
 
       it "default to the master database" do
