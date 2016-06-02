@@ -114,17 +114,6 @@ module ActiveRecordShards
       switch_connection(old_options)
     end
 
-    # Name of the connection pool. Used by ConnectionHandler to retrieve the current connection pool.
-    def connection_pool_name # :nodoc:
-      name = current_shard_selection.shard_name(self)
-
-      if configurations[name].nil? && on_slave?
-        current_shard_selection.shard_name(self, false)
-      else
-        name
-      end
-    end
-
     def supports_sharding?
       shard_names.any?
     end
@@ -160,58 +149,12 @@ module ActiveRecordShards
           current_shard_selection.shard = options[:shard]
         end
 
-        establish_shard_connection unless connected_to_shard?
+        ensure_shard_connection
       end
     end
 
     def shard_env
       ActiveRecordShards.rails_env
-    end
-
-    def establish_shard_connection
-      name = connection_pool_name
-      spec = configurations[name]
-
-      raise ActiveRecord::AdapterNotSpecified.new("No database defined by #{name} in database.yml") if spec.nil?
-
-      # in 3.2 rails is asking for a connection pool in a map of these ConnectionSpecifications.  If we want to re-use connections,
-      # we need to re-use specs.
-
-      # note that since we're subverting the standard establish_connection path, we have to handle the funky autoloading of the
-      # connection adapter ourselves.
-      specification_cache[name] ||= begin
-        if ActiveRecord::VERSION::STRING >= '4.1.0'
-          resolver = ActiveRecordShards::ConnectionSpecification::Resolver.new configurations
-          resolver.spec(spec)
-        else
-          resolver = ActiveRecordShards::ConnectionSpecification::Resolver.new spec, configurations
-          resolver.spec
-        end
-      end
-
-      if ActiveRecord::VERSION::MAJOR >= 4
-        connection_handler.establish_connection(self, specification_cache[name])
-      else
-        connection_handler.establish_connection(connection_pool_name, specification_cache[name])
-      end
-    end
-
-    def specification_cache
-      @@specification_cache ||= {}
-    end
-
-    def connection_pool_key
-      specification_cache[connection_pool_name]
-    end
-
-    def connected_to_shard?
-      if ActiveRecord::VERSION::MAJOR >= 4
-        specs_to_pools = Hash[connection_handler.connection_pool_list.map { |pool| [pool.spec, pool] }]
-      else
-        specs_to_pools = connection_handler.connection_pools
-      end
-
-      specs_to_pools.has_key?(connection_pool_key)
     end
 
     def columns_with_default_shard
@@ -243,4 +186,13 @@ module ActiveRecordShards
       end
     end
   end
+end
+
+case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
+when '3.2', '4.0', '4.1', '4.2'
+  require 'active_record_shards/connection_switcher-4-0'
+when '5.0'
+  require 'active_record_shards/connection_switcher-5-0'
+else
+  raise "ActiveRecordShards is not compatible with #{ActiveRecord::VERSION::STRING}"
 end

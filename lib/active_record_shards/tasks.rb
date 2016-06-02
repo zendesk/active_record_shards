@@ -51,7 +51,7 @@ namespace :db do
         end
       end
     end
-    ActiveRecord::Base.establish_connection(ActiveRecordShards.rails_env)
+    ActiveRecord::Base.establish_connection(ActiveRecordShards.rails_env.to_sym)
   end
 
   desc "Raises an error if there are pending migrations"
@@ -90,8 +90,18 @@ end
 
 module ActiveRecordShards
   module Tasks
-    def self.root_connection(conf)
-      ActiveRecord::Base.send("#{conf['adapter']}_connection", conf.merge('database' => nil))
+    if ActiveRecord::VERSION::MAJOR < 5
+      def self.root_connection(conf)
+        ActiveRecord::Base.send("#{conf['adapter']}_connection", conf.merge('database' => nil))
+      end
+    else
+      def self.root_connection(conf)
+        # this will trigger rails to load the adapter
+        conf = conf.merge('database' => nil)
+        resolver = ActiveRecord::ConnectionAdapters::ConnectionSpecification::Resolver.new(ActiveRecord::Base.configurations)
+        resolver.spec(conf)
+        ActiveRecord::Base.send("#{conf['adapter']}_connection", conf)
+      end
     end
   end
 end
