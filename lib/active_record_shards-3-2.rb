@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+require 'active_record_shards/connection_pool'
+require 'active_record_shards/connection_handler'
+require 'active_record_shards/connection_specification'
 
 
 ActiveRecordShards::ConnectionSpecification = ActiveRecord::Base::ConnectionSpecification
