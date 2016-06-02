@@ -11,41 +11,6 @@ require 'active_record_shards/migration'
 require 'active_record_shards/default_slave_patches'
 require 'active_record_shards/connection_handler'
 require 'active_record_shards/connection_specification'
-require 'active_record_shards/schema_dumper_extension'
-
-if ActiveRecord::VERSION::MAJOR >= 4
-  methods_to_override = [:establish_connection, :remove_connection, :pool_for,
-                         :pool_from_any_process_for]
-  ActiveRecordShards::ConnectionSpecification = ActiveRecord::ConnectionAdapters::ConnectionSpecification
-else
-  methods_to_override = [:remove_connection]
-  ActiveRecordShards::ConnectionSpecification = ActiveRecord::Base::ConnectionSpecification
-end
-
-ActiveRecordShards.override_connection_handler_methods(methods_to_override)
-
-ActiveRecord::Base.extend(ActiveRecordShards::ConfigurationParser)
-ActiveRecord::Base.extend(ActiveRecordShards::Model)
-ActiveRecord::Base.extend(ActiveRecordShards::ConnectionSwitcher)
-ActiveRecord::Base.extend(ActiveRecordShards::DefaultSlavePatches)
-
-if ActiveRecord.const_defined?(:Relation)
-  ActiveRecord::Relation.send(:include, ActiveRecordShards::DefaultSlavePatches::ActiveRelationPatches)
-end
-
-if ActiveRecord::Associations.const_defined?(:Preloader) && ActiveRecord::Associations::Preloader.const_defined?(:HasAndBelongsToMany)
-  ActiveRecord::Associations::Preloader::HasAndBelongsToMany.send(:include, ActiveRecordShards::DefaultSlavePatches::HasAndBelongsToManyPreloaderPatches)
-end
-
-if ActiveRecord::VERSION::STRING >= '4.1.0'
-  ActiveRecord::Associations::Builder::HasAndBelongsToMany.send(:include, ActiveRecordShards::DefaultSlavePatches::Rails41HasAndBelongsToManyBuilderExtension)
-end
-
-ActiveRecord::Associations::CollectionProxy.send(:include, ActiveRecordShards::AssociationCollectionConnectionSelection)
-
-if ActiveRecord::VERSION::MAJOR >= 4
-  ActiveRecord::SchemaDumper.send(:prepend, ActiveRecordShards::SchemaDumperExtension)
-end
 
 module ActiveRecordShards
   def self.rails_env
@@ -55,6 +20,13 @@ module ActiveRecordShards
     env ||= 'development'
   end
 end
+
+ActiveRecord::Base.extend(ActiveRecordShards::ConfigurationParser)
+ActiveRecord::Base.extend(ActiveRecordShards::Model)
+ActiveRecord::Base.extend(ActiveRecordShards::ConnectionSwitcher)
+ActiveRecord::Base.extend(ActiveRecordShards::DefaultSlavePatches)
+ActiveRecord::Relation.include(ActiveRecordShards::DefaultSlavePatches::ActiveRelationPatches)
+ActiveRecord::Associations::CollectionProxy.include(ActiveRecordShards::AssociationCollectionConnectionSelection)
 
 ActiveRecord::Base.singleton_class.class_eval do
   def establish_connection_with_connection_pool_name(spec = nil)
@@ -67,4 +39,13 @@ ActiveRecord::Base.singleton_class.class_eval do
   end
   alias_method :establish_connection_without_connection_pool_name, :establish_connection
   alias_method :establish_connection, :establish_connection_with_connection_pool_name
+end
+
+case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
+when '3.2'
+  require 'active_record_shards-3-2'
+when '4.0'
+  require 'active_record_shards-4-0'
+when '4.1', '4.2', '5.0'
+  require 'active_record_shards-4-1'
 end
