@@ -25,19 +25,6 @@ ActiveRecord::Base.extend(ActiveRecordShards::DefaultSlavePatches)
 ActiveRecord::Relation.include(ActiveRecordShards::DefaultSlavePatches::ActiveRelationPatches)
 ActiveRecord::Associations::CollectionProxy.include(ActiveRecordShards::AssociationCollectionConnectionSelection)
 
-ActiveRecord::Base.singleton_class.class_eval do
-  def establish_connection_with_connection_pool_name(spec = nil)
-    case spec
-    when ActiveRecordShards::ConnectionSpecification
-      connection_handler.establish_connection(connection_pool_name, spec)
-    else
-      establish_connection_without_connection_pool_name(spec)
-    end
-  end
-  alias_method :establish_connection_without_connection_pool_name, :establish_connection
-  alias_method :establish_connection, :establish_connection_with_connection_pool_name
-end
-
 case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
 when '3.2'
   require 'active_record_shards-3-2'
