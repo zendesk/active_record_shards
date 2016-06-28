@@ -11,7 +11,6 @@ AllCops:
 
 Layout/EmptyLines:
   Exclude:
-    - 'lib/active_record_shards/patches-3-2.rb'
     - 'lib/active_record_shards/patches-5-0.rb'
 
 Layout/IndentHash:
@@ -28,7 +27,6 @@ Style/EmptyMethod:
 
 Style/FileName:
   Exclude:
-    - 'lib/active_record_shards/patches-3-2.rb'
     - 'lib/active_record_shards/patches-4-2.rb'
     - 'lib/active_record_shards/patches-5-0.rb'
     - 'lib/active_record_shards/connection_switcher-4-0.rb'

@@ -26,8 +26,6 @@ ActiveRecord::Relation.include(ActiveRecordShards::DefaultSlavePatches::ActiveRe
 ActiveRecord::Associations::CollectionProxy.include(ActiveRecordShards::AssociationCollectionConnectionSelection)
 
 case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
-when '3.2'
-  require 'active_record_shards/patches-3-2'
 when '4.2'
   require 'active_record_shards/patches-4-2'
 when '5.0', '5.1'

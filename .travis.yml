@@ -4,7 +4,6 @@ rvm:
   - 2.3.3
   - 2.4.0
 gemfile:
-  - gemfiles/rails3.2.gemfile
   - gemfiles/rails4.2.gemfile
   - gemfiles/rails5.0.gemfile
   - gemfiles/rails5.1.gemfile
@@ -19,11 +18,8 @@ cache:
 branches:
   only:
     - master
-    - 3-7-0
 matrix:
   exclude:
-    - rvm: 2.4.0
-      gemfile: gemfiles/rails3.2.gemfile
     - rvm: 2.1.10
       gemfile: gemfiles/rails5.0.gemfile
     - rvm: 2.1.10
