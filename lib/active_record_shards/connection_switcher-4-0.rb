@@ -28,19 +28,19 @@ module ActiveRecordShards
 
       # note that since we're subverting the standard establish_connection path, we have to handle the funky autoloading of the
       # connection adapter ourselves.
-      specification_cache[name] ||= begin
-        if ActiveRecord::VERSION::STRING >= '4.1.0'
+      if ActiveRecord::VERSION::MAJOR >= 4
+        specification_cache[name] ||= begin
           resolver = ActiveRecordShards::ConnectionSpecification::Resolver.new configurations
           resolver.spec(spec)
-        else
+        end
+
+        connection_handler.establish_connection(self, specification_cache[name])
+      else
+        specification_cache[name] ||= begin
           resolver = ActiveRecordShards::ConnectionSpecification::Resolver.new spec, configurations
           resolver.spec
         end
-      end
 
-      if ActiveRecord::VERSION::MAJOR >= 4
-        connection_handler.establish_connection(self, specification_cache[name])
-      else
         connection_handler.establish_connection(connection_pool_name, specification_cache[name])
       end
     end
