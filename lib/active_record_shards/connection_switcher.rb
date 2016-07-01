@@ -116,18 +116,13 @@ module ActiveRecordShards
 
     # Name of the connection pool. Used by ConnectionHandler to retrieve the current connection pool.
     def connection_pool_name # :nodoc:
-      name = @connection_pool_name_override || current_shard_selection.shard_name(self)
+      name = current_shard_selection.shard_name(self)
 
       if configurations[name].nil? && on_slave?
         current_shard_selection.shard_name(self, false)
       else
         name
       end
-    end
-
-    def establish_connection_override(connection_name)
-      @connection_pool_name_override = connection_name
-      establish_connection(connection_name)
     end
 
     def supports_sharding?

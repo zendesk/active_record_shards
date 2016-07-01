@@ -585,24 +585,6 @@ describe "connection switching" do
     end
   end
 
-  describe "alternative connections" do
-    it "not interfere with other connections" do
-      assert_using_database('ars_test', Account)
-      assert_using_database('ars_test', Ticket)
-      assert_using_database('ars_test_alternative', Email)
-
-      ActiveRecord::Base.on_shard(0) do
-        assert_using_database('ars_test', Account)
-        assert_using_database('ars_test_shard0', Ticket)
-        assert_using_database('ars_test_alternative', Email)
-      end
-
-      assert_using_database('ars_test', Account)
-      assert_using_database('ars_test', Ticket)
-      assert_using_database('ars_test_alternative', Email)
-    end
-  end
-
   it "raises an exception if a connection is not found" do
     ActiveRecord::Base.on_shard(0) do
       ActiveRecord::Base.connection_handler.remove_connection(Ticket)
