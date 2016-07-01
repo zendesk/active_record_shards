@@ -40,8 +40,3 @@ test2:
 test2_slave:
   <<: *MYSQL
   database: ars_test2_slave
-
-alternative:
-  <<: *MYSQL
-  database: ars_test_alternative
-  shard_names: ['0', '1']
