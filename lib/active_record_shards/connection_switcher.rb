@@ -114,19 +114,6 @@ module ActiveRecordShards
       switch_connection(old_options)
     end
 
-    if ActiveRecord::VERSION::MAJOR < 5
-      # Name of the connection pool. Used by ConnectionHandler to retrieve the current connection pool.
-      def connection_pool_name # :nodoc:
-        name = current_shard_selection.shard_name(self)
-
-        if configurations[name].nil? && on_slave?
-          current_shard_selection.shard_name(self, false)
-        else
-          name
-        end
-      end
-    end
-
     def supports_sharding?
       shard_names.any?
     end
@@ -150,50 +137,7 @@ module ActiveRecordShards
       config[SHARD_NAMES_CONFIG_KEY] || []
     end
 
-    if ActiveRecord::VERSION::MAJOR >= 5
-      def connection_specification_name
-        name = current_shard_selection.resolve_connection_name(sharded: is_sharded?, configurations: self.configurations)
-
-        raise "No configuration found for #{name}" unless configurations[name] || name == "primary"
-        name
-      end
-    end
-
     private
-
-    if ActiveRecord::VERSION::MAJOR >= 5
-      def probe_pool
-        # See if we've connected before. If not, call `#establish_connection`
-        # so that ActiveRecord can resolve connection_specification_name to an
-        # ARS connection.
-        spec_name = connection_specification_name
-
-        pool = connection_handler.retrieve_connection_pool(spec_name)
-        if pool.nil?
-          resolver = ActiveRecord::ConnectionAdapters::ConnectionSpecification::Resolver.new configurations
-          spec = resolver.spec(spec_name.to_sym, spec_name)
-          connection_handler.establish_connection spec
-        end
-      end
-    end
-
-    def switch_connection(options)
-      if options.any?
-        if options.has_key?(:slave)
-          current_shard_selection.on_slave = options[:slave]
-        end
-
-        if options.has_key?(:shard)
-          current_shard_selection.shard = options[:shard]
-        end
-
-        if ActiveRecord::VERSION::MAJOR >= 5
-          probe_pool
-        else
-          establish_shard_connection unless connected_to_shard?
-        end
-      end
-    end
 
     def shard_env
       ActiveRecordShards.rails_env
@@ -217,71 +161,6 @@ module ActiveRecordShards
       result
     end
 
-    if ActiveRecord::VERSION::MAJOR < 5
-      def establish_shard_connection
-        name = connection_pool_name
-        spec = configurations[name]
-
-        raise ActiveRecord::AdapterNotSpecified.new("No database defined by #{name} in database.yml") if spec.nil?
-
-        # in 3.2 rails is asking for a connection pool in a map of these ConnectionSpecifications.  If we want to re-use connections,
-        # we need to re-use specs.
-
-        # note that since we're subverting the standard establish_connection path, we have to handle the funky autoloading of the
-        # connection adapter ourselves.
-        specification_cache[name] ||= begin
-          if ActiveRecord::VERSION::STRING >= '4.1.0'
-            resolver = ActiveRecordShards::ConnectionSpecification::Resolver.new configurations
-            resolver.spec(spec)
-          else
-            resolver = ActiveRecordShards::ConnectionSpecification::Resolver.new spec, configurations
-            resolver.spec
-          end
-        end
-
-        if ActiveRecord::VERSION::MAJOR >= 4
-          connection_handler.establish_connection(self, specification_cache[name])
-        else
-          connection_handler.establish_connection(connection_pool_name, specification_cache[name])
-        end
-      end
-
-      def specification_cache
-        @@specification_cache ||= {}
-      end
-
-      def connection_pool_key
-        specification_cache[connection_pool_name]
-      end
-
-      def connected_to_shard?
-        if ActiveRecord::VERSION::MAJOR >= 4
-          specs_to_pools = Hash[connection_handler.connection_pool_list.map { |pool| [pool.spec, pool] }]
-        else
-          specs_to_pools = connection_handler.connection_pools
-        end
-
-        specs_to_pools.has_key?(connection_pool_key)
-      end
-
-      def autoload_adapter(adapter_name)
-        begin
-          gem "activerecord-#{adapter_name}-adapter"
-          require "active_record/connection_adapters/#{adapter_name}_adapter"
-        rescue LoadError
-          begin
-            require "active_record/connection_adapters/#{adapter_name}_adapter"
-          rescue LoadError
-            raise "Please install the #{adapter_name} adapter: `gem install activerecord-#{adapter_name}-adapter` (#{$!})"
-          end
-        end
-
-        if !ActiveRecord::Base.respond_to?(adapter_name + "_connection")
-          raise AdapterNotFound, "database configuration specifies nonexistent #{adapter_name} adapter"
-        end
-      end
-    end
-
     class MasterSlaveProxy
       def initialize(target, which)
         @target = target
@@ -293,4 +172,13 @@ module ActiveRecordShards
       end
     end
   end
+end
+
+case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
+when '3.2', '4.0', '4.1', '4.2'
+  require 'active_record_shards/connection_switcher-4-0'
+when '5.0'
+  require 'active_record_shards/connection_switcher-5-0'
+else
+  raise "ActiveRecordShards is not compatible with #{ActiveRecord::VERSION::STRING}"
 end
