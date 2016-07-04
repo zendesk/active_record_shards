@@ -9,21 +9,7 @@ module ActiveRecordShards
 
     private
 
-    def switch_connection(options)
-      if options.any?
-        if options.has_key?(:slave)
-          current_shard_selection.on_slave = options[:slave]
-        end
-
-        if options.has_key?(:shard)
-          current_shard_selection.shard = options[:shard]
-        end
-
-        probe_pool
-      end
-    end
-
-    def probe_pool
+    def ensure_shard_connection
       # See if we've connected before. If not, call `#establish_connection`
       # so that ActiveRecord can resolve connection_specification_name to an
       # ARS connection.

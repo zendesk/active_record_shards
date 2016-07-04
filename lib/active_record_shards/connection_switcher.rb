@@ -139,6 +139,20 @@ module ActiveRecordShards
 
     private
 
+    def switch_connection(options)
+      if options.any?
+        if options.has_key?(:slave)
+          current_shard_selection.on_slave = options[:slave]
+        end
+
+        if options.has_key?(:shard)
+          current_shard_selection.shard = options[:shard]
+        end
+
+        ensure_shard_connection
+      end
+    end
+
     def shard_env
       ActiveRecordShards.rails_env
     end
