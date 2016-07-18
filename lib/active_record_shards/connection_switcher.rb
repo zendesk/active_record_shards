@@ -232,23 +232,6 @@ module ActiveRecordShards
       result
     end
 
-    def autoload_adapter(adapter_name)
-      begin
-        gem "activerecord-#{adapter_name}-adapter"
-        require "active_record/connection_adapters/#{adapter_name}_adapter"
-      rescue LoadError
-        begin
-          require "active_record/connection_adapters/#{adapter_name}_adapter"
-        rescue LoadError
-          raise "Please install the #{adapter_name} adapter: `gem install activerecord-#{adapter_name}-adapter` (#{$!})"
-        end
-      end
-
-      if !ActiveRecord::Base.respond_to?(adapter_name + "_connection")
-        raise AdapterNotFound, "database configuration specifies nonexistent #{adapter_name} adapter"
-      end
-    end
-
     class MasterSlaveProxy
       def initialize(target, which)
         @target = target
