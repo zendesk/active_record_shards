@@ -12,8 +12,11 @@ namespace :db do
       if key.starts_with?(ActiveRecordShards.rails_env) && !key.ends_with?("_slave")
         begin
           ActiveRecordShards::Tasks.root_connection(conf).drop_database(conf['database'])
-        rescue Exception => e
-          puts "Couldn't drop #{conf['database']} : #{e.inspect}"
+        # rescue ActiveRecord::NoDatabaseError # TODO: exists in AR but never is raised here ...
+        #   $stderr.puts "Database '#{conf['database']}' does not exist"
+        rescue Exception => error
+          $stderr.puts error, *(error.backtrace)
+          $stderr.puts "Couldn't drop #{conf['database']}"
         end
       end
     end
