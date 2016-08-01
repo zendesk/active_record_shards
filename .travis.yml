@@ -15,7 +15,9 @@ sudo: false
 cache:
   bundler: true
 branches:
-  only: master
+  only:
+    - master
+    - 3-7-0
 matrix:
   exclude:
     - rvm: 2.1.9
