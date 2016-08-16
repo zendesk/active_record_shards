@@ -14,7 +14,7 @@ class AccountThing < ActiveRecord::Base
   if respond_to?(:where)
     scope :enabled, lambda { where(:enabled => true) }
   else
-    named_scope :enabled, :conditions => {:enabled => true}
+    named_scope :enabled, :conditions => { :enabled => true }
   end
 end
 

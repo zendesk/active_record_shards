@@ -41,9 +41,9 @@ module ActiveRecordShards
     end
 
     private
+
     def ensure_concrete!
       raise "Please call this method on a concrete model, not an abstract class!" if @scope.abstract_class?
     end
   end
 end
-

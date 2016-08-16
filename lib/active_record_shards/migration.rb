@@ -15,7 +15,7 @@ module ActiveRecord
         alias_method m.to_sym, :"#{m}_with_sharding"
       end
 
-      def bootstrap_migrations_from_nil_shard(migrations_path, this_migration=nil)
+      def bootstrap_migrations_from_nil_shard(migrations_path, this_migration = nil)
         migrations = nil
         ActiveRecord::Base.on_shard(nil) do
           migrations = ActiveRecord::Migrator.new(:up, migrations_path).migrated
@@ -78,7 +78,6 @@ module ActiveRecordShards
     def shard(arg = nil)
       self.migration_shard = arg
     end
-
   end
 
   # ok, so some 'splaining to do.  Rails 3.1 puts the migrate() method on the instance of the

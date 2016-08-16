@@ -8,13 +8,6 @@ Lint/AssignmentInCondition:
     - 'lib/active_record_shards/configuration_parser.rb'
     - 'lib/active_record_shards/connection_switcher.rb'
 
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: AlignWith, SupportedStyles, AutoCorrect.
-# SupportedStyles: start_of_line, def
-Lint/DefEndAlignment:
-  Enabled: false
-
 # Offense count: 2
 # Cop supports --auto-correct.
 # Configuration parameters: AlignWith, SupportedStyles, AutoCorrect.
@@ -151,47 +144,14 @@ Style/ElseAlignment:
   Exclude:
     - 'lib/active_record_shards/default_slave_patches.rb'
 
-# Offense count: 8
+# Offense count: 7
 # Cop supports --auto-correct.
 Style/EmptyLines:
   Exclude:
     - 'lib/active_record_shards-3-2.rb'
+    - 'lib/active_record_shards-4-0.rb'
+    - 'lib/active_record_shards-4-1.rb'
     - 'lib/active_record_shards-5-0.rb'
-    - 'lib/active_record_shards/schema_dumper_extension.rb'
-
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/EmptyLinesAroundAccessModifier:
-  Exclude:
-    - 'lib/active_record_shards/shard_support.rb'
-
-# Offense count: 3
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-# SupportedStyles: empty_lines, no_empty_lines
-Style/EmptyLinesAroundBlockBody:
-  Exclude:
-    - 'test/connection_switching_test.rb'
-    - 'test/schema_dumper_extension_test.rb'
-
-# Offense count: 4
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-# SupportedStyles: empty_lines, no_empty_lines
-Style/EmptyLinesAroundModuleBody:
-  Exclude:
-    - 'lib/active_record_shards/connection_switcher-4-0.rb'
-    - 'lib/active_record_shards/migration.rb'
-    - 'lib/active_record_shards/schema_dumper_extension.rb'
-
-# Offense count: 3
-# Cop supports --auto-correct.
-# Configuration parameters: AllowForAlignment, ForceEqualSignAlignment.
-Style/ExtraSpacing:
-  Exclude:
-    - 'active_record_shards.gemspec'
-    - 'lib/active_record_shards/default_slave_patches.rb'
-    - 'test/connection_switching_test.rb'
 
 # Offense count: 6
 # Configuration parameters: ExpectMatchingDefinition, Regex, IgnoreExecutableScripts.
@@ -372,47 +332,6 @@ Style/SingleLineBlockParams:
   Exclude:
     - 'lib/active_record_shards/shard_support.rb'
 
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-# SupportedStyles: space, no_space
-Style/SpaceAroundEqualsInParameterDefault:
-  Enabled: false
-
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: AllowForAlignment.
-Style/SpaceAroundOperators:
-  Exclude:
-    - 'active_record_shards.gemspec'
-
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-# SupportedStyles: space, no_space
-Style/SpaceBeforeBlockBraces:
-  Enabled: false
-
-# Offense count: 4
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles, EnforcedStyleForEmptyBraces, SpaceBeforeBlockParameters.
-# SupportedStyles: space, no_space
-Style/SpaceInsideBlockBraces:
-  Enabled: false
-
-# Offense count: 2
-# Cop supports --auto-correct.
-Style/SpaceInsideBrackets:
-  Exclude:
-    - 'lib/active_record_shards/default_slave_patches.rb'
-
-# Offense count: 8
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, EnforcedStyleForEmptyBraces, SupportedStyles.
-# SupportedStyles: space, no_space, compact
-Style/SpaceInsideHashLiteralBraces:
-  Enabled: false
-
 # Offense count: 360
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, SupportedStyles, ConsistentQuotesInMultiline.
@@ -426,14 +345,6 @@ Style/StringLiterals:
 # SupportedStyles: single_quotes, double_quotes
 Style/StringLiteralsInInterpolation:
   Enabled: false
-
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-# SupportedStyles: final_newline, final_blank_line
-Style/TrailingBlankLines:
-  Exclude:
-    - 'lib/active_record_shards/shard_support.rb'
 
 # Offense count: 9
 # Cop supports --auto-correct.

@@ -1,6 +1,5 @@
 module ActiveRecordShards
   module ConnectionSwitcher
-
     # Name of the connection pool. Used by ConnectionHandler to retrieve the current connection pool.
     def connection_pool_name # :nodoc:
       name = current_shard_selection.shard_name(self)

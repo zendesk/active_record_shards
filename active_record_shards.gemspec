@@ -21,5 +21,5 @@ Gem::Specification.new "active_record_shards", "3.7.0" do |s|
   s.add_development_dependency("mocha")
   s.add_development_dependency("phenix", ">= 0.2.0")
 
-  s.files        = Dir["lib/**/*"] + ["README.md"]
+  s.files = Dir["lib/**/*"] + ["README.md"]
 end
