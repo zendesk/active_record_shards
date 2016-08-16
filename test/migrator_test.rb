@@ -70,7 +70,7 @@ describe ActiveRecord::Migrator do
     rescue Exception => e
       exception = e
     end
-    assert e
+    assert exception
   end
 
   it "fails with failing migrations" do

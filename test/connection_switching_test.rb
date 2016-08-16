@@ -527,7 +527,7 @@ describe "connection switching" do
 
         it "will :include things via has_and_belongs associations correctly" do
           a = Account.where(:id => 1001).includes(:people).first
-          assert a.people.size > 0
+          refute a.people.empty?
           assert_equal 'slave person', a.people.first.name
         end
 

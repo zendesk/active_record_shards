@@ -11,7 +11,7 @@ module ActiveRecordShards
       return unless base_methods.include?(method)
       _, method, punctuation = method.to_s.match(/^(.*?)([\?\!]?)$/).to_a
       base.class_eval <<-RUBY, __FILE__, __LINE__ + 1
-        #{class_method ? "class << self" : ""}
+        #{class_method ? 'class << self' : ''}
           def #{method}_with_default_slave#{punctuation}(*args, &block)
             on_slave_unless_tx do
               #{method}_without_default_slave#{punctuation}(*args, &block)
@@ -20,7 +20,7 @@ module ActiveRecordShards
 
           alias_method :#{method}_without_default_slave#{punctuation}, :#{method}#{punctuation}
           alias_method :#{method}#{punctuation}, :#{method}_with_default_slave#{punctuation}
-        #{class_method ? "end" : ""}
+        #{class_method ? 'end' : ''}
       RUBY
     end
 

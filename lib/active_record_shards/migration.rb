@@ -5,10 +5,10 @@ module ActiveRecord
       [:up, :down, :run].each do |m|
         define_method("#{m}_with_sharding") do |*args|
           ActiveRecord::Base.on_shard(nil) do
-            self.send("#{m}_without_sharding", *args)
+            send("#{m}_without_sharding", *args)
           end
           ActiveRecord::Base.on_all_shards do
-            self.send("#{m}_without_sharding", *args)
+            send("#{m}_without_sharding", *args)
           end
         end
         alias_method :"#{m}_without_sharding", m.to_sym
@@ -86,7 +86,7 @@ module ActiveRecordShards
   module ActualMigrationExtension
     def migrate_with_forced_shard(direction)
       if migration_shard.blank?
-        raise RuntimeError, "#{self.name}: Can't run migrations without a shard spec: this may be :all, :none,
+        raise "#{name}: Can't run migrations without a shard spec: this may be :all, :none,
                  or a specific shard (for data-fixups).  please call shard(arg) in your migration."
       end
 

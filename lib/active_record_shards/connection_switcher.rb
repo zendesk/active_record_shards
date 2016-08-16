@@ -141,11 +141,11 @@ module ActiveRecordShards
 
     def switch_connection(options)
       if options.any?
-        if options.has_key?(:slave)
+        if options.key?(:slave)
           current_shard_selection.on_slave = options[:slave]
         end
 
-        if options.has_key?(:shard)
+        if options.key?(:shard)
           current_shard_selection.shard = options[:shard]
         end
 
