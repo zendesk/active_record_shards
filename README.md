@@ -1,3 +1,5 @@
+[![Build Status](https://secure.travis-ci.org/zendesk/active_record_shards.png)](http://travis-ci.org/zendesk/active_record_shards)
+
 # ActiveRecord Shards
 
 ActiveRecord Shards is an extension for ActiveRecord that provides support for sharded database and slaves. Basically it is just a nice way to
@@ -95,5 +97,3 @@ Copyright (c) 2011 Zendesk. See LICENSE for details.
 
 ## Authors
 Mick Staugaard, Eric Chapweske
-
-[![Build Status](https://secure.travis-ci.org/osheroff/active_record_shards.png)](http://travis-ci.org/osheroff/active_record_shards)
