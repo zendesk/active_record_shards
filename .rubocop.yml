@@ -1,4 +1,9 @@
 AllCops:
+  CacheRootDirectory: tmp
+  Exclude:
+    - .git/**/*
+    - gemfiles/vendor/**/*
+    - vendor/**/*
   TargetRubyVersion: 2.1
 
 Style/PercentLiteralDelimiters:
