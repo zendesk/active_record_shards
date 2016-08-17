@@ -4,7 +4,7 @@ require File.expand_path('../helper', __FILE__)
 describe ActiveRecordShards::ConfigurationParser do
   describe "exploding the database.yml" do
     before do
-      @exploded_conf = ActiveRecordShards::ConfigurationParser.explode(YAML::load(IO.read(File.dirname(__FILE__) + '/database_parse_test.yml')))
+      @exploded_conf = ActiveRecordShards::ConfigurationParser.explode(YAML.load(IO.read(File.dirname(__FILE__) + '/database_parse_test.yml')))
     end
 
     describe "main slave" do

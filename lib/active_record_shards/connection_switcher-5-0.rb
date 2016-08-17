@@ -1,7 +1,7 @@
 module ActiveRecordShards
   module ConnectionSwitcher
     def connection_specification_name
-      name = current_shard_selection.resolve_connection_name(sharded: is_sharded?, configurations: self.configurations)
+      name = current_shard_selection.resolve_connection_name(sharded: is_sharded?, configurations: configurations)
 
       raise "No configuration found for #{name}" unless configurations[name] || name == "primary"
       name

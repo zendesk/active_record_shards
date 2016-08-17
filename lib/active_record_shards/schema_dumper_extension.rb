@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 module ActiveRecordShards
   module SchemaDumperExtension
-
     def dump(stream)
       stream = super(stream)
       original_connection = @connection
@@ -21,7 +20,6 @@ module ActiveRecordShards
       @connection = original_connection
     end
 
-
     def shard_header(stream)
       define_params = @version ? "version: #{@version}" : ""
 
@@ -34,11 +32,10 @@ ActiveRecord::Base.on_all_shards do
 ActiveRecord::Schema.define(#{define_params}) do
 
 HEADER
-      end
+    end
 
     def shard_trailer(stream)
       stream.puts "end\nend"
     end
-
   end
 end

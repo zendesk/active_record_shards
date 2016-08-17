@@ -43,7 +43,7 @@ class Minitest::Spec
       :password => config['test']['password']
     )
     databases = client.query("SHOW DATABASES")
-    databases.map{ |d| d['Database'] }
+    databases.map { |d| d['Database'] }
   end
 
   def rake(name)

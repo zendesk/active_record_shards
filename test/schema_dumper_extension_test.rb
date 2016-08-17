@@ -4,7 +4,6 @@ require File.expand_path('../helper', __FILE__)
 if ActiveRecord::VERSION::MAJOR >= 4
   describe ActiveRecordShards::SchemaDumperExtension do
     describe "schema dump" do
-
       let(:schema_file) { Tempfile.new('active_record_shards_schema.rb') }
       before do
         Phenix.rise!(with_schema: true)

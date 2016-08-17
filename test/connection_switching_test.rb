@@ -54,8 +54,8 @@ describe "connection switching" do
 
     describe "on_all_shards" do
       before do
-        @shard_0_master = ActiveRecord::Base.on_shard(0) {ActiveRecord::Base.connection}
-        @shard_1_master = ActiveRecord::Base.on_shard(1) {ActiveRecord::Base.connection}
+        @shard_0_master = ActiveRecord::Base.on_shard(0) { ActiveRecord::Base.connection }
+        @shard_1_master = ActiveRecord::Base.on_shard(1) { ActiveRecord::Base.connection }
         refute_equal(@shard_0_master.select_value("SELECT DATABASE()"), @shard_1_master.select_value("SELECT DATABASE()"))
       end
 
@@ -121,7 +121,7 @@ describe "connection switching" do
 
     describe ".shards.to_a" do
       it "works like this" do
-        ActiveRecord::Base.on_all_shards { |s| Ticket.create!(:title => s.to_s)  }
+        ActiveRecord::Base.on_all_shards { |s| Ticket.create!(:title => s.to_s) }
 
         res = Ticket.where(:title => "1").shards.to_a
         assert_equal 1, res.size
@@ -343,11 +343,9 @@ describe "connection switching" do
         assert_equal Account.count, ActiveRecord::Base.on_slave { Account.count }
         assert_equal Account.count, Account.on_slave { Account.count }
       end
-
     end
 
     describe "with slave configuration" do
-
       it "successfully execute queries" do
         assert_using_master_db
         Account.create!
@@ -529,7 +527,7 @@ describe "connection switching" do
 
         it "will :include things via has_and_belongs associations correctly" do
           a = Account.where(:id => 1001).includes(:people).first
-          assert a.people.size > 0
+          refute a.people.empty?
           assert_equal 'slave person', a.people.first.name
         end
 

@@ -15,7 +15,7 @@ namespace :db do
         # rescue ActiveRecord::NoDatabaseError # TODO: exists in AR but never is raised here ...
         #   $stderr.puts "Database '#{conf['database']}' does not exist"
         rescue Exception => error
-          $stderr.puts error, *(error.backtrace)
+          $stderr.puts error, *error.backtrace
           $stderr.puts "Couldn't drop #{conf['database']}"
         end
       end
@@ -68,7 +68,7 @@ namespace :db do
         pending_migrations.each do |pending_migration|
           puts '  %4d %s' % [pending_migration.version, pending_migration.name]
         end
-        abort %{Run "rake db:migrate" to update your database then try again.}
+        abort %(Run "rake db:migrate" to update your database then try again.)
       end
     end
   end

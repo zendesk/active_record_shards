@@ -5,17 +5,17 @@ module ActiveRecord
       [:up, :down, :run].each do |m|
         define_method("#{m}_with_sharding") do |*args|
           ActiveRecord::Base.on_shard(nil) do
-            self.send("#{m}_without_sharding", *args)
+            send("#{m}_without_sharding", *args)
           end
           ActiveRecord::Base.on_all_shards do
-            self.send("#{m}_without_sharding", *args)
+            send("#{m}_without_sharding", *args)
           end
         end
         alias_method :"#{m}_without_sharding", m.to_sym
         alias_method m.to_sym, :"#{m}_with_sharding"
       end
 
-      def bootstrap_migrations_from_nil_shard(migrations_path, this_migration=nil)
+      def bootstrap_migrations_from_nil_shard(migrations_path, this_migration = nil)
         migrations = nil
         ActiveRecord::Base.on_shard(nil) do
           migrations = ActiveRecord::Migrator.new(:up, migrations_path).migrated
@@ -78,7 +78,6 @@ module ActiveRecordShards
     def shard(arg = nil)
       self.migration_shard = arg
     end
-
   end
 
   # ok, so some 'splaining to do.  Rails 3.1 puts the migrate() method on the instance of the
@@ -87,7 +86,7 @@ module ActiveRecordShards
   module ActualMigrationExtension
     def migrate_with_forced_shard(direction)
       if migration_shard.blank?
-        raise RuntimeError, "#{self.name}: Can't run migrations without a shard spec: this may be :all, :none,
+        raise "#{name}: Can't run migrations without a shard spec: this may be :all, :none,
                  or a specific shard (for data-fixups).  please call shard(arg) in your migration."
       end
 
