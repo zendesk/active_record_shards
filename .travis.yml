@@ -10,7 +10,9 @@ gemfile:
   - gemfiles/rails4.2.gemfile
   - gemfiles/rails5.0.gemfile
 bundler_args: --no-deployment
-script: "bundle exec rake test"
+script:
+  - bundle exec rake rubocop
+  - bundle exec rake test
 sudo: false
 cache:
   bundler: true
