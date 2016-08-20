@@ -31,7 +31,7 @@ module ActiveRecordShards
         @which = which
       end
 
-      def method_missing(method, *args, &block)
+      def method_missing(method, *args, &block) # rubocop:disable Style/MethodMissing
         # would love to not rely on version here, unfortunately @association_collection
         # is a sensitive little bitch of an object.
         reflection = @association_collection.proxy_association.reflection

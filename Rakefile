@@ -12,7 +12,7 @@ Rake::TestTask.new(:test) do |test|
   test.warning = false
 end
 
-task :default => ["rubocop", "wwtd:local"]
+task default: ["rubocop", "wwtd:local"]
 
 RuboCop::RakeTask.new(:rubocop) do |task|
   task.options = %w[--display-cop-names]

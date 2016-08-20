@@ -5,16 +5,16 @@ class Account < ActiveRecord::Base
 
   has_many :tickets
   has_many :account_things
-  has_and_belongs_to_many :people, :join_table => 'account_people'
+  has_and_belongs_to_many :people, join_table: 'account_people'
 end
 
 class AccountThing < ActiveRecord::Base
   not_sharded
 
   if respond_to?(:where)
-    scope :enabled, -> { where(:enabled => true) }
+    scope :enabled, -> { where(enabled: true) }
   else
-    named_scope :enabled, :conditions => { :enabled => true }
+    named_scope :enabled, conditions: { enabled: true }
   end
 end
 

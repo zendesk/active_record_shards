@@ -33,7 +33,7 @@ module ActiveRecordShards
     end
 
     def count
-      enum.inject(0) { |accum, shard| @scope.clone.count + accum }
+      enum.inject(0) { |accum, _shard| @scope.clone.count + accum }
     end
 
     def to_a

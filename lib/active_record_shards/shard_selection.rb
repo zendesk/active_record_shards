@@ -82,7 +82,7 @@ module ActiveRecordShards
     end
 
     def options
-      { :shard => @shard, :slave => @on_slave }
+      { shard: @shard, slave: @on_slave }
     end
   end
 end

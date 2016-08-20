@@ -19,7 +19,7 @@ require 'active_record_shards'
 require 'logger'
 require 'phenix'
 
-RAILS_ENV = "test"
+RAILS_ENV = "test".freeze
 
 ActiveRecord::Base.logger = Logger.new(File.dirname(__FILE__) + "/test.log")
 ActiveSupport.test_order = :sorted if ActiveSupport.respond_to?(:test_order=)
@@ -29,18 +29,18 @@ def connection_exist_method
   ActiveRecord::VERSION::MAJOR == 5 ? :data_source_exists? : :table_exists?
 end
 
-BaseMigration = (ActiveRecord::VERSION::MAJOR >= 5 ? ActiveRecord::Migration[4.2] : ActiveRecord::Migration)
+BaseMigration = (ActiveRecord::VERSION::MAJOR >= 5 ? ActiveRecord::Migration[4.2] : ActiveRecord::Migration) # rubocop:disable Style/ConstantName
 
 Phenix.configure
 
 require 'active_support/test_case'
-class Minitest::Spec
+Minitest::Spec.class_eval do
   def show_databases(config)
     client = Mysql2::Client.new(
-      :host => config['test']['host'],
-      :port => config['test']['port'],
-      :username => config['test']['username'],
-      :password => config['test']['password']
+      host: config['test']['host'],
+      port: config['test']['port'],
+      username: config['test']['username'],
+      password: config['test']['password']
     )
     databases = client.query("SHOW DATABASES")
     databases.map { |d| d['Database'] }

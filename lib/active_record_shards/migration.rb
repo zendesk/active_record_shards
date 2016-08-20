@@ -41,7 +41,7 @@ module ActiveRecord
 
     # list of pending migrations is any migrations that haven't run on all shards.
     def pending_migrations
-      pending, missing = self.class.shard_status(migrations.map(&:version))
+      pending, _missing = self.class.shard_status(migrations.map(&:version))
       pending = pending.values.flatten
       migrations.select { |m| pending.include?(m.version) }
     end
@@ -66,7 +66,7 @@ module ActiveRecord
       ActiveRecord::Base.on_shard(nil) { collect.call(nil) }
       ActiveRecord::Base.on_all_shards { |shard| collect.call(shard) }
 
-      return pending, missing
+      [pending, missing]
     end
   end
 end
@@ -116,4 +116,4 @@ ActiveRecord::Migration.class_eval do
   alias_method :migrate, :migrate_with_forced_shard
 end
 
-ActiveRecord::MigrationProxy.delegate :migration_shard, :to => :migration
+ActiveRecord::MigrationProxy.delegate :migration_shard, to: :migration
