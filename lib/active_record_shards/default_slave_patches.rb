@@ -2,11 +2,12 @@
 module ActiveRecordShards
   module DefaultSlavePatches
     def self.wrap_method_in_on_slave(class_method, base, method)
-      base_methods = if class_method
-        base.methods + base.private_methods
-      else
-        base.instance_methods + base.private_instance_methods
-      end
+      base_methods =
+        if class_method
+          base.methods + base.private_methods
+        else
+          base.instance_methods + base.private_instance_methods
+        end
 
       return unless base_methods.include?(method)
       _, method, punctuation = method.to_s.match(/^(.*?)([\?\!]?)$/).to_a
@@ -25,13 +26,14 @@ module ActiveRecordShards
     end
 
     def columns_with_default_slave(*args, &block)
-      read_columns_from = if on_slave_by_default? && !Thread.current[:_active_record_shards_slave_off]
-        :slave
-      else
-        :master
-      end
+      read_columns_from =
+        if on_slave_by_default? && !Thread.current[:_active_record_shards_slave_off]
+          :slave
+        else
+          :master
+        end
 
-      on_cx_switch_block(read_columns_from, :construct_ro_scope => false) { columns_without_default_slave(*args, &block) }
+      on_cx_switch_block(read_columns_from, construct_ro_scope: false) { columns_without_default_slave(*args, &block) }
     end
 
     def transaction_with_slave_off(*args, &block)
@@ -58,7 +60,7 @@ module ActiveRecordShards
       end
     end
 
-    CLASS_SLAVE_METHODS = [:find_by_sql, :count_by_sql, :calculate, :find_one, :find_some, :find_every, :exists?, :table_exists?]
+    CLASS_SLAVE_METHODS = [:find_by_sql, :count_by_sql, :calculate, :find_one, :find_some, :find_every, :exists?, :table_exists?].freeze
 
     def self.extended(base)
       CLASS_SLAVE_METHODS.each { |m| ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(true, base, m) }
@@ -83,7 +85,7 @@ module ActiveRecordShards
       end
     end
 
-    def on_slave_unless_tx(&block)
+    def on_slave_unless_tx
       if on_slave_by_default? && !Thread.current[:_active_record_shards_slave_off]
         on_slave { yield }
       else
@@ -112,7 +114,7 @@ module ActiveRecordShards
 
     module HasAndBelongsToManyPreloaderPatches
       def self.included(base)
-        ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(false, base, :records_for) rescue nil
+        ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(false, base, :records_for) rescue nil # rubocop:disable Style/RescueModifier
       end
 
       def on_slave_unless_tx
@@ -142,7 +144,7 @@ module ActiveRecordShards
         end
 
         # also transfer the sharded-ness of the left table to the join model
-        model.not_sharded if !model.left_reflection.klass.is_sharded?
+        model.not_sharded unless model.left_reflection.klass.is_sharded?
         model
       end
     end

@@ -46,9 +46,9 @@ describe "connection switching" do
 
     describe "on_first_shard" do
       it "use the first shard" do
-        ActiveRecord::Base.on_first_shard {
+        ActiveRecord::Base.on_first_shard do
           assert_using_database('ars_test_shard0')
-        }
+        end
       end
     end
 
@@ -105,8 +105,8 @@ describe "connection switching" do
 
     describe ".shards.count" do
       before do
-        ActiveRecord::Base.on_shard(0) { 2.times { Ticket.create!(:title => "0") } }
-        ActiveRecord::Base.on_shard(1) { Ticket.create!(:title => "1") }
+        ActiveRecord::Base.on_shard(0) { 2.times { Ticket.create!(title: "0") } }
+        ActiveRecord::Base.on_shard(1) { Ticket.create!(title: "1") }
       end
 
       it "works like this:" do
@@ -115,15 +115,15 @@ describe "connection switching" do
       end
 
       it "works with scopes" do
-        assert_equal(1, Ticket.where(:title => "1").shards.count)
+        assert_equal(1, Ticket.where(title: "1").shards.count)
       end
     end
 
     describe ".shards.to_a" do
       it "works like this" do
-        ActiveRecord::Base.on_all_shards { |s| Ticket.create!(:title => s.to_s) }
+        ActiveRecord::Base.on_all_shards { |s| Ticket.create!(title: s.to_s) }
 
-        res = Ticket.where(:title => "1").shards.to_a
+        res = Ticket.where(title: "1").shards.to_a
         assert_equal 1, res.size
       end
     end
@@ -264,19 +264,19 @@ describe "connection switching" do
 
   describe "in an unsharded environment" do
     before do
-      silence_warnings { ::RAILS_ENV = 'test2' }
+      silence_warnings { ::RAILS_ENV = 'test2'.freeze }
       ActiveRecord::Base.establish_connection(::RAILS_ENV.to_sym)
       assert_using_database('ars_test2', Ticket)
     end
 
     after do
-      silence_warnings { ::RAILS_ENV = 'test' }
+      silence_warnings { ::RAILS_ENV = 'test'.freeze }
       ActiveRecord::Base.establish_connection(::RAILS_ENV.to_sym)
       assert_using_database('ars_test', Ticket)
     end
 
     it "be able to find by column" do
-      Account.where(:name => "peter").to_sql # does not blow up
+      Account.where(name: "peter").to_sql # does not blow up
     end
 
     it "have correct engine" do
@@ -537,7 +537,7 @@ describe "connection switching" do
         end
 
         it "will :include things via has_and_belongs associations correctly" do
-          a = Account.where(:id => 1001).includes(:people).first
+          a = Account.where(id: 1001).includes(:people).first
           refute a.people.empty?
           assert_equal 'slave person', a.people.first.name
         end
@@ -583,15 +583,15 @@ describe "connection switching" do
           assert_using_master_db
           account = Account.create!
 
-          account.tickets.create! :title => 'master ticket'
+          account.tickets.create! title: 'master ticket'
 
-          Ticket.on_slave {
-            account.tickets.create! :title => 'slave ticket'
-          }
+          Ticket.on_slave do
+            account.tickets.create! title: 'slave ticket'
+          end
 
           assert_equal "master ticket", account.tickets.first.title
           assert_equal "slave ticket", account.tickets.on_slave.first.title
-        rescue Exception
+        rescue StandardError
           retried ||= 0
           retried += 1
           puts "Failed in #{__LINE__}##{retried}"

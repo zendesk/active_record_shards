@@ -9,12 +9,11 @@ module ActiveRecordShards
       conf = conf.deep_dup
 
       conf.to_a.each do |env_name, env_config|
-        if shards = env_config.delete('shards')
-          env_config['shard_names'] = shards.keys
-          shards.each do |shard_name, shard_conf|
-            expand_child!(env_config, shard_conf)
-            conf["#{env_name}_shard_#{shard_name}"] = shard_conf
-          end
+        next unless shards = env_config.delete('shards')
+        env_config['shard_names'] = shards.keys
+        shards.each do |shard_name, shard_conf|
+          expand_child!(env_config, shard_conf)
+          conf["#{env_name}_shard_#{shard_name}"] = shard_conf
         end
       end
 

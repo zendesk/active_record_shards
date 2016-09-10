@@ -15,18 +15,18 @@ module ActiveRecordShards
 
     def default_shard=(new_default_shard)
       ActiveRecordShards::ShardSelection.default_shard = new_default_shard
-      switch_connection(:shard => new_default_shard)
+      switch_connection(shard: new_default_shard)
     end
 
-    def on_shard(shard, &block)
+    def on_shard(shard)
       old_options = current_shard_selection.options
-      switch_connection(:shard => shard) if supports_sharding?
+      switch_connection(shard: shard) if supports_sharding?
       yield
     ensure
       switch_connection(old_options)
     end
 
-    def on_first_shard(&block)
+    def on_first_shard
       shard_name = shard_names.first
       on_shard(shard_name) { yield }
     end
@@ -35,11 +35,11 @@ module ActiveRecordShards
       ShardSupport.new(self == ActiveRecord::Base ? nil : where(nil))
     end
 
-    def on_all_shards(&block)
+    def on_all_shards
       old_options = current_shard_selection.options
       if supports_sharding?
         shard_names.map do |shard|
-          switch_connection(:shard => shard)
+          switch_connection(shard: shard)
           yield(shard)
         end
       else
@@ -96,11 +96,12 @@ module ActiveRecordShards
     alias_method :with_slave_unless, :on_slave_unless
 
     def on_cx_switch_block(which, options = {}, &block)
+      @disallow_slave ||= 0
       old_options = current_shard_selection.options
-      switch_to_slave = (which == :slave && (@disallow_slave.nil? || @disallow_slave == 0))
-      switch_connection(:slave => switch_to_slave)
+      switch_to_slave = (which == :slave && @disallow_slave.zero?)
+      switch_connection(slave: switch_to_slave)
 
-      @disallow_slave = (@disallow_slave || 0) + 1 if which == :master
+      @disallow_slave += 1 if which == :master
 
       # we avoid_readonly_scope to prevent some stack overflow problems, like when
       # .columns calls .with_scope which calls .columns and onward, endlessly.
@@ -181,7 +182,7 @@ module ActiveRecordShards
         @which = which
       end
 
-      def method_missing(method, *args, &block)
+      def method_missing(method, *args, &block) # rubocop:disable Style/MethodMissing
         @target.on_master_or_slave(@which) { @target.send(method, *args, &block) }
       end
     end

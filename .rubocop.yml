@@ -12,142 +12,48 @@ Style/PercentLiteralDelimiters:
     '%w': '[]'
     '%W': '[]'
 
-# Offense count: 3
-# Configuration parameters: AllowSafeAssignment.
 Lint/AssignmentInCondition:
-  Exclude:
-    - 'lib/active_record_shards/configuration_parser.rb'
-    - 'lib/active_record_shards/connection_switcher.rb'
-
-# Offense count: 2
-# Cop supports --auto-correct.
-# Configuration parameters: AlignWith, SupportedStyles, AutoCorrect.
-# SupportedStyles: keyword, variable, start_of_line
-Lint/EndAlignment:
   Enabled: false
 
-# Offense count: 3
-Lint/RescueException:
-  Exclude:
-    - 'lib/active_record_shards/tasks.rb'
-    - 'test/connection_switching_test.rb'
-    - 'test/migrator_test.rb'
+Lint/EndAlignment:
+  Enabled: variable
 
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: IgnoreEmptyBlocks, AllowUnusedKeywordArguments.
-Lint/UnusedBlockArgument:
-  Exclude:
-    - 'lib/active_record_shards/shard_support.rb'
-
-# Offense count: 4
-# Cop supports --auto-correct.
-# Configuration parameters: AllowUnusedKeywordArguments, IgnoreEmptyMethods.
-Lint/UnusedMethodArgument:
-  Exclude:
-    - 'lib/active_record_shards/connection_switcher.rb'
-    - 'lib/active_record_shards/default_slave_patches.rb'
-
-# Offense count: 1
-Lint/UselessAssignment:
-  Exclude:
-    - 'lib/active_record_shards/migration.rb'
-
-# Offense count: 6
 Metrics/AbcSize:
-  Max: 27
+  Enabled: false
 
-# Offense count: 1
 Metrics/BlockNesting:
-  Max: 4
+  Enabled: false
 
-# Offense count: 4
 Metrics/CyclomaticComplexity:
-  Max: 9
+  Enabled: false
 
-# Offense count: 140
-# Configuration parameters: AllowHeredoc, AllowURI, URISchemes.
-# URISchemes: http, https
 Metrics/LineLength:
-  Max: 178
+  Enabled: false
 
-# Offense count: 16
-# Configuration parameters: CountComments.
 Metrics/MethodLength:
-  Max: 19
+  Enabled: false
 
-# Offense count: 1
-# Configuration parameters: CountComments.
 Metrics/ModuleLength:
-  Max: 127
+  Enabled: false
 
-# Offense count: 3
 Metrics/PerceivedComplexity:
-  Max: 10
+  Enabled: false
 
-# Offense count: 3
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-# SupportedStyles: prefer_alias, prefer_alias_method
 Style/Alias:
-  Exclude:
-    - 'lib/active_record_shards/connection_switcher.rb'
+  EnforcedStyle: prefer_alias_method
 
-# Offense count: 2
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles, ProceduralMethods, FunctionalMethods, IgnoredMethods.
-# SupportedStyles: line_count_based, semantic, braces_for_chaining
-# ProceduralMethods: benchmark, bm, bmbm, create, each_with_object, measure, new, realtime, tap, with_object
-# FunctionalMethods: let, let!, subject, watch
-# IgnoredMethods: lambda, proc, it
-Style/BlockDelimiters:
-  Exclude:
-    - 'test/connection_switching_test.rb'
-
-# Offense count: 2
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-# SupportedStyles: nested, compact
-Style/ClassAndModuleChildren:
-  Exclude:
-    - 'lib/active_record_shards/connection_specification.rb'
-    - 'test/helper.rb'
-
-# Offense count: 1
 Style/ClassVars:
-  Exclude:
-    - 'lib/active_record_shards/connection_switcher-4-0.rb'
+  Enabled: false
 
-# Offense count: 2
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles, SingleLineConditionsOnly.
-# SupportedStyles: assign_to_condition, assign_inside_condition
 Style/ConditionalAssignment:
-  Exclude:
-    - 'lib/active_record_shards/connection_switcher-4-0.rb'
-    - 'lib/active_record_shards/tasks.rb'
+  Enabled: false
 
-# Offense count: 1
-Style/ConstantName:
-  Exclude:
-    - 'test/helper.rb'
-
-# Offense count: 23
 Style/Documentation:
   Enabled: false
 
-# Offense count: 1
 Style/DoubleNegation:
-  Exclude:
-    - 'lib/active_record_shards/model.rb'
+  Enabled: false
 
-# Offense count: 2
-# Cop supports --auto-correct.
-Style/ElseAlignment:
-  Exclude:
-    - 'lib/active_record_shards/default_slave_patches.rb'
-
-# Offense count: 7
-# Cop supports --auto-correct.
 Style/EmptyLines:
   Exclude:
     - 'lib/active_record_shards-3-2.rb'
@@ -155,8 +61,6 @@ Style/EmptyLines:
     - 'lib/active_record_shards-4-1.rb'
     - 'lib/active_record_shards-5-0.rb'
 
-# Offense count: 6
-# Configuration parameters: ExpectMatchingDefinition, Regex, IgnoreExecutableScripts.
 Style/FileName:
   Exclude:
     - 'lib/active_record_shards-3-2.rb'
@@ -166,138 +70,32 @@ Style/FileName:
     - 'lib/active_record_shards/connection_switcher-4-0.rb'
     - 'lib/active_record_shards/connection_switcher-5-0.rb'
 
-# Offense count: 1
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-# SupportedStyles: format, sprintf, percent
 Style/FormatString:
-  Exclude:
-    - 'lib/active_record_shards/tasks.rb'
+  EnforcedStyle: percent
 
-# Offense count: 3
-# Configuration parameters: AllowedVariables.
-Style/GlobalVars:
-  Exclude:
-    - 'test/failure_migration/20110824010215_failure_migration.rb'
-
-# Offense count: 1
-# Configuration parameters: MinBodyLength.
 Style/GuardClause:
-  Exclude:
-    - 'lib/active_record_shards/tasks.rb'
-
-# Offense count: 40
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles, UseHashRocketsWithSymbolValues, PreferHashRocketsForNonAlnumEndingSymbols.
-# SupportedStyles: ruby19, ruby19_no_mixed_keys, hash_rockets
-Style/HashSyntax:
   Enabled: false
 
-# Offense count: 3
-# Cop supports --auto-correct.
-# Configuration parameters: MaxLineLength.
-Style/IfUnlessModifier:
-  Exclude:
-    - 'lib/active_record_shards/connection_switcher.rb'
-    - 'lib/active_record_shards/shard_selection.rb'
-    - 'test/connection_switching_test.rb'
+Style/HashSyntax:
+  EnforcedStyle: ruby19
 
-# Offense count: 10
-# Cop supports --auto-correct.
-# Configuration parameters: SupportedStyles, IndentationWidth.
-# SupportedStyles: special_inside_parentheses, consistent, align_braces
+Style/IfUnlessModifier:
+  Enabled: false
+
 Style/IndentHash:
   EnforcedStyle: consistent
 
-# Offense count: 2
-# Cop supports --auto-correct.
-# Configuration parameters: Width.
 Style/IndentationWidth:
-  Exclude:
-    - 'lib/active_record_shards/default_slave_patches.rb'
+  Width: 2
 
-# Offense count: 2
-Style/MethodMissing:
-  Exclude:
-    - 'lib/active_record_shards/association_collection_connection_selection.rb'
-    - 'lib/active_record_shards/connection_switcher.rb'
-
-# Offense count: 4
-# Cop supports --auto-correct.
-Style/MutableConstant:
-  Exclude:
-    - 'lib/active_record_shards/default_slave_patches.rb'
-    - 'test/connection_switching_test.rb'
-    - 'test/helper.rb'
-
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/NegatedIf:
-  Exclude:
-    - 'lib/active_record_shards/default_slave_patches.rb'
-
-# Offense count: 3
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, MinBodyLength, SupportedStyles.
-# SupportedStyles: skip_modifier_ifs, always
-Style/Next:
-  Exclude:
-    - 'lib/active_record_shards/configuration_parser.rb'
-    - 'lib/active_record_shards/tasks.rb'
-
-# Offense count: 6
-# Cop supports --auto-correct.
 Style/NumericLiterals:
-  MinDigits: 15
+  Enabled: false
 
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-# SupportedStyles: predicate, comparison
-Style/NumericPredicate:
-  Exclude:
-    - 'lib/active_record_shards/connection_switcher.rb'
-
-# Offense count: 1
-# Configuration parameters: NamePrefix, NamePrefixBlacklist, NameWhitelist.
-# NamePrefix: is_, has_, have_
-# NamePrefixBlacklist: is_, has_, have_
-# NameWhitelist: is_a?
-Style/PredicateName:
-  Exclude:
-    - 'lib/active_record_shards/model.rb'
-
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: AllowMultipleReturnValues.
-Style/RedundantReturn:
-  Exclude:
-    - 'lib/active_record_shards/migration.rb'
-
-# Offense count: 2
-# Cop supports --auto-correct.
-Style/RescueModifier:
-  Exclude:
-    - 'lib/active_record_shards/default_slave_patches.rb'
-    - 'lib/active_record_shards/tasks.rb'
-
-# Offense count: 1
-# Configuration parameters: Methods.
-# Methods: {"reduce"=>["a", "e"]}, {"inject"=>["a", "e"]}
 Style/SingleLineBlockParams:
-  Exclude:
-    - 'lib/active_record_shards/shard_support.rb'
+  Enabled: false
 
-# Offense count: 360
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles, ConsistentQuotesInMultiline.
-# SupportedStyles: single_quotes, double_quotes
 Style/StringLiterals:
   Enabled: false
 
-# Offense count: 9
-# Cop supports --auto-correct.
-# Configuration parameters: SupportedStyles, WordRegex.
-# SupportedStyles: percent, brackets
 Style/WordArray:
-  EnforcedStyle: percent
-  MinSize: 3
+  Enabled: false

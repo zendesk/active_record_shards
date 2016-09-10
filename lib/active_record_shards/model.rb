@@ -8,7 +8,7 @@ module ActiveRecordShards
       @sharded = false
     end
 
-    def is_sharded?
+    def is_sharded? # rubocop:disable Style/PredicateName
       if self == ActiveRecord::Base
         @sharded != false && supports_sharding?
       elsif self == base_class

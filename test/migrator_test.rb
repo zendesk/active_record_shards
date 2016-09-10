@@ -64,13 +64,9 @@ describe ActiveRecord::Migrator do
 
   it "does not migrate bad migrations" do
     migration_path = File.join(File.dirname(__FILE__), "/cowardly_migration")
-    exception = nil
-    begin
+    assert_raises StandardError do
       ActiveRecord::Migrator.migrate(migration_path)
-    rescue Exception => e
-      exception = e
     end
-    assert exception
   end
 
   it "fails with failing migrations" do
