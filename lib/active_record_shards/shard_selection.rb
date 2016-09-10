@@ -6,6 +6,7 @@ module ActiveRecordShards
 
     def initialize
       @on_slave = false
+      @shard = nil
     end
 
     if ActiveRecord::VERSION::MAJOR < 5

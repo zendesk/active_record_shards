@@ -1,16 +1,6 @@
 # frozen_string_literal: true
 require File.expand_path('../helper', __FILE__)
 
-class CowardlyMigration < BaseMigration
-  def self.up
-    "not gonna happen"
-  end
-
-  def self.down
-    "uh uh"
-  end
-end
-
 describe ActiveRecord::Migrator do
   before do
     Phenix.rise!(with_schema: true)
