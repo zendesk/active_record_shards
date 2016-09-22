@@ -158,22 +158,20 @@ module ActiveRecordShards
       ActiveRecordShards.rails_env
     end
 
-    def columns_with_default_shard
+    def with_default_shard
       if is_sharded? && current_shard_id.nil? && table_name != ActiveRecord::Migrator.schema_migrations_table_name
-        on_first_shard { columns_without_default_shard }
+        on_first_shard { yield }
       else
-        columns_without_default_shard
+        yield
       end
     end
 
+    def columns_with_default_shard
+      with_default_shard { columns_without_default_shard }
+    end
+
     def table_exists_with_default_shard?
-      result = table_exists_without_default_shard?
-
-      if !result && is_sharded? && (shard_name = shard_names.first)
-        result = on_shard(shard_name) { table_exists_without_default_shard? }
-      end
-
-      result
+      with_default_shard { table_exists_without_default_shard? }
     end
 
     class MasterSlaveProxy
