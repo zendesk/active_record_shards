@@ -473,14 +473,6 @@ describe "connection switching" do
           assert_equal('master_name', @model.name)
         end
 
-        it "be marked as read only" do
-          if ActiveRecord::VERSION::STRING >= '4.2.0'
-            skip("Readonly scope on finder method is complicated on Rails 4.2")
-          end
-
-          assert(@model.readonly?)
-        end
-
         it "be marked as comming from the slave" do
           assert(@model.from_slave?)
         end
@@ -504,15 +496,6 @@ describe "connection switching" do
           @model = Account.first
           assert(@model)
           assert_equal('master_name', @model.name)
-        end
-
-        it "not unset readonly" do
-          @model = Account.on_master.readonly.first
-          assert(@model.readonly?)
-        end
-
-        it "not be marked as read only" do
-          assert(!@model.readonly?)
         end
 
         it "not be marked as comming from the slave" do

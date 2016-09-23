@@ -109,13 +109,7 @@ module ActiveRecordShards
 
       switch_connection(slave: switch_to_slave)
 
-      # we avoid_readonly_scope to prevent some stack overflow problems, like when
-      # .columns calls .with_scope which calls .columns and onward, endlessly.
-      if self == ActiveRecord::Base || !switch_to_slave || construct_ro_scope == false
-        yield
-      else
-        readonly.scoping(&block)
-      end
+      yield
     ensure
       @disallow_slave -= 1 if which == :master
       switch_connection(old_options) if old_options
