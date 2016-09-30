@@ -1,5 +1,6 @@
 AllCops:
   CacheRootDirectory: tmp
+  DisplayCopNames: true
   Exclude:
     - .git/**/*
     - gemfiles/vendor/**/*

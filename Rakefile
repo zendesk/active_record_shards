@@ -14,9 +14,7 @@ end
 
 task default: ["rubocop", "wwtd:local"]
 
-RuboCop::RakeTask.new(:rubocop) do |task|
-  task.options = %w[--display-cop-names]
-end
+RuboCop::RakeTask.new
 
 task :console do
   require 'irb'
