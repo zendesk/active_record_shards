@@ -35,11 +35,13 @@ module ActiveRecord
     end
 
     # don't allow Migrator class to cache versions
+    undef migrated
     def migrated
       self.class.get_all_versions
     end
 
     # list of pending migrations is any migrations that haven't run on all shards.
+    undef pending_migrations
     def pending_migrations
       pending, _missing = self.class.shard_status(migrations.map(&:version))
       pending = pending.values.flatten
