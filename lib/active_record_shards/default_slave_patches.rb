@@ -26,13 +26,13 @@ module ActiveRecordShards
     end
 
     def columns_with_force_slave(*args, &block)
-      on_cx_switch_block(:slave, construct_ro_scope: false, force: true) do
+      on_cx_switch_block(:slave, force: true) do
         columns_without_force_slave(*args, &block)
       end
     end
 
     def table_exists_with_force_slave?(*args, &block)
-      on_cx_switch_block(:slave, construct_ro_scope: false, force: true) do
+      on_cx_switch_block(:slave, force: true) do
         table_exists_without_force_slave?(*args, &block)
       end
     end
