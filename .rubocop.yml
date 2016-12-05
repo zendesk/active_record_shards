@@ -25,6 +25,9 @@ Metrics/AbcSize:
 Metrics/BlockNesting:
   Enabled: false
 
+Metrics/BlockLength:
+  Enabled: false
+
 Metrics/CyclomaticComplexity:
   Enabled: false
 
@@ -55,10 +58,16 @@ Style/Documentation:
 Style/DoubleNegation:
   Enabled: false
 
+Style/EmptyLineAfterMagicComment:
+  Enabled: false
+
 Style/EmptyLines:
   Exclude:
     - 'lib/active_record_shards-3-2.rb'
     - 'lib/active_record_shards-5-0.rb'
+
+Style/EmptyMethod:
+  EnforcedStyle: expanded
 
 Style/FileName:
   Exclude:
@@ -75,17 +84,14 @@ Style/FormatString:
 Style/GuardClause:
   Enabled: false
 
-Style/HashSyntax:
-  EnforcedStyle: ruby19
-
 Style/IfUnlessModifier:
   Enabled: false
 
 Style/IndentHash:
   EnforcedStyle: consistent
 
-Style/IndentationWidth:
-  Width: 2
+Style/IndentHeredoc:
+  Enabled: false
 
 Style/NumericLiterals:
   Enabled: false
@@ -94,6 +100,9 @@ Style/SingleLineBlockParams:
   Enabled: false
 
 Style/StringLiterals:
+  Enabled: false
+
+Style/SymbolArray:
   Enabled: false
 
 Style/WordArray:

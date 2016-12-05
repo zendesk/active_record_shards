@@ -12,7 +12,7 @@ class AccountThing < ActiveRecord::Base
   not_sharded
 
   if respond_to?(:where)
-    scope :enabled, -> { where(enabled: true) }
+    scope(:enabled, -> { where(enabled: true) })
   else
     named_scope :enabled, conditions: { enabled: true }
   end
