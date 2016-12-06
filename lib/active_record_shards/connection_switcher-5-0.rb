@@ -3,7 +3,10 @@ module ActiveRecordShards
     def connection_specification_name
       name = current_shard_selection.resolve_connection_name(sharded: is_sharded?, configurations: configurations)
 
-      raise "No configuration found for #{name}" unless configurations[name] || name == "primary"
+      unless configurations[name] || name == "primary"
+        raise ActiveRecord::AdapterNotSpecified, "No database defined by #{name} in database.yml"
+      end
+
       name
     end
 
