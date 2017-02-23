@@ -8,8 +8,8 @@ Gem::Specification.new "active_record_shards", "3.7.3" do |s|
 
   s.required_ruby_version = "~> 2.0"
 
-  s.add_runtime_dependency("activerecord", ">= 3.2.16", "< 5.1")
-  s.add_runtime_dependency("activesupport", ">= 3.2.16", "< 5.1")
+  s.add_runtime_dependency("activerecord", ">= 3.2.16", "< 5.2")
+  s.add_runtime_dependency("activesupport", ">= 3.2.16", "< 5.2")
 
   s.add_development_dependency("wwtd")
   s.add_development_dependency("rake")
