@@ -20,9 +20,16 @@ module ActiveRecordShards
 
       pool = connection_handler.retrieve_connection_pool(spec_name)
       if pool.nil?
-        resolver = ActiveRecord::ConnectionAdapters::ConnectionSpecification::Resolver.new configurations
-        spec = resolver.spec(spec_name.to_sym, spec_name)
-        connection_handler.establish_connection spec
+        spec =
+          if ActiveRecord::VERSION::MAJOR == 5 && ActiveRecord::VERSION::MINOR.zero?
+            resolver = ActiveRecord::ConnectionAdapters::ConnectionSpecification::Resolver.new(configurations)
+            resolver.spec(spec_name.to_sym, spec_name)
+          else
+            # Resolver will be applied by Rails 5.1+
+            spec_name.to_sym
+          end
+
+        connection_handler.establish_connection(spec)
       end
     end
   end
