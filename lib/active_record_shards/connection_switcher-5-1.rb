@@ -19,11 +19,7 @@ module ActiveRecordShards
       spec_name = connection_specification_name
 
       pool = connection_handler.retrieve_connection_pool(spec_name)
-      if pool.nil?
-        resolver = ActiveRecord::ConnectionAdapters::ConnectionSpecification::Resolver.new(configurations)
-        spec = resolver.spec(spec_name.to_sym, spec_name)
-        connection_handler.establish_connection(spec)
-      end
+      connection_handler.establish_connection(spec_name.to_sym) if pool.nil?
     end
   end
 end
