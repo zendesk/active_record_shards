@@ -28,8 +28,8 @@ ActiveRecord::Associations::CollectionProxy.include(ActiveRecordShards::Associat
 case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
 when '3.2'
   require 'active_record_shards-3-2'
-when '4.1', '4.2'
-  require 'active_record_shards-4-1'
+when '4.2'
+  require 'active_record_shards-4-2'
 when '5.0', '5.1'
   require 'active_record_shards-5-0'
 else

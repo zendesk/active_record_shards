@@ -58,15 +58,12 @@ Style/DoubleNegation:
 Style/EmptyLines:
   Exclude:
     - 'lib/active_record_shards-3-2.rb'
-    - 'lib/active_record_shards-4-0.rb'
-    - 'lib/active_record_shards-4-1.rb'
     - 'lib/active_record_shards-5-0.rb'
 
 Style/FileName:
   Exclude:
     - 'lib/active_record_shards-3-2.rb'
-    - 'lib/active_record_shards-4-0.rb'
-    - 'lib/active_record_shards-4-1.rb'
+    - 'lib/active_record_shards-4-2.rb'
     - 'lib/active_record_shards-5-0.rb'
     - 'lib/active_record_shards/connection_switcher-4-0.rb'
     - 'lib/active_record_shards/connection_switcher-5-0.rb'
