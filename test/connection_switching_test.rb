@@ -543,7 +543,7 @@ describe "connection switching" do
         end
 
         it "sets up has and belongs to many sharded-ness correctly" do
-          if ActiveRecord::VERSION::STRING >= '4.1.0'
+          if ActiveRecord::VERSION::MAJOR >= 4
             refute Account.const_get(:HABTM_People).is_sharded?
           end
         end
