@@ -158,11 +158,21 @@ module ActiveRecordShards
       ActiveRecordShards.rails_env
     end
 
-    def with_default_shard
-      if is_sharded? && current_shard_id.nil? && table_name != ActiveRecord::Migrator.schema_migrations_table_name
-        on_first_shard { yield }
-      else
-        yield
+    if ActiveRecord::VERSION::MAJOR >= 4
+      def with_default_shard
+        if is_sharded? && current_shard_id.nil? && table_name != ActiveRecord::SchemaMigration.table_name
+          on_first_shard { yield }
+        else
+          yield
+        end
+      end
+    else
+      def with_default_shard
+        if is_sharded? && current_shard_id.nil? && table_name != ActiveRecord::Migrator.schema_migrations_table_name
+          on_first_shard { yield }
+        else
+          yield
+        end
       end
     end
 
