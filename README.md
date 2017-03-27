@@ -13,6 +13,11 @@ ActiveRecord Shards has been used and tested on Rails 3.2, 4.2 and 5.0 and has i
 
 and make sure to require 'active\_record\_shards' in some way.
 
+Add the following to the end of your Rakefile (to ensure it overrides the base tasks):
+
+    require 'active_record_shards/tasks'
+
+
 ## Configuration
 
 Add the slave and shard configuration to config/database.yml:
