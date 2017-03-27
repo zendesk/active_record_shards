@@ -39,7 +39,7 @@ namespace :db do
 
           ActiveRecordShards::Tasks.root_connection(conf).create_database(conf['database'], symbolized_configuration)
         rescue ActiveRecord::StatementInvalid => ex
-          if ex.message.include?('database exists')
+          if ex.message[/database.*exists/]
             puts "#{conf['database']} already exists"
           else
             raise ex
