@@ -91,6 +91,16 @@ This will perform the query on the slave, and mark the returned instances as rea
 
     Account.on_slave.find_by_big_expensive_query
 
+## Migrations
+
+Your migrations must specify which databases (root and/or shards) the migration
+applies to, so you must add `shard(X)` where X is one of:
+
+  * :none (apply this migration to the root database, not the shards)
+  * :all (apply this migration to all shards, not the root)
+  * <name> (apply this migration to a named shard, for data fixups)
+  * :root_and_all (apply this migration to the root database and all the shards)
+
 ## Copyright
 
 Copyright (c) 2011 Zendesk. See LICENSE for details.

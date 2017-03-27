@@ -18,16 +18,19 @@ describe ActiveRecord::Migrator do
       assert ActiveRecord::Base.connection.public_send(connection_exist_method, :accounts)
       assert ActiveRecord::Base.connection.select_value("select version from schema_migrations where version = '20110824010216'")
       assert ActiveRecord::Base.connection.select_value("select version from schema_migrations where version = '20110829215912'")
+      assert ActiveRecord::Base.connection.select_value("select version from schema_migrations where version = '20170327162001'")
     end
 
     ActiveRecord::Base.on_all_shards do
       assert table_has_column?("emails", "sharded_column")
       assert !table_has_column?("accounts", "non_sharded_column")
+      assert table_has_column?("accounts", "root_and_all_column")
     end
 
     ActiveRecord::Base.on_shard(nil) do
       assert !table_has_column?("emails", "sharded_column")
       assert table_has_column?("accounts", "non_sharded_column")
+      assert table_has_column?("accounts", "root_and_all_column")
     end
 
     # now test down/ up
@@ -41,6 +44,14 @@ describe ActiveRecord::Migrator do
       assert !table_has_column?("accounts", "non_sharded_column")
     end
 
+    ActiveRecord::Migrator.run(:down, migration_path, 20170327162001)
+    ActiveRecord::Base.on_all_shards do
+      assert !table_has_column?("accounts", "root_and_all_column")
+    end
+    ActiveRecord::Base.on_shard(nil) do
+      assert !table_has_column?("accounts", "root_and_all_column")
+    end
+
     ActiveRecord::Migrator.run(:up, migration_path, 20110824010216)
     ActiveRecord::Base.on_all_shards do
       assert table_has_column?("emails", "sharded_column")
@@ -49,6 +60,14 @@ describe ActiveRecord::Migrator do
     ActiveRecord::Migrator.run(:up, migration_path, 20110829215912)
     ActiveRecord::Base.on_shard(nil) do
       assert table_has_column?("accounts", "non_sharded_column")
+    end
+
+    ActiveRecord::Migrator.run(:up, migration_path, 20170327162001)
+    ActiveRecord::Base.on_all_shards do
+      assert table_has_column?("accounts", "root_and_all_column")
+    end
+    ActiveRecord::Base.on_shard(nil) do
+      assert table_has_column?("accounts", "root_and_all_column")
     end
   end
 
