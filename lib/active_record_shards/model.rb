@@ -1,22 +1,22 @@
 # frozen_string_literal: true
+
 module ActiveRecordShards
   module Model
     def not_sharded
       if self != ActiveRecord::Base && self != base_class
         raise "You should only call not_sharded on direct descendants of ActiveRecord::Base"
       end
-      @sharded = false
+      self.sharded = false
     end
 
     def is_sharded? # rubocop:disable Style/PredicateName
-      sharded_ivar = defined?(@sharded) ? @sharded : nil
       if self == ActiveRecord::Base
-        sharded_ivar != false && supports_sharding?
+        sharded != false && supports_sharding?
       elsif self == base_class
-        if sharded_ivar.nil?
+        if sharded.nil?
           ActiveRecord::Base.is_sharded?
         else
-          sharded_ivar != false
+          sharded != false
         end
       else
         base_class.is_sharded?
@@ -58,5 +58,6 @@ module ActiveRecordShards
     private
 
     attr_reader :on_slave_by_default
+    attr_accessor :sharded
   end
 end
