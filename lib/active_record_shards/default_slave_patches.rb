@@ -113,7 +113,7 @@ module ActiveRecordShards
     # in rails 4.1+, they create a join class that's used to pull in records for HABTM.
     # this simplifies the hell out of our existence, because all we have to do is inerit on-slave-by-default
     # down from the parent now.
-    module Rails41HasAndBelongsToManyBuilderExtension
+    module HasAndBelongsToManyBuilderExtension
       def self.included(base)
         base.class_eval do
           alias_method :through_model_without_inherit_default_slave_from_lhs, :through_model

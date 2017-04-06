@@ -248,32 +248,30 @@ describe "connection switching" do
       end
     end
 
-    if ActiveRecord::VERSION::MAJOR >= 5
-      describe "for InternalMetadata" do
-        before do
-          ActiveRecord::InternalMetadata.on_slave do
-            ActiveRecord::InternalMetadata.connection.execute("alter table ar_internal_metadata add column foo int")
-            ActiveRecord::InternalMetadata.reset_column_information
-          end
+    describe "for InternalMetadata" do
+      before do
+        ActiveRecord::InternalMetadata.on_slave do
+          ActiveRecord::InternalMetadata.connection.execute("alter table ar_internal_metadata add column foo int")
+          ActiveRecord::InternalMetadata.reset_column_information
         end
+      end
 
-        after do
-          ActiveRecord::InternalMetadata.on_slave do
-            ActiveRecord::Base.connection.execute("alter table ar_internal_metadata drop column foo")
-            ActiveRecord::InternalMetadata.reset_column_information
-            refute ActiveRecord::InternalMetadata.column_names.include?('foo')
-          end
+      after do
+        ActiveRecord::InternalMetadata.on_slave do
+          ActiveRecord::Base.connection.execute("alter table ar_internal_metadata drop column foo")
+          ActiveRecord::InternalMetadata.reset_column_information
+          refute ActiveRecord::InternalMetadata.column_names.include?('foo')
         end
+      end
 
-        it "use the non-sharded slave connection" do
-          assert_using_database('ars_test', ActiveRecord::InternalMetadata)
-          assert ActiveRecord::InternalMetadata.column_names.include?('foo')
-        end
+      it "use the non-sharded slave connection" do
+        assert_using_database('ars_test', ActiveRecord::InternalMetadata)
+        assert ActiveRecord::InternalMetadata.column_names.include?('foo')
+      end
 
-        it "ignores master/transactions" do
-          assert_using_database('ars_test', ActiveRecord::InternalMetadata)
-          ActiveRecord::InternalMetadata.on_master { assert ActiveRecord::InternalMetadata.column_names.include?('foo') }
-        end
+      it "ignores master/transactions" do
+        assert_using_database('ars_test', ActiveRecord::InternalMetadata)
+        ActiveRecord::InternalMetadata.on_master { assert ActiveRecord::InternalMetadata.column_names.include?('foo') }
       end
     end
   end
@@ -293,7 +291,7 @@ describe "connection switching" do
         assert UnshardedModel.table_exists?
 
         ActiveRecord::Base.on_all_shards do
-          refute ActiveRecord::Base.connection.public_send(connection_exist_method, "unsharded_models")
+          refute ActiveRecord::Base.connection.data_source_exists?("unsharded_models")
         end
       end
     end
@@ -657,19 +655,5 @@ describe "connection switching" do
         end
       end
     end
-  end
-
-  if ActiveRecord::VERSION::MAJOR < 5
-
-    it "raises an exception if a connection is not found" do
-      ActiveRecord::Base.on_shard(0) do
-        ActiveRecord::Base.connection_handler.remove_connection(Ticket)
-        assert_raises(ActiveRecord::ConnectionNotEstablished) do
-          ActiveRecord::Base.connection_handler.retrieve_connection_pool(Ticket)
-          assert_using_database('ars_test_shard0', Ticket)
-        end
-      end
-    end
-
   end
 end

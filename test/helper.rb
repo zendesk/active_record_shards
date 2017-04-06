@@ -25,12 +25,6 @@ ActiveRecord::Base.logger = Logger.new(File.dirname(__FILE__) + "/test.log")
 ActiveSupport.test_order = :sorted if ActiveSupport.respond_to?(:test_order=)
 ActiveSupport::Deprecation.behavior = :raise
 
-def connection_exist_method
-  ActiveRecord::VERSION::MAJOR == 5 ? :data_source_exists? : :table_exists?
-end
-
-BaseMigration = (ActiveRecord::VERSION::MAJOR >= 5 ? ActiveRecord::Migration[4.2] : ActiveRecord::Migration) # rubocop:disable Naming/ConstantName
-
 require 'active_support/test_case'
 
 # support multiple before/after blocks per example

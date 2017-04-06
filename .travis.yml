@@ -1,10 +1,8 @@
 rvm:
-  - 2.1.10
   - 2.2.4
   - 2.3.3
   - 2.4.0
 gemfile:
-  - gemfiles/rails4.2.gemfile
   - gemfiles/rails5.0.gemfile
   - gemfiles/rails5.1.gemfile
 bundler_args: --no-deployment
@@ -19,11 +17,6 @@ branches:
   only:
     - v4
 matrix:
-  exclude:
-    - rvm: 2.1.10
-      gemfile: gemfiles/rails5.0.gemfile
-    - rvm: 2.1.10
-      gemfile: gemfiles/rails5.1.gemfile
   include:
     - rvm: 2.4.0
       env:

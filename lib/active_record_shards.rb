@@ -27,13 +27,11 @@ ActiveRecord::Relation.include(ActiveRecordShards::DefaultSlavePatches::ActiveRe
 ActiveRecord::Associations::CollectionProxy.include(ActiveRecordShards::AssociationCollectionConnectionSelection)
 
 case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
-when '4.2'
-  require 'active_record_shards/patches-4-2'
 when '5.0', '5.1'
   require 'active_record_shards/patches-5-0'
 else
   raise "ActiveRecordShards is not compatible with #{ActiveRecord::VERSION::STRING}"
 end
 
-ActiveRecord::Associations::Builder::HasAndBelongsToMany.include(ActiveRecordShards::DefaultSlavePatches::Rails41HasAndBelongsToManyBuilderExtension)
+ActiveRecord::Associations::Builder::HasAndBelongsToMany.include(ActiveRecordShards::DefaultSlavePatches::HasAndBelongsToManyBuilderExtension)
 ActiveRecord::SchemaDumper.prepend(ActiveRecordShards::SchemaDumperExtension)
