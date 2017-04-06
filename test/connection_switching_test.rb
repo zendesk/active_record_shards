@@ -340,8 +340,8 @@ describe "connection switching" do
         Account.create!
         assert_using_master_db
 
-        assert_equal Account.count, ActiveRecord::Base.on_slave { Account.count }
-        assert_equal Account.count, Account.on_slave { Account.count }
+        assert_equal(Account.count, ActiveRecord::Base.on_slave { Account.count })
+        assert_equal(Account.count, Account.on_slave { Account.count })
       end
     end
 

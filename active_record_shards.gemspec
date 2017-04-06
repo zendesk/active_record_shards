@@ -15,7 +15,7 @@ Gem::Specification.new "active_record_shards", "3.9.1" do |s|
   s.add_development_dependency("rake", '~> 12.0')
   s.add_development_dependency("mysql2")
   s.add_development_dependency("bump")
-  s.add_development_dependency("rubocop", "0.42.0")
+  s.add_development_dependency("rubocop", "0.48.1")
   s.add_development_dependency("minitest")
   s.add_development_dependency("minitest-rg")
   s.add_development_dependency("mocha")
