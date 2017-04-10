@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 require 'active_record_shards'
 
-%w[db:drop db:create db:abort_if_pending_migrations db:reset db:test:purge].each do |name|
+known_tasks = Rake.application.tasks.map(&:name)
+tasks_to_clear = %w[db:drop db:create db:abort_if_pending_migrations db:reset db:test:purge]
+(known_tasks & tasks_to_clear).each do |name|
   Rake::Task[name].clear
 end
 
