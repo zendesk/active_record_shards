@@ -58,8 +58,6 @@ module ActiveRecordShards
       base.after_initialize :initialize_shard_and_slave
     end
 
-    attr_writer :on_slave_by_default
-
     # In a shared connection, ShardedModel.table_exists? will run on the first
     # shard (because of ConnectionSwitcher#table_exists_with_default_shard), while
     # ShardedModel.connection.table_exists?(sharded_table) will still run on the
