@@ -70,7 +70,7 @@ module ActiveRecordShards
     # we set primary_key as 'id'. Any model with a different primary key will
     # need to explicit set it in the class definition.
     def primary_key_with_default_value
-      @primary_key = 'id' unless defined? @primary_key
+      @primary_key ||= 'id'
       primary_key_without_default_value
     end
   end
