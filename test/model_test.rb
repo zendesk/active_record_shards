@@ -19,7 +19,7 @@ describe 'models' do
         self.primary_key = 'model_id'
       end
 
-      assert 'model_id', UniqueModel.primary_key
+      assert_equal 'model_id', UniqueModel.primary_key
     end
   end
 end
