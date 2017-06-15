@@ -65,6 +65,13 @@ module ActiveRecordShards
     def self.extended(base)
       CLASS_SLAVE_METHODS.each { |m| ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(true, base, m) }
 
+      # ActiveRecord::Explain in v3 will eagerly establish an on_master
+      # connection just to just the _static_ `supports_explain?` method on
+      # the Mysql2Adapter
+      if ActiveRecord::VERSION::MAJOR == 3
+        ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(true, base, :logging_query_plan)
+      end
+
       base.class_eval do
         include InstanceMethods
 
@@ -97,13 +104,6 @@ module ActiveRecordShards
       def self.included(base)
         [:calculate, :exists?, :pluck, :find_with_associations].each do |m|
           ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(false, base, m)
-        end
-
-        # ActiveRecord::Explain in v3 will eagerly establish an on_master
-        # connection just to just the _static_ `supports_explain?` method on
-        # the Mysql2Adapter
-        if ActiveRecord::VERSION::MAJOR == 3
-          ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(false, base, :logging_query_plan)
         end
       end
 
