@@ -484,17 +484,6 @@ describe "connection switching" do
           assert_equal 'master_name', account.reload.name
         end
 
-        if ActiveRecord::VERSION::MAJOR == 3
-          it "logging_query_plan does not checkout master connection" do
-            # This method is called on #to_a, and is implemented on the
-            # Mysql2Adapter as a static boolean, but will trigger a connection
-            # to the master.
-            Account.on_master.connection.expects(:supports_explain?).never
-            Account.on_slave.connection.expects(:supports_explain?).at_least_once
-            Account.where(id: 1000).to_a
-          end
-        end
-
         it "do exists? on the slave" do
           if Account.respond_to?(:exists?)
             assert Account.exists?(1001)
