@@ -51,27 +51,28 @@ module ActiveRecordShards
       end
     end
 
-    def self.extended(base)
-      base.send(:include, InstanceMethods)
-      base.singleton_class.send(:alias_method, :primary_key_without_default_value, :primary_key)
-      base.singleton_class.send(:alias_method, :primary_key, :primary_key_with_default_value)
-      base.after_initialize :initialize_shard_and_slave
+    module PrimaryKeyWithDefault
+      # In a shared connection, ShardedModel.table_exists? will run on the first
+      # shard (because of ConnectionSwitcher#table_exists_with_default_shard), while
+      # ShardedModel.connection.table_exists?(sharded_table) will still run on the
+      # *shared* connection (and will return false, as the sharded table doesn't exist
+      # in the shared database). Among other potential issues, this behavior causes
+      # ActiveRecord to cache the sharded table primary_id as nil.
+      #
+      # Removing the with_default_shard behavior might cause issues, so instead
+      # we set primary_key as 'id'. Any model with a different primary key will
+      # need to explicit set it in the class definition.
+      def primary_key
+        # Do not call `super`, or it can trigger `stack level too deep` if some
+        # code alias_method chain `primay_key` later (e.g. new relic gem)
+        @primary_key ||= 'id'
+      end
     end
 
-
-    # In a shared connection, ShardedModel.table_exists? will run on the first
-    # shard (because of ConnectionSwitcher#table_exists_with_default_shard), while
-    # ShardedModel.connection.table_exists?(sharded_table) will still run on the
-    # *shared* connection (and will return false, as the sharded table doesn't exist
-    # in the shared database). Among other potential issues, this behavior causes
-    # ActiveRecord to cache the sharded table primary_id as nil.
-    #
-    # Removing the with_default_shard behavior might cause issues, so instead
-    # we set primary_key as 'id'. Any model with a different primary key will
-    # need to explicit set it in the class definition.
-    def primary_key_with_default_value
-      @primary_key ||= 'id'
-      primary_key_without_default_value
+    def self.extended(base)
+      base.send(:include, InstanceMethods)
+      base.singleton_class.prepend PrimaryKeyWithDefault
+      base.after_initialize :initialize_shard_and_slave
     end
   end
 end
