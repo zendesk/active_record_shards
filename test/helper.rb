@@ -29,7 +29,7 @@ def connection_exist_method
   ActiveRecord::VERSION::MAJOR == 5 ? :data_source_exists? : :table_exists?
 end
 
-BaseMigration = (ActiveRecord::VERSION::MAJOR >= 5 ? ActiveRecord::Migration[4.2] : ActiveRecord::Migration) # rubocop:disable Style/ConstantName
+BaseMigration = (ActiveRecord::VERSION::MAJOR >= 5 ? ActiveRecord::Migration[4.2] : ActiveRecord::Migration) # rubocop:disable Naming/ConstantName
 
 require 'active_support/test_case'
 
