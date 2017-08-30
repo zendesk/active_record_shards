@@ -107,15 +107,11 @@ module ActiveRecordShards
 
     module Rails3HasAndBelongsToManyPreloaderPatches
       def self.included(base)
-        ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(false, base, :records_for) rescue nil # rubocop:disable Style/RescueModifier
+        ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(false, base, :records_for)
       end
 
       def on_slave_unless_tx
         klass.on_slave_unless_tx { yield }
-      end
-
-      def exists_with_default_slave?(*args, &block)
-        on_slave_unless_tx { exists_without_default_slave?(*args, &block) }
       end
     end
 
