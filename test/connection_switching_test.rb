@@ -590,6 +590,18 @@ describe "connection switching" do
     end
   end
 
+  describe "schema cache" do
+    it "is shared between slave and master" do
+      slave = Ticket.on_slave { Ticket.connection.schema_cache.object_id }
+      Ticket.connection.schema_cache.object_id.must_equal slave
+    end
+
+    it "is shared between different models" do
+      slave = Email.on_slave { Email.connection.schema_cache.object_id }
+      Email.connection.schema_cache.object_id.must_equal slave
+    end
+  end
+
   if ActiveRecord::VERSION::MAJOR < 5
 
     it "raises an exception if a connection is not found" do
