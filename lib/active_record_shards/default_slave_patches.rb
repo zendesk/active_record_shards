@@ -105,7 +105,7 @@ module ActiveRecordShards
       end
     end
 
-    module HasAndBelongsToManyPreloaderPatches
+    module Rails3HasAndBelongsToManyPreloaderPatches
       def self.included(base)
         ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(false, base, :records_for) rescue nil # rubocop:disable Style/RescueModifier
       end

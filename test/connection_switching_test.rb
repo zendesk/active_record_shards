@@ -521,7 +521,7 @@ describe "connection switching" do
           assert_equal "master_name", model.name
         end
 
-        it "propogate the default_slave setting to inherited classes" do
+        it "propagate the default_slave setting to inherited classes" do
           assert AccountInherited.on_slave_by_default?
         end
 
