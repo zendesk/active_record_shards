@@ -38,14 +38,15 @@ module ActiveRecordShards
 
     def transaction_with_slave_off(*args, &block)
       if on_slave_by_default?
-        old_val = Thread.current[:_active_record_shards_slave_off]
-        Thread.current[:_active_record_shards_slave_off] = true
-      end
-
-      transaction_without_slave_off(*args, &block)
-    ensure
-      if on_slave_by_default?
-        Thread.current[:_active_record_shards_slave_off] = old_val
+        begin
+          old_val = Thread.current[:_active_record_shards_slave_off]
+          Thread.current[:_active_record_shards_slave_off] = true
+          transaction_without_slave_off(*args, &block)
+        ensure
+          Thread.current[:_active_record_shards_slave_off] = old_val
+        end
+      else
+        transaction_without_slave_off(*args, &block)
       end
     end
 
