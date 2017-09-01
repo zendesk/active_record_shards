@@ -24,13 +24,11 @@ module ActiveRecordShards
     end
 
     def on_slave_by_default?
-      if self == ActiveRecord::Base
-        false
-      elsif self == base_class
-        on_slave_by_default
-      else
-        base_class.on_slave_by_default?
-      end
+      base_class.instance_variable_get(:@on_slave_by_default)
+    end
+
+    def on_slave_by_default=(value)
+      base_class.instance_variable_set(:@on_slave_by_default, value)
     end
 
     module InstanceMethods
@@ -53,11 +51,8 @@ module ActiveRecordShards
       base.after_initialize :initialize_shard_and_slave
     end
 
-    attr_writer :on_slave_by_default
-
     private
 
-    attr_reader :on_slave_by_default
     attr_accessor :sharded
   end
 end
