@@ -44,6 +44,13 @@ describe "connection switching" do
       ActiveRecord::Base.on_slave { assert_using_database('ars_test_slave') }
     end
 
+    it "does not fail on unrelated ensure error when current_shard_selection fails" do
+      ActiveRecord::Base.expects(:current_shard_selection).raises(ArgumentError)
+      assert_raises ArgumentError do
+        ActiveRecord::Base.on_slave { 1 }
+      end
+    end
+
     describe "on_first_shard" do
       it "use the first shard" do
         ActiveRecord::Base.on_first_shard do
