@@ -9,7 +9,10 @@ gemfile:
   - gemfiles/rails5.0.gemfile
   - gemfiles/rails5.1.gemfile
 bundler_args: --no-deployment
-script: bundle exec rake test
+script: bundle exec rake $TASK
+env:
+  global:
+    - TASK=test
 sudo: false
 cache:
   bundler: true
@@ -27,4 +30,5 @@ matrix:
       gemfile: gemfiles/rails5.1.gemfile
   include:
     - rvm: 2.4.0
-      script: bundle exec rake rubucop
+      env:
+        - TASK=rubocop
