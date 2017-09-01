@@ -95,18 +95,18 @@ module ActiveRecordShards
     alias_method :with_slave_if, :on_slave_if
     alias_method :with_slave_unless, :on_slave_unless
 
-    def on_cx_switch_block(which, options = {}, &block)
+    def on_cx_switch_block(which, force: false, construct_ro_scope: nil, &block)
       @disallow_slave ||= 0
       @disallow_slave += 1 if which == :master
 
-      switch_to_slave = @disallow_slave.zero?
+      switch_to_slave = force || @disallow_slave.zero?
       old_options = current_shard_selection.options
 
       switch_connection(slave: switch_to_slave)
 
       # we avoid_readonly_scope to prevent some stack overflow problems, like when
       # .columns calls .with_scope which calls .columns and onward, endlessly.
-      if self == ActiveRecord::Base || !switch_to_slave || options[:construct_ro_scope] == false
+      if self == ActiveRecord::Base || !switch_to_slave || construct_ro_scope == false
         yield
       else
         readonly.scoping(&block)

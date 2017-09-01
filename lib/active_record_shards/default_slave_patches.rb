@@ -25,15 +25,16 @@ module ActiveRecordShards
       RUBY
     end
 
-    def columns_with_default_slave(*args, &block)
-      read_columns_from =
-        if on_slave_by_default? && !Thread.current[:_active_record_shards_slave_off]
-          :slave
-        else
-          :master
-        end
+    def columns_with_force_slave(*args, &block)
+      on_cx_switch_block(:slave, construct_ro_scope: false, force: true) do
+        columns_without_force_slave(*args, &block)
+      end
+    end
 
-      on_cx_switch_block(read_columns_from, construct_ro_scope: false) { columns_without_default_slave(*args, &block) }
+    def table_exists_with_force_slave?(*args, &block)
+      on_cx_switch_block(:slave, construct_ro_scope: false, force: true) do
+        table_exists_without_force_slave?(*args, &block)
+      end
     end
 
     def transaction_with_slave_off(*args, &block)
@@ -61,7 +62,7 @@ module ActiveRecordShards
       end
     end
 
-    CLASS_SLAVE_METHODS = [:find_by_sql, :count_by_sql, :calculate, :find_one, :find_some, :find_every, :exists?, :table_exists?].freeze
+    CLASS_SLAVE_METHODS = [:find_by_sql, :count_by_sql, :calculate, :find_one, :find_some, :find_every, :exists?].freeze
 
     def self.extended(base)
       CLASS_SLAVE_METHODS.each { |m| ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(true, base, m) }
@@ -73,8 +74,11 @@ module ActiveRecordShards
         alias_method :reload, :reload_with_slave_off
 
         class << self
-          alias_method :columns_without_default_slave, :columns
-          alias_method :columns, :columns_with_default_slave
+          alias_method :columns_without_force_slave, :columns
+          alias_method :columns, :columns_with_force_slave
+
+          alias_method :table_exists_without_force_slave?, :table_exists?
+          alias_method :table_exists?, :table_exists_with_force_slave?
 
           alias_method :transaction_without_slave_off, :transaction
           alias_method :transaction, :transaction_with_slave_off

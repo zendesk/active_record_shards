@@ -2,6 +2,14 @@
 require File.expand_path('../helper', __FILE__)
 
 describe "connection switching" do
+  def clear_connection_pool
+    if ActiveRecord::VERSION::MAJOR >= 4
+      ActiveRecord::Base.connection_handler.connection_pool_list.clear
+    else
+      ActiveRecord::Base.connection_handler.connection_pools.clear
+    end
+  end
+
   before do
     Phenix.rise!(with_schema: true)
     ActiveRecord::Base.establish_connection(RAILS_ENV.to_sym)
@@ -177,35 +185,52 @@ describe "connection switching" do
     end
 
     describe "for unsharded models" do
-      it "use the non-sharded connection" do
-        assert_using_database('ars_test', Account)
-        Account.connection.execute("alter table accounts add column foo int")
-        Account.reset_column_information
-        assert Account.column_names.include?('foo')
+      before do
+        Account.on_slave do
+          Account.connection.execute("alter table accounts add column foo int")
+          Account.reset_column_information
+        end
       end
 
       after do
-        ActiveRecord::Base.connection.execute("alter table accounts drop column foo")
-        Account.reset_column_information
+        Account.on_slave do
+          ActiveRecord::Base.connection.execute("alter table accounts drop column foo")
+          Account.reset_column_information
+          refute Account.column_names.include?('foo')
+        end
+      end
+
+      it "use the non-sharded slave connection" do
+        assert_using_database('ars_test', Account)
+        assert Account.column_names.include?('foo')
+      end
+
+      it "ignores master/transactions" do
+        assert_using_database('ars_test', Account)
+        Account.on_master { assert Account.column_names.include?('foo') }
       end
     end
 
     describe "for sharded models" do
       before do
         ActiveRecord::Base.on_first_shard do
-          ActiveRecord::Base.connection.execute("alter table tickets add column foo int")
-          Ticket.reset_column_information
+          ActiveRecord::Base.on_slave do
+            ActiveRecord::Base.connection.execute("alter table tickets add column foo int")
+            Ticket.reset_column_information
+          end
         end
       end
 
       after do
         ActiveRecord::Base.on_first_shard do
-          ActiveRecord::Base.connection.execute("alter table tickets drop column foo")
-          Ticket.reset_column_information
+          ActiveRecord::Base.on_slave do
+            ActiveRecord::Base.connection.execute("alter table tickets drop column foo")
+            Ticket.reset_column_information
+          end
         end
       end
 
-      it "get colmns from the first shard" do
+      it "gets columns from the slave shard" do
         assert Ticket.column_names.include?('foo')
       end
 
@@ -241,12 +266,12 @@ describe "connection switching" do
     end
 
     describe "for unsharded models" do
-      it "use the unsharded connection" do
+      it "use the unsharded slave connection" do
         class UnshardedModel < ActiveRecord::Base
           not_sharded
         end
 
-        UnshardedModel.connection.execute("create table unsharded_models (id int)")
+        UnshardedModel.on_slave { UnshardedModel.connection.execute("create table unsharded_models (id int)") }
         assert UnshardedModel.table_exists?
 
         ActiveRecord::Base.on_all_shards do
@@ -256,12 +281,14 @@ describe "connection switching" do
     end
 
     describe "for sharded models" do
-      it "try the first shard" do
+      it "uses the first shard slave" do
         class ShardedModel < ActiveRecord::Base
         end
 
         ActiveRecord::Base.on_first_shard do
-          ShardedModel.connection.execute("create table sharded_models (id int)")
+          ShardedModel.on_slave do
+            ShardedModel.connection.execute("create table sharded_models (id int)")
+          end
         end
 
         assert ShardedModel.table_exists?
@@ -321,12 +348,7 @@ describe "connection switching" do
       before do
         @saved_config = ActiveRecord::Base.configurations.delete('test_slave')
         Thread.current[:shard_selection] = nil # drop caches
-
-        if ActiveRecord::VERSION::MAJOR >= 4
-          ActiveRecord::Base.connection_handler.connection_pool_list.clear
-        else
-          ActiveRecord::Base.connection_handler.connection_pools.clear
-        end
+        clear_connection_pool
         ActiveRecord::Base.establish_connection(:test)
       end
 
