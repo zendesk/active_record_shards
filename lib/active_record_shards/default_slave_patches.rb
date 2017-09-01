@@ -26,24 +26,17 @@ module ActiveRecordShards
     end
 
     def columns_with_default_slave(*args, &block)
-      read_columns_from =
-        if on_slave_by_default? && !Thread.current[:_active_record_shards_slave_off]
-          :slave
-        else
-          :master
-        end
-
+      read_columns_from = (on_slave_by_default? ? :slave : :master)
       on_cx_switch_block(read_columns_from, construct_ro_scope: false) { columns_without_default_slave(*args, &block) }
     end
 
     def transaction_with_slave_off(*args, &block)
       if on_slave_by_default?
         begin
-          old_val = Thread.current[:_active_record_shards_slave_off]
-          Thread.current[:_active_record_shards_slave_off] = true
+          self.on_slave_by_default = false
           transaction_without_slave_off(*args, &block)
         ensure
-          Thread.current[:_active_record_shards_slave_off] = old_val
+          self.on_slave_by_default = true
         end
       else
         transaction_without_slave_off(*args, &block)
@@ -87,7 +80,7 @@ module ActiveRecordShards
     end
 
     def on_slave_unless_tx
-      if on_slave_by_default? && !Thread.current[:_active_record_shards_slave_off]
+      if on_slave_by_default?
         on_slave { yield }
       else
         yield
