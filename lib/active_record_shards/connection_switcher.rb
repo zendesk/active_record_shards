@@ -96,11 +96,11 @@ module ActiveRecordShards
     alias_method :with_slave_unless, :on_slave_unless
 
     def on_cx_switch_block(which, options = {}, &block)
-      old_options = current_shard_selection.options
-
       @disallow_slave ||= 0
       @disallow_slave += 1 if which == :master
+
       switch_to_slave = @disallow_slave.zero?
+      old_options = current_shard_selection.options
 
       switch_connection(slave: switch_to_slave)
 
@@ -113,7 +113,7 @@ module ActiveRecordShards
       end
     ensure
       @disallow_slave -= 1 if which == :master
-      switch_connection(old_options)
+      switch_connection(old_options) if old_options
     end
 
     def supports_sharding?
