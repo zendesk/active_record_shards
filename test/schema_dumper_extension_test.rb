@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-require File.expand_path('../helper', __FILE__)
+require_relative 'helper'
 
 if ActiveRecord::VERSION::MAJOR >= 4
   describe ActiveRecordShards::SchemaDumperExtension do
