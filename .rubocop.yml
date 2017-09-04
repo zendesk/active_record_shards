@@ -7,17 +7,47 @@ AllCops:
     - vendor/**/*
   TargetRubyVersion: 2.1
 
-Style/PercentLiteralDelimiters:
-  PreferredDelimiters:
-    '%i': '[]'
-    '%w': '[]'
-    '%W': '[]'
+# Configured cops
 
-Lint/AssignmentInCondition:
-  Enabled: false
+Layout/EmptyLines:
+  Exclude:
+    - 'lib/active_record_shards/patches-3-2.rb'
+    - 'lib/active_record_shards/patches-5-0.rb'
+
+Layout/IndentHash:
+  EnforcedStyle: consistent
 
 Lint/EndAlignment:
   Enabled: variable
+
+Style/Alias:
+  EnforcedStyle: prefer_alias_method
+
+Style/EmptyMethod:
+  EnforcedStyle: expanded
+
+Style/FileName:
+  Exclude:
+    - 'lib/active_record_shards/patches-3-2.rb'
+    - 'lib/active_record_shards/patches-4-2.rb'
+    - 'lib/active_record_shards/patches-5-0.rb'
+    - 'lib/active_record_shards/connection_switcher-4-0.rb'
+    - 'lib/active_record_shards/connection_switcher-5-0.rb'
+    - 'lib/active_record_shards/connection_switcher-5-1.rb'
+
+Style/FormatString:
+  EnforcedStyle: percent
+
+# Disabled cops
+
+Layout/EmptyLineAfterMagicComment:
+  Enabled: false
+
+Layout/IndentHeredoc:
+  Enabled: false
+
+Lint/AssignmentInCondition:
+  Enabled: false
 
 Metrics/AbcSize:
   Enabled: false
@@ -43,9 +73,6 @@ Metrics/ModuleLength:
 Metrics/PerceivedComplexity:
   Enabled: false
 
-Style/Alias:
-  EnforcedStyle: prefer_alias_method
-
 Style/ClassVars:
   Enabled: false
 
@@ -58,39 +85,10 @@ Style/Documentation:
 Style/DoubleNegation:
   Enabled: false
 
-Style/EmptyLineAfterMagicComment:
-  Enabled: false
-
-Style/EmptyLines:
-  Exclude:
-    - 'lib/active_record_shards/patches-3-2.rb'
-    - 'lib/active_record_shards/patches-5-0.rb'
-
-Style/EmptyMethod:
-  EnforcedStyle: expanded
-
-Style/FileName:
-  Exclude:
-    - 'lib/active_record_shards/patches-3-2.rb'
-    - 'lib/active_record_shards/patches-4-2.rb'
-    - 'lib/active_record_shards/patches-5-0.rb'
-    - 'lib/active_record_shards/connection_switcher-4-0.rb'
-    - 'lib/active_record_shards/connection_switcher-5-0.rb'
-    - 'lib/active_record_shards/connection_switcher-5-1.rb'
-
-Style/FormatString:
-  EnforcedStyle: percent
-
 Style/GuardClause:
   Enabled: false
 
 Style/IfUnlessModifier:
-  Enabled: false
-
-Style/IndentHash:
-  EnforcedStyle: consistent
-
-Style/IndentHeredoc:
   Enabled: false
 
 Style/NumericLiterals:
