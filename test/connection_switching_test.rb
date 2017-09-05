@@ -550,8 +550,18 @@ describe "connection switching" do
           assert_equal "master_name", model.name
         end
 
-        it "propogate the default_slave setting to inherited classes" do
+        it "propogate the on_slave_by_default reader to inherited classes" do
           assert AccountInherited.on_slave_by_default?
+        end
+
+        it "propogate the on_slave_by_default writer to inherited classes" do
+          begin
+            AccountInherited.on_slave_by_default = false
+            refute AccountInherited.on_slave_by_default?
+            refute Account.on_slave_by_default?
+          ensure
+            AccountInherited.on_slave_by_default = true
+          end
         end
 
         it "will :include things via has_and_belongs associations correctly" do
