@@ -24,7 +24,9 @@ module ActiveRecordShards
     end
 
     def on_slave_by_default?
-      base_class.instance_variable_get(:@on_slave_by_default)
+      if base_class.instance_variable_defined?(:@on_slave_by_default)
+        base_class.instance_variable_get(:@on_slave_by_default)
+      end
     end
 
     def on_slave_by_default=(value)
