@@ -34,6 +34,30 @@ BaseMigration = (ActiveRecord::VERSION::MAJOR >= 5 ? ActiveRecord::Migration[4.2
 Phenix.configure
 
 require 'active_support/test_case'
+
+# support multiple before/after blocks per example
+Minitest::Spec::DSL.class_eval do
+  remove_method :before
+  def before(_type = nil, &block)
+    include(Module.new do
+      define_method(:setup) do
+        super()
+        instance_exec(&block)
+      end
+    end)
+  end
+
+  remove_method :after
+  def after(_type = nil, &block)
+    include(Module.new do
+      define_method(:teardown) do
+        instance_exec(&block)
+        super()
+      end
+    end)
+  end
+end
+
 Minitest::Spec.class_eval do
   def show_databases(config)
     client = Mysql2::Client.new(
@@ -65,5 +89,19 @@ Minitest::Spec.class_eval do
 
   def table_has_column?(table, column)
     !ActiveRecord::Base.connection.select_values("desc #{table}").grep(column).empty?
+  end
+
+  # create all databases and then tear them down after test
+  # avoid doing any shard switching while preparing our databases
+  def self.with_phenix
+    before do
+      ActiveRecord::Base.stubs(:with_default_shard).yields
+      Phenix.rise!(with_schema: true)
+      ActiveRecord::Base.unstub(:with_default_shard)
+    end
+
+    after do
+      Phenix.burn!
+    end
   end
 end

@@ -5,18 +5,16 @@ if ActiveRecord::VERSION::MAJOR >= 4
   describe ActiveRecordShards::SchemaDumperExtension do
     describe "schema dump" do
       let(:schema_file) { Tempfile.new('active_record_shards_schema.rb') }
-      before do
-        Phenix.rise!(with_schema: true)
 
+      with_phenix
+
+      before do
         # create shard-specific columns
         ActiveRecord::Migrator.migrations_paths = [File.join(File.dirname(__FILE__), "/migrations")]
         ActiveRecord::Migrator.migrate(ActiveRecord::Migrator.migrations_paths)
       end
 
-      after do
-        schema_file.unlink
-        Phenix.burn!
-      end
+      after { schema_file.unlink }
 
       it "includes the sharded tables" do
         ActiveRecord::SchemaDumper.dump(ActiveRecord::Base.connection, schema_file)
