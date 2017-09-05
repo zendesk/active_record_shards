@@ -10,14 +10,11 @@ describe "connection switching" do
     end
   end
 
+  with_phenix
+
   before do
-    Phenix.rise!(with_schema: true)
     ActiveRecord::Base.establish_connection(RAILS_ENV.to_sym)
     require 'models'
-  end
-
-  after do
-    Phenix.burn!
   end
 
   describe "shard switching" do

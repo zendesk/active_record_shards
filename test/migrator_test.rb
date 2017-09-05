@@ -2,13 +2,7 @@
 require_relative 'helper'
 
 describe ActiveRecord::Migrator do
-  before do
-    Phenix.rise!(with_schema: true)
-  end
-
-  after do
-    Phenix.burn!
-  end
+  with_phenix
 
   it "migrates" do
     migration_path = File.join(File.dirname(__FILE__), "/migrations")
