@@ -91,6 +91,15 @@ This will perform the query on the slave, and mark the returned instances as rea
 
     Account.on_slave.find_by_big_expensive_query
 
+## Debugging
+
+Show if a query went to master or slave in the logs:
+
+```Ruby
+require 'active_record_shards/sql_comments'
+ActiveRecordShards::SqlComments.enable
+```
+
 ## Copyright
 
 Copyright (c) 2011 Zendesk. See LICENSE for details.
