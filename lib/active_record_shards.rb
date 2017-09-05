@@ -5,6 +5,7 @@ require 'active_record_shards/configuration_parser'
 require 'active_record_shards/model'
 require 'active_record_shards/shard_selection'
 require 'active_record_shards/connection_switcher'
+require 'active_record_shards/connection_schema_cache'
 require 'active_record_shards/association_collection_connection_selection'
 require 'active_record_shards/migration'
 require 'active_record_shards/default_slave_patches'
@@ -21,6 +22,9 @@ end
 ActiveRecord::Base.extend(ActiveRecordShards::ConfigurationParser)
 ActiveRecord::Base.extend(ActiveRecordShards::Model)
 ActiveRecord::Base.extend(ActiveRecordShards::ConnectionSwitcher)
+class << ActiveRecord::Base
+  prepend ActiveRecordShards::ConnectionSchemaCache
+end
 ActiveRecord::Base.extend(ActiveRecordShards::DefaultSlavePatches)
 ActiveRecord::Relation.include(ActiveRecordShards::DefaultSlavePatches::ActiveRelationPatches)
 ActiveRecord::Associations::CollectionProxy.include(ActiveRecordShards::AssociationCollectionConnectionSelection)
