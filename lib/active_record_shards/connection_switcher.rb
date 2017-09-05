@@ -6,8 +6,13 @@ module ActiveRecordShards
     SHARD_NAMES_CONFIG_KEY = 'shard_names'.freeze
 
     def self.extended(base)
-      base.singleton_class.send(:alias_method, :columns_without_default_shard, :columns)
-      base.singleton_class.send(:alias_method, :columns, :columns_with_default_shard)
+      if ActiveRecord::VERSION::MAJOR >= 5
+        base.singleton_class.send(:alias_method, :load_schema_without_default_shard!, :load_schema!)
+        base.singleton_class.send(:alias_method, :load_schema!, :load_schema_with_default_shard!)
+      else
+        base.singleton_class.send(:alias_method, :columns_without_default_shard, :columns)
+        base.singleton_class.send(:alias_method, :columns, :columns_with_default_shard)
+      end
 
       base.singleton_class.send(:alias_method, :table_exists_without_default_shard?, :table_exists?)
       base.singleton_class.send(:alias_method, :table_exists?, :table_exists_with_default_shard?)
@@ -177,8 +182,14 @@ module ActiveRecordShards
       end
     end
 
-    def columns_with_default_shard
-      with_default_shard { columns_without_default_shard }
+    if ActiveRecord::VERSION::MAJOR >= 5
+      def load_schema_with_default_shard!
+        with_default_shard { load_schema_without_default_shard! }
+      end
+    else
+      def columns_with_default_shard
+        with_default_shard { columns_without_default_shard }
+      end
     end
 
     def table_exists_with_default_shard?
