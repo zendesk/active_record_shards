@@ -554,6 +554,10 @@ describe "connection switching" do
           assert AccountInherited.on_slave_by_default?
         end
 
+        it "is false on ActiveRecord::Base" do
+          refute ActiveRecord::Base.on_slave_by_default?
+        end
+
         it "propogate the on_slave_by_default writer to inherited classes" do
           begin
             AccountInherited.on_slave_by_default = false
@@ -561,6 +565,12 @@ describe "connection switching" do
             refute Account.on_slave_by_default?
           ensure
             AccountInherited.on_slave_by_default = true
+          end
+        end
+
+        it "refuses to set on ActiveRecord::Base" do
+          assert_raises ArgumentError do
+            ActiveRecord::Base.on_slave_by_default = true
           end
         end
 
