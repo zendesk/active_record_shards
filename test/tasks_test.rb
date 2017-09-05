@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-require File.expand_path('../helper', __FILE__)
+require_relative 'helper'
 
 # ActiveRecordShards overrides some of the ActiveRecord tasks, so
 # ActiveRecord needs to be loaded first.

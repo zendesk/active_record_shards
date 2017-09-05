@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-require File.expand_path('../helper', __FILE__)
+require_relative 'helper'
 
 describe ActiveRecordShards::ConfigurationParser do
   describe "exploding the database.yml" do
