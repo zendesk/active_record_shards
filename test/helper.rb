@@ -31,8 +31,6 @@ end
 
 BaseMigration = (ActiveRecord::VERSION::MAJOR >= 5 ? ActiveRecord::Migration[4.2] : ActiveRecord::Migration) # rubocop:disable Style/ConstantName
 
-Phenix.configure
-
 require 'active_support/test_case'
 
 # support multiple before/after blocks per example
@@ -96,7 +94,25 @@ Minitest::Spec.class_eval do
   def self.with_phenix
     before do
       ActiveRecord::Base.stubs(:with_default_shard).yields
+
+      # Populate unsharded databases
+      Phenix.configure do |config|
+        config.schema_path = File.join(Dir.pwd, 'test', 'unsharded_schema.rb')
+        config.skip_database = lambda do |name, _|
+          %w[test_shard_0 test_shard_0_slave test_shard_1 test_shard_1_slave].include?(name)
+        end
+      end
       Phenix.rise!(with_schema: true)
+
+      # Populate sharded databases
+      Phenix.configure do |config|
+        config.schema_path = File.join(Dir.pwd, 'test', 'sharded_schema.rb')
+        config.skip_database = lambda do |name, _|
+          %w[test test_slave test2 test2_slave].include?(name)
+        end
+      end
+      Phenix.rise!(with_schema: true)
+
       ActiveRecord::Base.unstub(:with_default_shard)
     end
 
