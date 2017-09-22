@@ -643,10 +643,10 @@ describe "connection switching" do
       end
 
       it "work on association collections" do
-        begin
-          assert_using_master_db
-          account = Account.create!
+        assert_using_master_db
+        account = Account.create!
 
+        ActiveRecord::Base.on_shard(0) do
           account.tickets.create! title: 'master ticket'
 
           Ticket.on_slave do
@@ -655,11 +655,6 @@ describe "connection switching" do
 
           assert_equal "master ticket", account.tickets.first.title
           assert_equal "slave ticket", account.tickets.on_slave.first.title
-        rescue StandardError
-          retried ||= 0
-          retried += 1
-          puts "Failed in #{__LINE__}##{retried}"
-          retry if retried < 3
         end
       end
     end
