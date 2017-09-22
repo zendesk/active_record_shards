@@ -18,10 +18,6 @@ class AccountThing < ActiveRecord::Base
   end
 end
 
-class Email < ActiveRecord::Base
-  not_sharded
-end
-
 class AccountInherited < Account
 end
 

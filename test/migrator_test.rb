@@ -15,19 +15,19 @@ describe ActiveRecord::Migrator do
     end
 
     ActiveRecord::Base.on_all_shards do
-      assert table_has_column?("emails", "sharded_column")
+      assert table_has_column?("tickets", "sharded_column")
       assert !table_has_column?("accounts", "non_sharded_column")
     end
 
     ActiveRecord::Base.on_shard(nil) do
-      assert !table_has_column?("emails", "sharded_column")
+      assert !table_has_column?("tickets", "sharded_column")
       assert table_has_column?("accounts", "non_sharded_column")
     end
 
     # now test down/ up
     ActiveRecord::Migrator.run(:down, migration_path, 20110824010216)
     ActiveRecord::Base.on_all_shards do
-      assert !table_has_column?("emails", "sharded_column")
+      assert !table_has_column?("tickets", "sharded_column")
     end
 
     ActiveRecord::Migrator.run(:down, migration_path, 20110829215912)
@@ -37,7 +37,7 @@ describe ActiveRecord::Migrator do
 
     ActiveRecord::Migrator.run(:up, migration_path, 20110824010216)
     ActiveRecord::Base.on_all_shards do
-      assert table_has_column?("emails", "sharded_column")
+      assert table_has_column?("tickets", "sharded_column")
     end
 
     ActiveRecord::Migrator.run(:up, migration_path, 20110829215912)

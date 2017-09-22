@@ -18,14 +18,6 @@ ActiveRecord::Schema.define(version: 1) do
     t.integer "person_id"
   end
 
-  create_table "emails", force: true do |t|
-    t.string   "from"
-    t.string   "to"
-    t.text     "mail"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
   create_table "tickets", force: true do |t|
     t.string   "title"
     t.integer  "account_id"

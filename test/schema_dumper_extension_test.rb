@@ -31,12 +31,12 @@ if ActiveRecord::VERSION::MAJOR >= 4
         end
 
         ActiveRecord::Base.on_all_shards do
-          assert table_has_column?("emails", "sharded_column")
+          assert table_has_column?("tickets", "sharded_column")
           assert !table_has_column?("accounts", "non_sharded_column")
         end
 
         ActiveRecord::Base.on_shard(nil) do
-          assert !table_has_column?("emails", "sharded_column")
+          assert !table_has_column?("tickets", "sharded_column")
           assert table_has_column?("accounts", "non_sharded_column")
         end
       end
