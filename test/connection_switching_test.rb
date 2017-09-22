@@ -617,14 +617,25 @@ describe "connection switching" do
         end
 
         it "supports implicit joins" do
-          accounts = Account.includes(:tickets)
-          accounts = accounts.references(:tickets) if ActiveRecord::VERSION::MAJOR >= 4
-          assert_equal ["slave_name", "slave_name2"], accounts.order('tickets.id').map(&:name).sort
+          accounts = Account.includes(:account_things)
+          accounts = accounts.references(:account_things) if ActiveRecord::VERSION::MAJOR >= 4
+          assert_equal ["slave_name", "slave_name2"], accounts.order('account_things.id').map(&:name).sort
         end
 
         it "supports joins" do
-          accounts = Account.joins('LEFT OUTER JOIN tickets ON tickets.account_id = accounts.id').map(&:name).sort
+          accounts = Account.joins('LEFT OUTER JOIN account_things ON account_things.account_id = accounts.id').map(&:name).sort
           assert_equal ["slave_name", "slave_name2"], accounts
+        end
+
+        it "does not support implicit joins between an unsharded and a sharded table" do
+          accounts = Account.includes(:tickets).order('tickets.id')
+          accounts = accounts.references(:tickets) if ActiveRecord::VERSION::MAJOR >= 4
+          assert_raises(ActiveRecord::StatementInvalid) { accounts.first }
+        end
+
+        it "does not support explicit joins between an unsharded and a sharded table" do
+          accounts = Account.joins('LEFT OUTER JOIN tickets ON tickets.account_id = accounts.id')
+          assert_raises(ActiveRecord::StatementInvalid) { accounts.first }
         end
 
         after do
