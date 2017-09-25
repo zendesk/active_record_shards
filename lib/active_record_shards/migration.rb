@@ -14,24 +14,6 @@ module ActiveRecord
         alias_method :"#{m}_without_sharding", m.to_sym
         alias_method m.to_sym, :"#{m}_with_sharding"
       end
-
-      def bootstrap_migrations_from_nil_shard(migrations_path, this_migration = nil)
-        migrations = nil
-        ActiveRecord::Base.on_shard(nil) do
-          migrations = ActiveRecord::Migrator.new(:up, migrations_path).migrated
-        end
-
-        puts "inserting #{migrations.size} migrations on all shards..."
-        ActiveRecord::Base.on_all_shards do
-          migrator = ActiveRecord::Migrator.new(:up, migrations_path)
-          migrations.each do |m|
-            migrator.__send__(:record_version_state_after_migrating, m)
-          end
-          if this_migration
-            migrator.__send__(:record_version_state_after_migrating, this_migration)
-          end
-        end
-      end
     end
 
     # don't allow Migrator class to cache versions
