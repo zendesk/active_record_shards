@@ -9,6 +9,8 @@ if ActiveRecord::VERSION::MAJOR >= 4
       with_phenix
 
       before do
+        ActiveRecord::Base.establish_connection(RAILS_ENV.to_sym)
+
         # create shard-specific columns
         ActiveRecord::Migrator.migrations_paths = [File.join(File.dirname(__FILE__), "/migrations")]
         ActiveRecord::Migrator.migrate(ActiveRecord::Migrator.migrations_paths)
@@ -25,18 +27,15 @@ if ActiveRecord::VERSION::MAJOR >= 4
 
         ActiveRecord::Base.on_all_shards do
           assert ActiveRecord::Base.connection.public_send(connection_exist_method, :schema_migrations), "Schema Migrations doesn't exist"
-          assert ActiveRecord::Base.connection.public_send(connection_exist_method, :accounts)
           assert ActiveRecord::Base.connection.select_value("select version from schema_migrations where version = '20110824010216'")
           assert ActiveRecord::Base.connection.select_value("select version from schema_migrations where version = '20110829215912'")
         end
 
         ActiveRecord::Base.on_all_shards do
           assert table_has_column?("tickets", "sharded_column")
-          assert !table_has_column?("accounts", "non_sharded_column")
         end
 
         ActiveRecord::Base.on_shard(nil) do
-          assert !table_has_column?("tickets", "sharded_column")
           assert table_has_column?("accounts", "non_sharded_column")
         end
       end
