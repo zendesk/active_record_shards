@@ -82,9 +82,6 @@ module ActiveRecordShards
     end
   end
 
-  # ok, so some 'splaining to do.  Rails 3.1 puts the migrate() method on the instance of the
-  # migration, where it should have been.  But this makes our monkey patch incompatible.
-  # So we're forced to *either* include or extend this.
   module ActualMigrationExtension
     def migrate_with_forced_shard(direction)
       if migration_shard.blank?
