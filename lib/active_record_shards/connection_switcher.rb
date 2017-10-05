@@ -130,7 +130,7 @@ module ActiveRecordShards
     end
 
     def current_shard_selection
-      Thread.current[:shard_selection] ||= ShardSelection.new
+      Thread.current[:shard_selection] ||= ShardSelection.new(shard_names.first)
     end
 
     def current_shard_id

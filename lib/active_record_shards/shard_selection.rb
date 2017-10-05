@@ -3,9 +3,9 @@ module ActiveRecordShards
   class ShardSelection
     NO_SHARD = :_no_shard
 
-    def initialize
+    def initialize(shard)
       @on_slave = false
-      @shard = nil
+      self.shard = shard
     end
 
     def shard
