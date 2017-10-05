@@ -151,10 +151,6 @@ module ActiveRecordShards
 
     def switch_connection(options)
       if options.any?
-        if options.key?(:slave)
-          current_shard_selection.on_slave = options[:slave]
-        end
-
         if options.key?(:shard)
           unless config = configurations[shard_env]
             raise "Did not find #{shard_env} in configurations, did you forget to add it to your database config? (configurations: #{configurations.inspect})"
@@ -163,6 +159,10 @@ module ActiveRecordShards
             raise "Did not find shard #{options[:shard]} in configurations"
           end
           current_shard_selection.shard = options[:shard]
+        end
+
+        if options.key?(:slave)
+          current_shard_selection.on_slave = options[:slave]
         end
 
         ensure_shard_connection
