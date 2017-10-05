@@ -156,8 +156,11 @@ module ActiveRecordShards
         end
 
         if options.key?(:shard)
-          unless configurations[shard_env]
+          unless config = configurations[shard_env]
             raise "Did not find #{shard_env} in configurations, did you forget to add it to your database config? (configurations: #{configurations.inspect})"
+          end
+          unless config['shard_names'].include?(options[:shard])
+            raise "Did not find shard #{options[:shard]} in configurations"
           end
           current_shard_selection.shard = options[:shard]
         end
