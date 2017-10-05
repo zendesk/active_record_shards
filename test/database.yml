@@ -11,7 +11,7 @@ mysql: &MYSQL
 test:
   <<: *MYSQL
   database: ars_test
-  shard_names: ['0', '1']
+  shard_names: [0, 1]
 
 test_slave:
   <<: *MYSQL
