@@ -38,11 +38,8 @@ module ActiveRecordShards
     else
 
       def shard
-        if @shard.nil? || @shard == NO_SHARD
-          nil
-        else
-          @shard || self.class.default_shard
-        end
+        raise "Missing shard information on connection" unless @shard
+        @shard
       end
 
       PRIMARY = "primary".freeze
