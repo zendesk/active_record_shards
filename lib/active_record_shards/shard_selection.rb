@@ -11,12 +11,9 @@ module ActiveRecordShards
     if ActiveRecord::VERSION::MAJOR < 5
 
       def shard(klass = nil)
-        if (@shard || self.class.default_shard) && (klass.nil? || klass.is_sharded?)
-          if @shard == NO_SHARD
-            nil
-          else
-            @shard || self.class.default_shard
-          end
+        if klass.nil? || klass.is_sharded?
+          raise "Missing shard information on connection" unless @shard
+          @shard
         end
       end
 
@@ -38,11 +35,8 @@ module ActiveRecordShards
     else
 
       def shard
-        if @shard.nil? || @shard == NO_SHARD
-          nil
-        else
-          @shard || self.class.default_shard
-        end
+        raise "Missing shard information on connection" unless @shard
+        @shard
       end
 
       PRIMARY = "primary".freeze
