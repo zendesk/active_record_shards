@@ -2,7 +2,6 @@
 module ActiveRecordShards
   class ShardSelection
     NO_SHARD = :_no_shard
-    cattr_accessor :default_shard
 
     def initialize
       @on_slave = false
