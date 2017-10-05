@@ -13,11 +13,6 @@ module ActiveRecordShards
       base.singleton_class.send(:alias_method, :table_exists?, :table_exists_with_default_shard?)
     end
 
-    def default_shard=(new_default_shard)
-      ActiveRecordShards::ShardSelection.default_shard = new_default_shard
-      switch_connection(shard: new_default_shard)
-    end
-
     def on_shard(shard)
       old_options = current_shard_selection.options
       switch_connection(shard: shard) if supports_sharding?

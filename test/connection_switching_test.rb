@@ -133,46 +133,7 @@ describe "connection switching" do
     end
   end
 
-  describe "default shard selection" do
-    describe "of nil" do
-      before do
-        ActiveRecord::Base.default_shard = nil
-      end
-
-      it "use unsharded db for sharded models" do
-        assert_using_database('ars_test', Ticket)
-        assert_using_database('ars_test', Account)
-      end
-    end
-
-    describe "value" do
-      before do
-        ActiveRecord::Base.default_shard = 0
-      end
-
-      after do
-        ActiveRecord::Base.default_shard = nil
-      end
-
-      it "use default shard db for sharded models" do
-        assert_using_database('ars_test_shard0', Ticket)
-        assert_using_database('ars_test', Account)
-      end
-
-      it "still be able to switch to shard nil" do
-        ActiveRecord::Base.on_shard(nil) do
-          assert_using_database('ars_test', Ticket)
-          assert_using_database('ars_test', Account)
-        end
-      end
-    end
-  end
-
   describe "ActiveRecord::Base.columns" do
-    before do
-      ActiveRecord::Base.default_shard = nil
-    end
-
     describe "for unsharded models" do
       before do
         Account.on_slave do
