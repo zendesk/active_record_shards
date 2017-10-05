@@ -144,7 +144,7 @@ module ActiveRecordShards
       unless config.fetch(SHARD_NAMES_CONFIG_KEY, []).all? { |shard_name| shard_name.is_a?(Integer) }
         raise "All shard names must be integers: #{config[SHARD_NAMES_CONFIG_KEY].inspect}."
       end
-      config[SHARD_NAMES_CONFIG_KEY] || []
+      config[SHARD_NAMES_CONFIG_KEY] || raise("No shards configured for #{shard_env}")
     end
 
     private
