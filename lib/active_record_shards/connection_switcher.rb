@@ -19,8 +19,7 @@ module ActiveRecordShards
     end
 
     def default_shard=(new_default_shard)
-      ActiveRecordShards::ShardSelection.default_shard = new_default_shard
-      switch_connection(shard: new_default_shard)
+      raise "default_shard= is deprecated"
     end
 
     def on_shard(shard)
