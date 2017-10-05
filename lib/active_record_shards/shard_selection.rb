@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 module ActiveRecordShards
   class ShardSelection
-    NO_SHARD = :_no_shard
-
     def initialize(shard)
       @on_slave = false
       self.shard = shard
