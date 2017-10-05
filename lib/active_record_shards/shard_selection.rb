@@ -39,7 +39,7 @@ module ActiveRecordShards
     end
 
     def shard=(new_shard)
-      @shard = (new_shard || NO_SHARD)
+      @shard = Integer(new_shard)
     end
 
     def on_slave?
