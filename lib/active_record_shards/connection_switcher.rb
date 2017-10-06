@@ -140,7 +140,13 @@ module ActiveRecordShards
       unless config = configurations[shard_env]
         raise "Did not find #{shard_env} in configurations, did you forget to add it to your database config ? (configurations: #{configurations.inspect})"
       end
-      config[SHARD_NAMES_CONFIG_KEY] || raise("No shards configured for #{shard_env}")
+      unless config[SHARD_NAMES_CONFIG_KEY]
+        raise "No shards configured for #{shard_env}"
+      end
+      unless config[SHARD_NAMES_CONFIG_KEY].all? { |shard_name| shard_name.is_a?(Integer) }
+        raise "All shard names must be integers: #{config[SHARD_NAMES_CONFIG_KEY].inspect}."
+      end
+      config[SHARD_NAMES_CONFIG_KEY]
     end
 
     private

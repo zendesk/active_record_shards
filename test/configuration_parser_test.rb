@@ -19,42 +19,42 @@ describe ActiveRecordShards::ConfigurationParser do
           "username"    => "root",
           "password"    => nil,
           "host"        => "main_slave_host",
-          "shard_names" => ["a", "b"].to_set
+          "shard_names" => [500, 501].to_set
         }, @conf)
       end
     end
 
     describe "shard a" do
       describe "master" do
-        before { @conf = @exploded_conf["test_shard_a"] }
+        before { @conf = @exploded_conf["test_shard_500"] }
         it "be exploded" do
           @conf["shard_names"] = @conf["shard_names"].to_set
           assert_equal({
             "adapter"     => "mysql",
             "encoding"    => "utf8",
-            "database"    => "ars_test_shard_a",
+            "database"    => "ars_test_shard_500",
             "port"        => 123,
             "username"    => "root",
             "password"    => nil,
-            "host"        => "shard_a_host",
-            "shard_names" => ["a", "b"].to_set
+            "host"        => "shard_500_host",
+            "shard_names" => [500, 501].to_set
           }, @conf)
         end
       end
 
       describe "slave" do
-        before { @conf = @exploded_conf["test_shard_a_slave"] }
+        before { @conf = @exploded_conf["test_shard_500_slave"] }
         it "be exploded" do
           @conf["shard_names"] = @conf["shard_names"].to_set
           assert_equal({
             "adapter"     => "mysql",
             "encoding"    => "utf8",
-            "database"    => "ars_test_shard_a",
+            "database"    => "ars_test_shard_500",
             "port"        => 123,
             "username"    => "root",
             "password"    => nil,
-            "host"        => "shard_a_slave_host",
-            "shard_names" => ["a", "b"].to_set
+            "host"        => "shard_500_slave_host",
+            "shard_names" => [500, 501].to_set
           }, @conf)
         end
       end
@@ -62,35 +62,35 @@ describe ActiveRecordShards::ConfigurationParser do
 
     describe "shard b" do
       describe "master" do
-        before { @conf = @exploded_conf["test_shard_b"] }
+        before { @conf = @exploded_conf["test_shard_501"] }
         it "be exploded" do
           @conf["shard_names"] = @conf["shard_names"].to_set
           assert_equal({
             "adapter"     => "mysql",
             "encoding"    => "utf8",
-            "database"    => "ars_test_shard_b",
+            "database"    => "ars_test_shard_501",
             "port"        => 123,
             "username"    => "root",
             "password"    => nil,
-            "host"        => "shard_b_host",
-            "shard_names" => ["a", "b"].to_set
+            "host"        => "shard_501_host",
+            "shard_names" => [500, 501].to_set
           }, @conf)
         end
       end
 
       describe "slave" do
-        before { @conf = @exploded_conf["test_shard_b_slave"] }
+        before { @conf = @exploded_conf["test_shard_501_slave"] }
         it "be exploded" do
           @conf["shard_names"] = @conf["shard_names"].to_set
           assert_equal({
             "adapter"     => "mysql",
             "encoding"    => "utf8",
-            "database"    => "ars_test_shard_b_slave",
+            "database"    => "ars_test_shard_501_slave",
             "port"        => 123,
             "username"    => "root",
             "password"    => nil,
-            "host"        => "shard_b_host",
-            "shard_names" => ["a", "b"].to_set
+            "host"        => "shard_501_host",
+            "shard_names" => [500, 501].to_set
           }, @conf)
         end
       end
