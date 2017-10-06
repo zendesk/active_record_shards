@@ -286,6 +286,30 @@ describe "connection switching" do
     end
   end
 
+  if ActiveRecord::VERSION::MAJOR > 3
+    describe "ActiveRecord::Base.connection.schema_cache.columns_hash" do
+      before do
+        ActiveRecord::Base.default_shard = nil
+      end
+
+      it 'works for non-sharded models' do
+        Account.connection.schema_cache.columns_hash('accounts')
+      end
+
+      it 'explodes when a shard has not been specified for sharded model' do
+        assert_raises('You can not connect a sharded model without calling on_shard.') do
+          Ticket.connection.schema_cache.columns_hash('tickets')
+        end
+      end
+
+      it 'explodes when a shard has been specified for sharded model' do
+        ActiveRecord::Base.on_first_shard do
+          Ticket.connection.schema_cache.columns_hash('tickets')
+        end
+      end
+    end
+  end
+
   describe "ActiveRecord::Base.table_exists?" do
     before do
       ActiveRecord::Base.default_shard = nil
