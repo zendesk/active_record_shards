@@ -8,6 +8,7 @@ require 'active_record_shards/connection_switcher'
 require 'active_record_shards/association_collection_connection_selection'
 require 'active_record_shards/migration'
 require 'active_record_shards/default_slave_patches'
+require 'active_record_shards/schema_dumper_extension'
 
 module ActiveRecordShards
   def self.rails_env
@@ -33,3 +34,6 @@ when '5.0', '5.1'
 else
   raise "ActiveRecordShards is not compatible with #{ActiveRecord::VERSION::STRING}"
 end
+
+ActiveRecord::Associations::Builder::HasAndBelongsToMany.include(ActiveRecordShards::DefaultSlavePatches::Rails41HasAndBelongsToManyBuilderExtension)
+ActiveRecord::SchemaDumper.prepend(ActiveRecordShards::SchemaDumperExtension)

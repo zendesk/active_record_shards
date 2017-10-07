@@ -9,10 +9,6 @@ AllCops:
 
 # Configured cops
 
-Layout/EmptyLines:
-  Exclude:
-    - 'lib/active_record_shards/patches-5-0.rb'
-
 Layout/IndentHash:
   EnforcedStyle: consistent
 
