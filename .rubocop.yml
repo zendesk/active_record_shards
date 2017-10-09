@@ -49,6 +49,9 @@ Layout/IndentHeredoc:
 Lint/AssignmentInCondition:
   Enabled: false
 
+Lint/RescueWithoutErrorClass:
+  Enabled: false
+
 Metrics/AbcSize:
   Enabled: false
 
