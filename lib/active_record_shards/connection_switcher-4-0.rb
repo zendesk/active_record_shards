@@ -27,9 +27,6 @@ module ActiveRecordShards
 
       # in 3.2 rails is asking for a connection pool in a map of these ConnectionSpecifications.  If we want to re-use connections,
       # we need to re-use specs.
-
-      # note that since we're subverting the standard establish_connection path, we have to handle the funky autoloading of the
-      # connection adapter ourselves.
       if ActiveRecord::VERSION::MAJOR >= 4
         specification_cache[name] ||= begin
           resolver = ActiveRecordShards::ConnectionSpecification::Resolver.new configurations
