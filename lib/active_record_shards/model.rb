@@ -10,17 +10,7 @@ module ActiveRecordShards
     end
 
     def is_sharded? # rubocop:disable Naming/PredicateName
-      if self == ActiveRecord::Base
-        sharded != false && supports_sharding?
-      elsif self == base_class
-        if sharded.nil?
-          ActiveRecord::Base.is_sharded?
-        else
-          sharded != false
-        end
-      else
-        base_class.is_sharded?
-      end
+      self <= ActiveRecordShards::ShardedModel
     end
 
     def on_slave_by_default?
