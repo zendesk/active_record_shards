@@ -1,6 +1,7 @@
 module ActiveRecordShards
   module ConnectionSwitcher
     def connection_specification_name
+      byebug
       name = current_shard_selection.resolve_connection_name(sharded: is_sharded?, configurations: configurations)
 
       unless configurations[name] || name == "primary"

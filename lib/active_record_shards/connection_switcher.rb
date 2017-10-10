@@ -152,6 +152,7 @@ module ActiveRecordShards
     private
 
     def switch_connection(options)
+      puts "Switching to #{options}"
       if options.any?
         if options.key?(:shard)
           unless config = configurations[shard_env]

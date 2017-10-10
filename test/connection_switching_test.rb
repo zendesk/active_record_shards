@@ -19,10 +19,10 @@ describe "connection switching" do
 
   describe "shard switching" do
     it "only switch connection on sharded models" do
-      assert_using_database('ars_test', Ticket)
+      assert_using_database('ars_test_shard1_slave', Ticket)
       assert_using_database('ars_test', Account)
 
-      ActiveRecord::Base.on_shard(0) do
+      Ticket.on_shard(0) do
         assert_using_database('ars_test_shard0', Ticket)
         assert_using_database('ars_test', Account)
       end
