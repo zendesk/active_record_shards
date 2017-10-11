@@ -246,55 +246,6 @@ describe "connection switching" do
             ShardedModel.connection.execute("create table sharded_models (id int)")
           end
         end
-
-        assert ShardedModel.table_exists?
-      end
-    end
-  end
-
-  describe "in an unsharded environment" do
-    before do
-      silence_warnings { ::RAILS_ENV = 'test2'.freeze }
-      ActiveRecord::Base.establish_connection(::RAILS_ENV.to_sym)
-      assert_using_database('ars_test2', Ticket)
-    end
-
-    after do
-      silence_warnings { ::RAILS_ENV = 'test'.freeze }
-      ActiveRecord::Base.establish_connection(::RAILS_ENV.to_sym)
-      assert_using_database('ars_test', Ticket)
-    end
-
-    it "be able to find by column" do
-      Account.where(name: "peter").to_sql # does not blow up
-    end
-
-    it "have correct engine" do
-      assert_equal Account, Account.arel_engine
-    end
-
-    describe "shard switching" do
-      it "just stay on the main db" do
-        assert_using_database('ars_test2', Ticket)
-        assert_using_database('ars_test2', Account)
-
-        ActiveRecord::Base.on_shard(0) do
-          assert_using_database('ars_test2', Ticket)
-          assert_using_database('ars_test2', Account)
-        end
-      end
-    end
-
-    describe "on_all_shards" do
-      before do
-        @database_names = []
-        ActiveRecord::Base.on_all_shards do
-          @database_names << ActiveRecord::Base.connection.select_value("SELECT DATABASE()")
-        end
-      end
-
-      it "execute the block on all shard masters" do
-        assert_equal([ActiveRecord::Base.connection.select_value("SELECT DATABASE()")], @database_names)
       end
     end
   end
