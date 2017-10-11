@@ -20,27 +20,6 @@ describe "connection switching" do
       end
     end
 
-    it "switch to shard and back" do
-      assert_using_database('ars_test')
-      ActiveRecord::Base.on_slave { assert_using_database('ars_test_slave') }
-
-      ActiveRecord::Base.on_shard(0) do
-        assert_using_database('ars_test_shard0')
-        ActiveRecord::Base.on_slave { assert_using_database('ars_test_shard0_slave') }
-
-        ActiveRecord::Base.on_shard(nil) do
-          assert_using_database('ars_test')
-          ActiveRecord::Base.on_slave { assert_using_database('ars_test_slave') }
-        end
-
-        assert_using_database('ars_test_shard0')
-        ActiveRecord::Base.on_slave { assert_using_database('ars_test_shard0_slave') }
-      end
-
-      assert_using_database('ars_test')
-      ActiveRecord::Base.on_slave { assert_using_database('ars_test_slave') }
-    end
-
     it "does not fail on unrelated ensure error when current_shard_selection fails" do
       ActiveRecord::Base.expects(:current_shard_selection).raises(ArgumentError)
       assert_raises ArgumentError do
