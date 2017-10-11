@@ -7,7 +7,6 @@ require 'active_record_shards/shard_selection'
 require 'active_record_shards/connection_switcher'
 require 'active_record_shards/association_collection_connection_selection'
 require 'active_record_shards/default_slave_patches'
-require 'active_record_shards/schema_dumper_extension'
 
 module ActiveRecordShards
   def self.rails_env
@@ -25,6 +24,5 @@ ActiveRecord::Base.extend(ActiveRecordShards::DefaultSlavePatches)
 ActiveRecord::Relation.include(ActiveRecordShards::DefaultSlavePatches::ActiveRelationPatches)
 ActiveRecord::Associations::CollectionProxy.include(ActiveRecordShards::AssociationCollectionConnectionSelection)
 ActiveRecord::Associations::Builder::HasAndBelongsToMany.include(ActiveRecordShards::DefaultSlavePatches::HasAndBelongsToManyBuilderExtension)
-ActiveRecord::SchemaDumper.prepend(ActiveRecordShards::SchemaDumperExtension)
 
 ActiveRecord::InternalMetadata.not_sharded
