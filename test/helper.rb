@@ -102,10 +102,26 @@ Minitest::Spec.class_eval do
           %w[test_shard_0 test_shard_0_slave test_shard_1 test_shard_1_slave].include?(name)
         end
       end
+      Phenix.load_database_config
+      require 'models'
+      # Ticket.establish_connection(:test_shard_0)
+      # ActiveRecord::Base.establish_connection(:test)
+      ActiveRecord::Base.send(:sharded=, false)
+      # require 'models'
+      # byebug
+      # Account.primary_key
+      # Ticket.on_first_shard { Ticket.primary_key }
       Phenix.rise!(with_schema: true)
 
+      puts "*" * 80
+      puts "Done with unsharded schema"
+      puts "*" * 80
+
+      ActiveRecord::Base.send(:sharded=, true)
+      ActiveRecord::Base.establish_connection(:test_shard_0)
       # Populate sharded databases
       Phenix.configure do |config|
+        config.active_record_connection_class = Ticket
         config.schema_path = File.join(Dir.pwd, 'test', 'sharded_schema.rb')
         config.skip_database = lambda do |name, _|
           %w[test test_slave test2 test2_slave].include?(name)

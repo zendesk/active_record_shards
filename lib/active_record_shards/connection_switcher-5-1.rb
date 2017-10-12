@@ -2,6 +2,7 @@ module ActiveRecordShards
   module ConnectionSwitcher
     def connection_specification_name
       name = current_shard_selection.resolve_connection_name(sharded: is_sharded?, configurations: configurations)
+      puts "ARS::ConnectionSwitcher resolved #{name} for #{is_sharded?} #{self}"
 
       unless configurations[name] || name == "primary"
         raise ActiveRecord::AdapterNotSpecified, "No database defined by #{name} in database.yml"

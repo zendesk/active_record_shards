@@ -19,8 +19,7 @@ module ActiveRecordShards
     end
 
     def default_shard=(new_default_shard)
-      ActiveRecordShards::ShardSelection.default_shard = new_default_shard
-      switch_connection(shard: new_default_shard)
+      raise "default_shard= is deprecated"
     end
 
     def on_shard(shard)
@@ -130,7 +129,7 @@ module ActiveRecordShards
     end
 
     def current_shard_selection
-      Thread.current[:shard_selection] ||= ShardSelection.new
+      Thread.current[:shard_selection] ||= ShardSelection.new(shard_names.first)
     end
 
     def current_shard_id
@@ -139,21 +138,34 @@ module ActiveRecordShards
 
     def shard_names
       unless config = configurations[shard_env]
-        raise "Did not find #{shard_env} in configurations, did you forget to add it to your database.yml ? (configurations: #{configurations.inspect})"
+        raise "Did not find #{shard_env} in configurations, did you forget to add it to your database config ? (configurations: #{configurations.inspect})"
       end
-      config[SHARD_NAMES_CONFIG_KEY] || []
+      unless config[SHARD_NAMES_CONFIG_KEY]
+        raise "No shards configured for #{shard_env}"
+      end
+      unless config[SHARD_NAMES_CONFIG_KEY].all? { |shard_name| shard_name.is_a?(Integer) }
+        raise "All shard names must be integers: #{config[SHARD_NAMES_CONFIG_KEY].inspect}."
+      end
+      config[SHARD_NAMES_CONFIG_KEY]
     end
 
     private
 
     def switch_connection(options)
+      puts "Switching to #{options}"
       if options.any?
-        if options.key?(:slave)
-          current_shard_selection.on_slave = options[:slave]
+        if options.key?(:shard)
+          unless config = configurations[shard_env]
+            raise "Did not find #{shard_env} in configurations, did you forget to add it to your database config ? (configurations: #{configurations.inspect})"
+          end
+          unless shard = config['shard_names'].include?(options[:shard])
+            raise "Did not find shard #{options[:shard]} in configurations"
+          end
+          current_shard_selection.shard = options[:shard]
         end
 
-        if options.key?(:shard)
-          current_shard_selection.shard = options[:shard]
+        if options.key?(:slave)
+          current_shard_selection.on_slave = options[:slave]
         end
 
         ensure_shard_connection
