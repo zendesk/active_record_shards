@@ -3,6 +3,8 @@ require_relative 'helper'
 require 'active_record_shards/sql_comments'
 
 describe ActiveRecordShards::SqlComments do
+  with_phenix
+
   class CommentTester
     attr_reader :called
     prepend ActiveRecordShards::SqlComments::Methods
