@@ -30,23 +30,19 @@ namespace :db do
   task create: :load_config do
     ActiveRecord::Base.configurations.each do |key, conf|
       next if !key.starts_with?(ActiveRecordShards.rails_env) || key.ends_with?("_slave")
-      if ActiveRecord::VERSION::MAJOR >= 4
-        begin
-          # MysqlAdapter takes charset instead of encoding in Rails 4
-          # https://github.com/rails/rails/commit/78b30fed9336336694fb2cb5d2825f95800b541c
-          symbolized_configuration = conf.symbolize_keys
-          symbolized_configuration[:charset] = symbolized_configuration[:encoding]
+      begin
+        # MysqlAdapter takes charset instead of encoding in Rails 4
+        # https://github.com/rails/rails/commit/78b30fed9336336694fb2cb5d2825f95800b541c
+        symbolized_configuration = conf.symbolize_keys
+        symbolized_configuration[:charset] = symbolized_configuration[:encoding]
 
-          ActiveRecordShards::Tasks.root_connection(conf).create_database(conf['database'], symbolized_configuration)
-        rescue ActiveRecord::StatementInvalid => ex
-          if ex.message.include?('database exists')
-            puts "#{conf['database']} already exists"
-          else
-            raise ex
-          end
+        ActiveRecordShards::Tasks.root_connection(conf).create_database(conf['database'], symbolized_configuration)
+      rescue ActiveRecord::StatementInvalid => ex
+        if ex.message.include?('database exists')
+          puts "#{conf['database']} already exists"
+        else
+          raise ex
         end
-      else
-        create_database(conf)
       end
     end
     ActiveRecord::Base.establish_connection(ActiveRecordShards.rails_env.to_sym)
@@ -56,11 +52,7 @@ namespace :db do
   task abort_if_pending_migrations: :environment do
     if defined? ActiveRecord
       pending_migrations =
-        if Rails::VERSION::MAJOR >= 4
-          ActiveRecord::Base.on_shard(nil) { ActiveRecord::Migrator.open(ActiveRecord::Migrator.migrations_paths).pending_migrations }
-        else
-          ActiveRecord::Base.on_shard(nil) { ActiveRecord::Migrator.new(:up, 'db/migrate').pending_migrations }
-        end
+        ActiveRecord::Base.on_shard(nil) { ActiveRecord::Migrator.open(ActiveRecord::Migrator.migrations_paths).pending_migrations }
 
       if pending_migrations.any?
         puts "You have #{pending_migrations.size} pending migrations:"

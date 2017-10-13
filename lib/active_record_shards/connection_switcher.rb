@@ -164,21 +164,11 @@ module ActiveRecordShards
       ActiveRecordShards.rails_env
     end
 
-    if ActiveRecord::VERSION::MAJOR >= 4
-      def with_default_shard
-        if is_sharded? && current_shard_id.nil? && table_name != ActiveRecord::SchemaMigration.table_name
-          on_first_shard { yield }
-        else
-          yield
-        end
-      end
-    else
-      def with_default_shard
-        if is_sharded? && current_shard_id.nil? && table_name != ActiveRecord::Migrator.schema_migrations_table_name
-          on_first_shard { yield }
-        else
-          yield
-        end
+    def with_default_shard
+      if is_sharded? && current_shard_id.nil? && table_name != ActiveRecord::SchemaMigration.table_name
+        on_first_shard { yield }
+      else
+        yield
       end
     end
 
@@ -210,7 +200,7 @@ module ActiveRecordShards
 end
 
 case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
-when '3.2', '4.2'
+when '4.2'
   require 'active_record_shards/connection_switcher-4-0'
 when '5.0'
   require 'active_record_shards/connection_switcher-5-0'

@@ -2,14 +2,6 @@
 require_relative 'helper'
 
 describe "connection switching" do
-  def clear_connection_pool
-    if ActiveRecord::VERSION::MAJOR >= 4
-      ActiveRecord::Base.connection_handler.connection_pool_list.clear
-    else
-      ActiveRecord::Base.connection_handler.connection_pools.clear
-    end
-  end
-
   with_phenix
 
   before do
@@ -374,7 +366,7 @@ describe "connection switching" do
       before do
         @saved_config = ActiveRecord::Base.configurations.delete('test_slave')
         Thread.current[:shard_selection] = nil # drop caches
-        clear_connection_pool
+        ActiveRecord::Base.connection_handler.connection_pool_list.clear
         ActiveRecord::Base.establish_connection(:test)
       end
 
@@ -463,9 +455,7 @@ describe "connection switching" do
         end
 
         it "be marked as read only" do
-          if ActiveRecord::VERSION::STRING >= '4.2.0'
-            skip("Readonly scope on finder method is complicated on Rails 4.2")
-          end
+          skip("Readonly scope on finder method is complicated on Rails 4.2")
 
           assert(@model.readonly?)
         end
@@ -607,9 +597,7 @@ describe "connection switching" do
         end
 
         it "sets up has and belongs to many sharded-ness correctly" do
-          if ActiveRecord::VERSION::MAJOR >= 4
-            refute Account.const_get(:HABTM_People).is_sharded?
-          end
+          refute Account.const_get(:HABTM_People).is_sharded?
         end
 
         it "supports .pluck" do
@@ -618,7 +606,7 @@ describe "connection switching" do
 
         it "supports implicit joins" do
           accounts = Account.includes(:account_things)
-          accounts = accounts.references(:account_things) if ActiveRecord::VERSION::MAJOR >= 4
+          accounts = accounts.references(:account_things)
           assert_equal ["slave_name", "slave_name2"], accounts.order('account_things.id').map(&:name).sort
         end
 
@@ -629,7 +617,7 @@ describe "connection switching" do
 
         it "does not support implicit joins between an unsharded and a sharded table" do
           accounts = Account.includes(:tickets).order('tickets.id')
-          accounts = accounts.references(:tickets) if ActiveRecord::VERSION::MAJOR >= 4
+          accounts = accounts.references(:tickets)
           assert_raises(ActiveRecord::StatementInvalid) { accounts.first }
         end
 
