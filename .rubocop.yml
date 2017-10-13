@@ -5,7 +5,7 @@ AllCops:
     - .git/**/*
     - gemfiles/vendor/**/*
     - vendor/**/*
-  TargetRubyVersion: 2.1
+  TargetRubyVersion: 2.2
 
 # Configured cops
 
@@ -34,43 +34,16 @@ Style/FormatString:
 Layout/EmptyLineAfterMagicComment:
   Enabled: false
 
-Layout/IndentHeredoc:
-  Enabled: false
-
 Lint/AssignmentInCondition:
   Enabled: false
 
 Lint/RescueWithoutErrorClass:
   Enabled: false
 
-Metrics/AbcSize:
-  Enabled: false
-
-Metrics/BlockNesting:
-  Enabled: false
-
-Metrics/BlockLength:
-  Enabled: false
-
-Metrics/CyclomaticComplexity:
-  Enabled: false
-
-Metrics/LineLength:
-  Enabled: false
-
-Metrics/MethodLength:
-  Enabled: false
-
-Metrics/ModuleLength:
-  Enabled: false
-
-Metrics/PerceivedComplexity:
+Metrics:
   Enabled: false
 
 Style/ClassVars:
-  Enabled: false
-
-Style/ConditionalAssignment:
   Enabled: false
 
 Style/Documentation:
@@ -86,9 +59,6 @@ Style/IfUnlessModifier:
   Enabled: false
 
 Style/NumericLiterals:
-  Enabled: false
-
-Style/SingleLineBlockParams:
   Enabled: false
 
 Style/StringLiterals:

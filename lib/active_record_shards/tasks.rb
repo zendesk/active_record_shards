@@ -15,8 +15,8 @@ namespace :db do
       # rescue ActiveRecord::NoDatabaseError # TODO: exists in AR but never is raised here ...
       #   $stderr.puts "Database '#{conf['database']}' does not exist"
       rescue StandardError => error
-        $stderr.puts error, *error.backtrace
-        $stderr.puts "Couldn't drop #{conf['database']}"
+        warn error, *error.backtrace
+        warn "Couldn't drop #{conf['database']}"
       end
     end
   end
