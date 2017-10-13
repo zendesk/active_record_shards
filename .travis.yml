@@ -17,7 +17,7 @@ cache:
   bundler: true
 branches:
   only:
-    - master
+    - v4
 matrix:
   exclude:
     - rvm: 2.1.10
