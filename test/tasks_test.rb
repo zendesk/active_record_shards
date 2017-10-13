@@ -34,6 +34,7 @@ describe "Database rake tasks" do
   end
 
   after do
+    Phenix.configure
     Phenix.burn!
   end
 
