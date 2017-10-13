@@ -44,9 +44,5 @@ module ActiveRecordShards
       base.send(:include, InstanceMethods)
       base.after_initialize :initialize_shard_and_slave
     end
-
-    private
-
-    attr_accessor :sharded
   end
 end
