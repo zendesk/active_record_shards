@@ -6,13 +6,8 @@ module ActiveRecordShards
     SHARD_NAMES_CONFIG_KEY = 'shard_names'.freeze
 
     def self.extended(base)
-      if ActiveRecord::VERSION::MAJOR >= 5
-        base.singleton_class.send(:alias_method, :load_schema_without_default_shard!, :load_schema!)
-        base.singleton_class.send(:alias_method, :load_schema!, :load_schema_with_default_shard!)
-      else
-        base.singleton_class.send(:alias_method, :columns_without_default_shard, :columns)
-        base.singleton_class.send(:alias_method, :columns, :columns_with_default_shard)
-      end
+      base.singleton_class.send(:alias_method, :load_schema_without_default_shard!, :load_schema!)
+      base.singleton_class.send(:alias_method, :load_schema!, :load_schema_with_default_shard!)
 
       base.singleton_class.send(:alias_method, :table_exists_without_default_shard?, :table_exists?)
       base.singleton_class.send(:alias_method, :table_exists?, :table_exists_with_default_shard?)
@@ -121,6 +116,16 @@ module ActiveRecordShards
       switch_connection(old_options) if old_options
     end
 
+    def connection_specification_name
+      name = current_shard_selection.resolve_connection_name(sharded: is_sharded?, configurations: configurations)
+
+      unless configurations[name] || name == "primary"
+        raise ActiveRecord::AdapterNotSpecified, "No database defined by #{name} in database.yml"
+      end
+
+      name
+    end
+
     def supports_sharding?
       shard_names.any?
     end
@@ -172,14 +177,8 @@ module ActiveRecordShards
       end
     end
 
-    if ActiveRecord::VERSION::MAJOR >= 5
-      def load_schema_with_default_shard!
-        with_default_shard { load_schema_without_default_shard! }
-      end
-    else
-      def columns_with_default_shard
-        with_default_shard { columns_without_default_shard }
-      end
+    def load_schema_with_default_shard!
+      with_default_shard { load_schema_without_default_shard! }
     end
 
     def table_exists_with_default_shard?
@@ -200,8 +199,6 @@ module ActiveRecordShards
 end
 
 case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
-when '4.2'
-  require 'active_record_shards/connection_switcher-4-0'
 when '5.0'
   require 'active_record_shards/connection_switcher-5-0'
 when '5.1'

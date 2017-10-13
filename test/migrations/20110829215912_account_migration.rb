@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-class AccountMigration < BaseMigration
+class AccountMigration < ActiveRecord::Migration[4.2]
   shard :none
 
   def self.up

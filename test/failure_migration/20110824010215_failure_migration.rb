@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-class FailureMigration < BaseMigration
+class FailureMigration < ActiveRecord::Migration[4.2]
   shard :all
 
   def self.up
