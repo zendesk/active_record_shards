@@ -10,7 +10,7 @@ module ActiveRecordShards
     end
 
     def is_sharded? # rubocop:disable Naming/PredicateName
-      self <= ActiveRecordShards::ShardedModel
+      false
     end
 
     def on_slave_by_default?
