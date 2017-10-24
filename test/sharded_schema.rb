@@ -8,4 +8,16 @@ ActiveRecord::Schema.define(version: 1) do
     t.datetime "created_at"
     t.datetime "updated_at"
   end
+
+  create_table "comments", force: true do |t|
+    t.text     "body"
+    t.integer  "account_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "ticket_comments", force: true, id: false do |t|
+    t.integer "ticket_id"
+    t.integer "comment_id"
+  end
 end

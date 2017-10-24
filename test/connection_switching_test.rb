@@ -469,14 +469,38 @@ describe "connection switching" do
           end
         end
 
-        it "will :include things via has_and_belongs associations correctly" do
+        it "will :include things via has_and_belongs associations correctly when unsharded" do
           a = Account.where(id: 1001).includes(:people).first
           refute a.people.empty?
           assert_equal 'slave person', a.people.first.name
         end
 
-        it "sets up has and belongs to many sharded-ness correctly" do
+        it "sets up has and belongs to many sharded-ness correctly when unsharded" do
           refute Account.const_get(:HABTM_People).is_sharded?
+        end
+
+        it "will :include things via has_and_belongs associations correctly when sharded" do
+          Ticket.on_slave_by_default = true
+          Comment.on_slave_by_default = true
+          ActiveRecordShards::ShardedModel.on_shard(0) do
+            Ticket.connection.execute("INSERT INTO tickets (id, title, created_at, updated_at) VALUES(1000, 'master_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
+            Ticket.on_slave.connection.execute("INSERT INTO tickets (id, title, created_at, updated_at) VALUES(1000, 'slave_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
+            Ticket.on_slave.connection.execute("INSERT INTO tickets (id, title, created_at, updated_at) VALUES(1001, 'slave_name2', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
+
+            Comment.connection.execute("REPLACE INTO comments(id, body) VALUES(10, 'master comment')")
+            Comment.on_slave.connection.execute("REPLACE INTO comments(id, body) VALUES(20, 'slave comment')")
+
+            Ticket.connection.execute("INSERT INTO ticket_comments(ticket_id, comment_id) VALUES(1000, 10)")
+            Ticket.on_slave.connection.execute("INSERT INTO ticket_comments(ticket_id, comment_id) VALUES(1001, 20)")
+
+            t = Ticket.where(id: 1001).includes(:comments).first
+            refute t.comments.empty?
+            assert_equal 'slave comment', t.comments.first.body
+          end
+        end
+
+        it "sets up has and belongs to many sharded-ness correctly when sharded" do
+          assert Ticket.const_get(:HABTM_Comments).is_sharded?
         end
 
         it "supports .pluck" do
