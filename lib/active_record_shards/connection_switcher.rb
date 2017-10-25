@@ -90,11 +90,6 @@ module ActiveRecordShards
       on_master_or_slave(:master, &block)
     end
 
-    # just to ease the transition from replica to active_record_shards
-    alias_method :with_slave, :on_slave
-    alias_method :with_slave_if, :on_slave_if
-    alias_method :with_slave_unless, :on_slave_unless
-
     def on_cx_switch_block(which, force: false, construct_ro_scope: nil, &block)
       @disallow_slave ||= 0
       @disallow_slave += 1 if which == :master
