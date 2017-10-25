@@ -10,7 +10,7 @@ test:
   slave:
     database: ars_tasks_test_slave
   shards:
-    a:
+    0:
       database: ars_tasks_test_shard_a
-    b:
+    1:
       database: ars_tasks_test_shard_b

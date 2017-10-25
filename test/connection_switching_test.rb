@@ -83,8 +83,8 @@ describe "connection switching" do
         assert_includes(database_names, @shard_1_master.select_value("SELECT DATABASE()"))
 
         assert_equal(2, database_shards.size)
-        assert_includes(database_shards, "0")
-        assert_includes(database_shards, "1")
+        assert_includes(database_shards, 0)
+        assert_includes(database_shards, 1)
       end
 
       it "execute the block unsharded" do
