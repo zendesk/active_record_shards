@@ -9,13 +9,13 @@ test:
   slave:
     host: main_slave_host
   shards:
-    a:
-      database: ars_test_shard_a
-      host: shard_a_host
+    500:
+      database: ars_test_shard_500
+      host: shard_500_host
       slave:
-        host: shard_a_slave_host
-    b:
-      database: ars_test_shard_b
-      host: shard_b_host
+        host: shard_500_slave_host
+    501:
+      database: ars_test_shard_501
+      host: shard_501_host
       slave:
-        database: ars_test_shard_b_slave
+        database: ars_test_shard_501_slave
