@@ -120,7 +120,7 @@ module ActiveRecordShards
       name = current_shard_selection.resolve_connection_name(sharded: is_sharded?, configurations: configurations)
 
       unless configurations[name] || name == "primary"
-        raise ActiveRecord::AdapterNotSpecified, "No database defined by #{name} in database.yml"
+        raise ActiveRecord::AdapterNotSpecified, "No database defined by #{name} in your database config. (configurations: #{configurations.inspect})"
       end
 
       name
@@ -144,7 +144,10 @@ module ActiveRecordShards
 
     def shard_names
       unless config = configurations[shard_env]
-        raise "Did not find #{shard_env} in configurations, did you forget to add it to your database.yml ? (configurations: #{configurations.inspect})"
+        raise "Did not find #{shard_env} in configurations, did you forget to add it to your database config? (configurations: #{configurations.inspect})"
+      end
+      unless config.fetch(SHARD_NAMES_CONFIG_KEY, []).all? { |shard_name| shard_name.is_a?(Integer) }
+        raise "All shard names must be integers: #{config[SHARD_NAMES_CONFIG_KEY].inspect}."
       end
       config[SHARD_NAMES_CONFIG_KEY] || []
     end
@@ -158,6 +161,9 @@ module ActiveRecordShards
         end
 
         if options.key?(:shard)
+          unless configurations[shard_env]
+            raise "Did not find #{shard_env} in configurations, did you forget to add it to your database config? (configurations: #{configurations.inspect})"
+          end
           current_shard_selection.shard = options[:shard]
         end
 

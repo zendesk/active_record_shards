@@ -10,6 +10,11 @@ module ActiveRecordShards
 
       conf.to_a.each do |env_name, env_config|
         next unless shards = env_config.delete('shards')
+
+        unless shards.keys.all? { |shard_name| shard_name.is_a?(Integer) }
+          raise "All shard names must be integers: #{shards.keys.inspect}."
+        end
+
         env_config['shard_names'] = shards.keys
         shards.each do |shard_name, shard_conf|
           expand_child!(env_config, shard_conf)
