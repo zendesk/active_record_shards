@@ -497,6 +497,8 @@ describe "connection switching" do
             refute t.comments.empty?
             assert_equal 'slave comment', t.comments.first.body
           end
+          Ticket.on_slave_by_default = false
+          Comment.on_slave_by_default = false
         end
 
         it "sets up has and belongs to many sharded-ness correctly when sharded" do
