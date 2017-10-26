@@ -11,34 +11,15 @@ describe "connection switching" do
 
   describe "shard switching" do
     it "only switch connection on sharded models" do
-      assert_using_database('ars_test', Ticket)
-      assert_using_database('ars_test', Account)
-
-      ActiveRecord::Base.on_shard(0) do
+      Ticket.on_shard(0) do
         assert_using_database('ars_test_shard0', Ticket)
         assert_using_database('ars_test', Account)
       end
-    end
 
-    it "switch to shard and back" do
-      assert_using_database('ars_test')
-      ActiveRecord::Base.on_slave { assert_using_database('ars_test_slave') }
-
-      ActiveRecord::Base.on_shard(0) do
-        assert_using_database('ars_test_shard0')
-        ActiveRecord::Base.on_slave { assert_using_database('ars_test_shard0_slave') }
-
-        ActiveRecord::Base.on_shard(nil) do
-          assert_using_database('ars_test')
-          ActiveRecord::Base.on_slave { assert_using_database('ars_test_slave') }
-        end
-
-        assert_using_database('ars_test_shard0')
-        ActiveRecord::Base.on_slave { assert_using_database('ars_test_shard0_slave') }
+      Ticket.on_shard(1) do
+        assert_using_database('ars_test_shard1', Ticket)
+        assert_using_database('ars_test', Account)
       end
-
-      assert_using_database('ars_test')
-      ActiveRecord::Base.on_slave { assert_using_database('ars_test_slave') }
     end
 
     it "does not fail on unrelated ensure error when current_shard_selection fails" do
@@ -50,22 +31,22 @@ describe "connection switching" do
 
     describe "on_first_shard" do
       it "use the first shard" do
-        ActiveRecord::Base.on_first_shard do
-          assert_using_database('ars_test_shard0')
+        ActiveRecordShards::ShardedModel.on_first_shard do
+          assert_using_database('ars_test_shard0', Ticket)
         end
       end
     end
 
     describe "on_all_shards" do
       before do
-        @shard_0_master = ActiveRecord::Base.on_shard(0) { ActiveRecord::Base.connection }
-        @shard_1_master = ActiveRecord::Base.on_shard(1) { ActiveRecord::Base.connection }
+        @shard_0_master = ActiveRecordShards::ShardedModel.on_shard(0) { ActiveRecordShards::ShardedModel.connection }
+        @shard_1_master = ActiveRecordShards::ShardedModel.on_shard(1) { ActiveRecordShards::ShardedModel.connection }
         refute_equal(@shard_0_master.select_value("SELECT DATABASE()"), @shard_1_master.select_value("SELECT DATABASE()"))
       end
 
       it "execute the block on all shard masters" do
-        result = ActiveRecord::Base.on_all_shards do |shard|
-          [ActiveRecord::Base.connection.select_value("SELECT DATABASE()"), shard]
+        result = ActiveRecordShards::ShardedModel.on_all_shards do |shard|
+          [ActiveRecordShards::ShardedModel.connection.select_value("SELECT DATABASE()"), shard]
         end
         database_names = result.map(&:first)
         database_shards = result.map(&:last)
@@ -90,15 +71,15 @@ describe "connection switching" do
 
     describe ".shards.enum" do
       it "works like this:" do
-        ActiveRecord::Base.on_all_shards { Ticket.create! }
-        count = ActiveRecord::Base.shards.enum.map { Ticket.count }.inject(&:+)
-        assert_equal(ActiveRecord::Base.shard_names.size, count)
+        ActiveRecordShards::ShardedModel.on_all_shards { Ticket.create! }
+        count = ActiveRecordShards::ShardedModel.shards.enum.map { Ticket.count }.inject(&:+)
+        assert_equal(ActiveRecordShards::ShardedModel.shard_names.size, count)
       end
     end
 
     describe ".shards.find" do
       it "works like this:" do
-        t = ActiveRecord::Base.on_shard(1) { Ticket.create! }
+        t = ActiveRecordShards::ShardedModel.on_shard(1) { Ticket.create! }
         assert(Ticket.shards.find(t.id))
 
         assert_raises(ActiveRecord::RecordNotFound) do
@@ -109,8 +90,8 @@ describe "connection switching" do
 
     describe ".shards.count" do
       before do
-        ActiveRecord::Base.on_shard(0) { 2.times { Ticket.create!(title: "0") } }
-        ActiveRecord::Base.on_shard(1) { Ticket.create!(title: "1") }
+        ActiveRecordShards::ShardedModel.on_shard(0) { 2.times { Ticket.create!(title: "0") } }
+        ActiveRecordShards::ShardedModel.on_shard(1) { Ticket.create!(title: "1") }
       end
 
       it "works like this:" do
@@ -125,7 +106,7 @@ describe "connection switching" do
 
     describe ".shards.to_a" do
       it "works like this" do
-        ActiveRecord::Base.on_all_shards { |s| Ticket.create!(title: s.to_s) }
+        ActiveRecordShards::ShardedModel.on_all_shards { |s| Ticket.create!(title: s.to_s) }
 
         res = Ticket.where(title: "1").shards.to_a
         assert_equal 1, res.size
@@ -133,46 +114,7 @@ describe "connection switching" do
     end
   end
 
-  describe "default shard selection" do
-    describe "of nil" do
-      before do
-        ActiveRecord::Base.default_shard = nil
-      end
-
-      it "use unsharded db for sharded models" do
-        assert_using_database('ars_test', Ticket)
-        assert_using_database('ars_test', Account)
-      end
-    end
-
-    describe "value" do
-      before do
-        ActiveRecord::Base.default_shard = 0
-      end
-
-      after do
-        ActiveRecord::Base.default_shard = nil
-      end
-
-      it "use default shard db for sharded models" do
-        assert_using_database('ars_test_shard0', Ticket)
-        assert_using_database('ars_test', Account)
-      end
-
-      it "still be able to switch to shard nil" do
-        ActiveRecord::Base.on_shard(nil) do
-          assert_using_database('ars_test', Ticket)
-          assert_using_database('ars_test', Account)
-        end
-      end
-    end
-  end
-
   describe "ActiveRecord::Base.columns" do
-    before do
-      ActiveRecord::Base.default_shard = nil
-    end
-
     describe "for unsharded models" do
       before do
         Account.on_slave do
@@ -202,18 +144,18 @@ describe "connection switching" do
 
     describe "for sharded models" do
       before do
-        ActiveRecord::Base.on_first_shard do
-          ActiveRecord::Base.on_slave do
-            ActiveRecord::Base.connection.execute("alter table tickets add column foo int")
+        ActiveRecordShards::ShardedModel.on_first_shard do
+          ActiveRecordShards::ShardedModel.on_slave do
+            ActiveRecordShards::ShardedModel.connection.execute("alter table tickets add column foo int")
             Ticket.reset_column_information
           end
         end
       end
 
       after do
-        ActiveRecord::Base.on_first_shard do
-          ActiveRecord::Base.on_slave do
-            ActiveRecord::Base.connection.execute("alter table tickets drop column foo")
+        ActiveRecordShards::ShardedModel.on_first_shard do
+          ActiveRecordShards::ShardedModel.on_slave do
+            ActiveRecordShards::ShardedModel.connection.execute("alter table tickets drop column foo")
             Ticket.reset_column_information
           end
         end
@@ -224,7 +166,7 @@ describe "connection switching" do
       end
 
       it "have correct from_shard" do
-        ActiveRecord::Base.on_all_shards do |shard|
+        ActiveRecordShards::ShardedModel.on_all_shards do |shard|
           assert_equal shard, Ticket.new.from_shard
         end
       end
@@ -232,15 +174,11 @@ describe "connection switching" do
 
     describe "for SchemaMigration" do
       before do
-        ActiveRecord::Base.on_shard(nil) do
-          ActiveRecord::Base.connection.execute("alter table schema_migrations add column foo int")
-        end
+        ActiveRecord::Base.connection.execute("alter table schema_migrations add column foo int")
       end
 
       after do
-        ActiveRecord::Base.on_shard(nil) do
-          ActiveRecord::Base.connection.execute("alter table schema_migrations drop column foo")
-        end
+        ActiveRecord::Base.connection.execute("alter table schema_migrations drop column foo")
       end
 
       it "doesn't switch to shard" do
@@ -277,84 +215,27 @@ describe "connection switching" do
   end
 
   describe "ActiveRecord::Base.table_exists?" do
-    before do
-      ActiveRecord::Base.default_shard = nil
-    end
-
     describe "for unsharded models" do
       it "use the unsharded slave connection" do
         class UnshardedModel < ActiveRecord::Base
-          not_sharded
         end
 
         UnshardedModel.on_slave { UnshardedModel.connection.execute("create table unsharded_models (id int)") }
         assert UnshardedModel.table_exists?
 
-        ActiveRecord::Base.on_all_shards do
-          refute ActiveRecord::Base.connection.data_source_exists?("unsharded_models")
+        ActiveRecordShards::ShardedModel.on_all_shards do
+          refute ActiveRecordShards::ShardedModel.connection.data_source_exists?("unsharded_models")
         end
       end
     end
 
     describe "for sharded models" do
       it "uses the first shard slave" do
-        class ShardedModel < ActiveRecord::Base
-        end
-
-        ActiveRecord::Base.on_first_shard do
-          ShardedModel.on_slave do
-            ShardedModel.connection.execute("create table sharded_models (id int)")
+        Ticket.on_first_shard do
+          ActiveRecordShards::ShardedModel.on_slave do
+            assert Ticket.table_exists?
           end
         end
-
-        assert ShardedModel.table_exists?
-      end
-    end
-  end
-
-  describe "in an unsharded environment" do
-    before do
-      silence_warnings { ::RAILS_ENV = 'test2'.freeze }
-      ActiveRecord::Base.establish_connection(::RAILS_ENV.to_sym)
-      assert_using_database('ars_test2', Ticket)
-    end
-
-    after do
-      silence_warnings { ::RAILS_ENV = 'test'.freeze }
-      ActiveRecord::Base.establish_connection(::RAILS_ENV.to_sym)
-      assert_using_database('ars_test', Ticket)
-    end
-
-    it "be able to find by column" do
-      Account.where(name: "peter").to_sql # does not blow up
-    end
-
-    it "have correct engine" do
-      assert_equal Account, Account.arel_engine
-    end
-
-    describe "shard switching" do
-      it "just stay on the main db" do
-        assert_using_database('ars_test2', Ticket)
-        assert_using_database('ars_test2', Account)
-
-        ActiveRecord::Base.on_shard(0) do
-          assert_using_database('ars_test2', Ticket)
-          assert_using_database('ars_test2', Account)
-        end
-      end
-    end
-
-    describe "on_all_shards" do
-      before do
-        @database_names = []
-        ActiveRecord::Base.on_all_shards do
-          @database_names << ActiveRecord::Base.connection.select_value("SELECT DATABASE()")
-        end
-      end
-
-      it "execute the block on all shard masters" do
-        assert_equal([ActiveRecord::Base.connection.select_value("SELECT DATABASE()")], @database_names)
       end
     end
   end
@@ -588,14 +469,40 @@ describe "connection switching" do
           end
         end
 
-        it "will :include things via has_and_belongs associations correctly" do
+        it "will :include things via has_and_belongs associations correctly when unsharded" do
           a = Account.where(id: 1001).includes(:people).first
           refute a.people.empty?
           assert_equal 'slave person', a.people.first.name
         end
 
-        it "sets up has and belongs to many sharded-ness correctly" do
+        it "sets up has and belongs to many sharded-ness correctly when unsharded" do
           refute Account.const_get(:HABTM_People).is_sharded?
+        end
+
+        it "will :include things via has_and_belongs associations correctly when sharded" do
+          Ticket.on_slave_by_default = true
+          Comment.on_slave_by_default = true
+          ActiveRecordShards::ShardedModel.on_shard(0) do
+            Ticket.connection.execute("INSERT INTO tickets (id, title, created_at, updated_at) VALUES(1000, 'master_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
+            Ticket.on_slave.connection.execute("INSERT INTO tickets (id, title, created_at, updated_at) VALUES(1000, 'slave_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
+            Ticket.on_slave.connection.execute("INSERT INTO tickets (id, title, created_at, updated_at) VALUES(1001, 'slave_name2', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
+
+            Comment.connection.execute("REPLACE INTO comments(id, body) VALUES(10, 'master comment')")
+            Comment.on_slave.connection.execute("REPLACE INTO comments(id, body) VALUES(20, 'slave comment')")
+
+            Ticket.connection.execute("INSERT INTO ticket_comments(ticket_id, comment_id) VALUES(1000, 10)")
+            Ticket.on_slave.connection.execute("INSERT INTO ticket_comments(ticket_id, comment_id) VALUES(1001, 20)")
+
+            t = Ticket.where(id: 1001).includes(:comments).first
+            refute t.comments.empty?
+            assert_equal 'slave comment', t.comments.first.body
+          end
+          Ticket.on_slave_by_default = false
+          Comment.on_slave_by_default = false
+        end
+
+        it "sets up has and belongs to many sharded-ness correctly when sharded" do
+          assert Ticket.const_get(:HABTM_Comments).is_sharded?
         end
 
         it "supports .pluck" do
@@ -643,7 +550,7 @@ describe "connection switching" do
         assert_using_master_db
         account = Account.create!
 
-        ActiveRecord::Base.on_shard(0) do
+        ActiveRecordShards::ShardedModel.on_shard(0) do
           account.tickets.create! title: 'master ticket'
 
           Ticket.on_slave do

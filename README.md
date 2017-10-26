@@ -44,15 +44,13 @@ basically connections inherit configuration from the parent configuration file.
 ## Usage
 
 Normally you have some models that live on a shared database, and you might need to query this data in order to know what shard to switch to.
-All the models that live on the shared database must be marked as not\_sharded:
+All the models that live on the sharded database must inherit from ActiveRecordShards::ShardedModel:
 
     class Account < ActiveRecord::Base
-      not_sharded
-
       has_many :projects
     end
 
-    class Project < ActiveRecord::Base
+    class Project < ActiveRecordShards::ShardedModel
       belongs_to :account
     end
 

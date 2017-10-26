@@ -3,6 +3,7 @@ require 'active_record'
 require 'active_record/base'
 require 'active_record_shards/configuration_parser'
 require 'active_record_shards/model'
+require 'active_record_shards/sharded_model'
 require 'active_record_shards/shard_selection'
 require 'active_record_shards/connection_switcher'
 require 'active_record_shards/association_collection_connection_selection'
@@ -24,5 +25,3 @@ ActiveRecord::Base.extend(ActiveRecordShards::DefaultSlavePatches)
 ActiveRecord::Relation.include(ActiveRecordShards::DefaultSlavePatches::ActiveRelationPatches)
 ActiveRecord::Associations::CollectionProxy.include(ActiveRecordShards::AssociationCollectionConnectionSelection)
 ActiveRecord::Associations::Builder::HasAndBelongsToMany.include(ActiveRecordShards::DefaultSlavePatches::HasAndBelongsToManyBuilderExtension)
-
-ActiveRecord::InternalMetadata.not_sharded

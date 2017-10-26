@@ -1,20 +1,14 @@
 # frozen_string_literal: true
 module ActiveRecordShards
   class ShardSelection
-    NO_SHARD = :_no_shard
-    cattr_accessor :default_shard
-
-    def initialize
+    def initialize(shard)
       @on_slave = false
-      @shard = nil
+      self.shard = shard
     end
 
     def shard
-      if @shard.nil? || @shard == NO_SHARD
-        nil
-      else
-        @shard || self.class.default_shard
-      end
+      raise "Missing shard information on connection" unless @shard
+      @shard
     end
 
     PRIMARY = "primary".freeze
@@ -40,7 +34,7 @@ module ActiveRecordShards
     end
 
     def shard=(new_shard)
-      @shard = (new_shard || NO_SHARD)
+      @shard = Integer(new_shard)
     end
 
     def on_slave?

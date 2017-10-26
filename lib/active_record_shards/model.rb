@@ -3,24 +3,14 @@
 module ActiveRecordShards
   module Model
     def not_sharded
-      if self != ActiveRecord::Base && self != base_class
-        raise "You should only call not_sharded on direct descendants of ActiveRecord::Base"
-      end
-      self.sharded = false
+      ActiveSupport::Deprecation.warn("Calling not_sharded is deprecated. "\
+                                      "Please ensure to still read from the "\
+                                      "account db slave after removing the "\
+                                      "call.")
     end
 
     def is_sharded? # rubocop:disable Naming/PredicateName
-      if self == ActiveRecord::Base
-        sharded != false && supports_sharding?
-      elsif self == base_class
-        if sharded.nil?
-          ActiveRecord::Base.is_sharded?
-        else
-          sharded != false
-        end
-      else
-        base_class.is_sharded?
-      end
+      false
     end
 
     def on_slave_by_default?
@@ -61,9 +51,5 @@ module ActiveRecordShards
       base.send(:include, InstanceMethods)
       base.after_initialize :initialize_shard_and_slave
     end
-
-    private
-
-    attr_accessor :sharded
   end
 end
