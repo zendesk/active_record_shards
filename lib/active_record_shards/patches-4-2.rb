@@ -11,3 +11,5 @@ ActiveRecordShards.override_connection_handler_methods(methods_to_override)
 ActiveRecord::Associations::Builder::HasAndBelongsToMany.include(ActiveRecordShards::DefaultSlavePatches::Rails41HasAndBelongsToManyBuilderExtension)
 
 ActiveRecord::SchemaDumper.prepend(ActiveRecordShards::SchemaDumperExtension)
+
+require 'active_record_shards/association_scope-4-0'
