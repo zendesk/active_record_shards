@@ -12,4 +12,4 @@ ActiveRecord::Associations::Builder::HasAndBelongsToMany.include(ActiveRecordSha
 
 ActiveRecord::SchemaDumper.prepend(ActiveRecordShards::SchemaDumperExtension)
 
-require 'active_record_shards/association_scope-4-0'
+require 'active_record_shards/association_scope-4-2'

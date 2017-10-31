@@ -147,6 +147,10 @@ module ActiveRecordShards
       config[SHARD_NAMES_CONFIG_KEY] || []
     end
 
+    def needs_default_shard?
+      is_sharded? && current_shard_id.nil? && table_name != ActiveRecord::SchemaMigration.table_name
+    end
+
     private
 
     def switch_connection(options)
@@ -172,7 +176,7 @@ module ActiveRecordShards
 
     if ActiveRecord::VERSION::MAJOR >= 4
       def with_default_shard
-        if is_sharded? && current_shard_id.nil? && table_name != ActiveRecord::SchemaMigration.table_name
+        if needs_default_shard?
           on_first_shard { yield }
         else
           yield
