@@ -3,10 +3,15 @@
 module ActiveRecordShards
   module Model
     def not_sharded
-      ActiveRecord::Base.logger.warn("Calling not_sharded is deprecated. "\
-                                     "Please ensure to still read from the "\
-                                     "account db slave after removing the "\
-                                     "call.")
+      message = "Calling not_sharded is deprecated. "\
+        "Please ensure to still read from the "\
+        "account db slave after removing the "\
+        "call."
+      if ActiveRecord::Base.logger
+        ActiveRecord::Base.logger.warn(message)
+      else
+        Kernel.warn(message)
+      end
     end
 
     def is_sharded? # rubocop:disable Naming/PredicateName
