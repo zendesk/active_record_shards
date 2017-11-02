@@ -85,6 +85,14 @@ module ActiveRecordShards
       on_master_or_slave(:master, &block)
     end
 
+    def force_cx_switch_slave_block
+      old_options = current_shard_selection.options
+      switch_connection(slave: true)
+      yield
+    ensure
+      switch_connection(old_options) if old_options
+    end
+
     def on_cx_switch_block(which, force: false, construct_ro_scope: nil, &block)
       @disallow_slave ||= 0
       @disallow_slave += 1 if which == :master
