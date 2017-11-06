@@ -87,10 +87,6 @@ module ActiveRecordShards
           current_shard_selection.shard = options[:shard]
         end
 
-        if options.key?(:slave)
-          self.current_slave_selection = options[:slave]
-        end
-
         ensure_shard_connection
       end
     end
