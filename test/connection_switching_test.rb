@@ -23,9 +23,9 @@ describe "connection switching" do
     end
 
     it "does not fail on unrelated ensure error when current_shard_selection fails" do
-      ActiveRecord::Base.expects(:current_shard_selection).at_least_once.raises(ArgumentError)
+      ActiveRecordShards::ShardedModel.expects(:current_shard_selection).at_least_once.raises(ArgumentError)
       assert_raises ArgumentError do
-        ActiveRecord::Base.on_slave { 1 }
+        ActiveRecordShards::ShardedModel.on_slave { 1 }
       end
     end
 
@@ -58,14 +58,6 @@ describe "connection switching" do
         assert_equal(2, database_shards.size)
         assert_includes(database_shards, 0)
         assert_includes(database_shards, 1)
-      end
-
-      it "execute the block unsharded" do
-        ActiveRecord::Base.expects(:supports_sharding?).at_least_once.returns false
-        result = ActiveRecord::Base.on_all_shards do |shard|
-          [ActiveRecord::Base.connection.select_value("SELECT DATABASE()"), shard]
-        end
-        assert_equal [["ars_test", nil]], result
       end
     end
 
