@@ -39,7 +39,7 @@ module ActiveRecordShards
 
     module InstanceMethods
       def initialize_shard_and_slave
-        @from_slave = !!self.class.current_shard_selection.options[:slave]
+        @from_slave = !!self.class.current_slave_selection
         @from_shard = self.class.current_shard_selection.options[:shard]
       end
 

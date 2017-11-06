@@ -23,7 +23,7 @@ describe "connection switching" do
     end
 
     it "does not fail on unrelated ensure error when current_shard_selection fails" do
-      ActiveRecord::Base.expects(:current_shard_selection).raises(ArgumentError)
+      ActiveRecord::Base.expects(:current_shard_selection).at_least_once.raises(ArgumentError)
       assert_raises ArgumentError do
         ActiveRecord::Base.on_slave { 1 }
       end
@@ -245,12 +245,14 @@ describe "connection switching" do
       before do
         @saved_config = ActiveRecord::Base.configurations.delete('test_slave')
         Thread.current[:shard_selection] = nil # drop caches
+        ActiveRecord::Base.reset_connection_resolver
         ActiveRecord::Base.connection_handler.connection_pool_list.clear
         ActiveRecord::Base.establish_connection(:test)
       end
 
       after do
         ActiveRecord::Base.configurations['test_slave'] = @saved_config
+        ActiveRecord::Base.reset_connection_resolver
         Thread.current[:shard_selection] = nil # drop caches
       end
 
