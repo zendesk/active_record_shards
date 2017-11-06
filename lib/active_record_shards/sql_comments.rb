@@ -3,7 +3,7 @@ module ActiveRecordShards
   module SqlComments
     module Methods
       def execute(query, name = nil)
-        slave = ActiveRecord::Base.current_shard_selection.on_slave?
+        slave = ActiveRecord::Base.current_slave_selection
         query += " /* #{slave ? 'slave' : 'master'} */"
         super(query, name)
       end
