@@ -23,7 +23,7 @@ describe "connection switching" do
     end
 
     it "does not fail on unrelated ensure error when current_shard_selection fails" do
-      ActiveRecord::Base.expects(:current_shard_selection).raises(ArgumentError)
+      ActiveRecord::Base.expects(:current_shard_selection).at_least_once.raises(ArgumentError)
       assert_raises ArgumentError do
         ActiveRecord::Base.on_slave { 1 }
       end

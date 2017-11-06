@@ -46,11 +46,11 @@ module ActiveRecordShards
     end
 
     def force_cx_switch_slave_block
-      old_options = current_shard_selection.options
+      old_options = current_slave_selection
       switch_connection(slave: true)
       yield
     ensure
-      switch_connection(old_options) if old_options
+      switch_connection(slave: old_options)
     end
 
     def on_cx_switch_block(which, &block)
@@ -58,7 +58,7 @@ module ActiveRecordShards
       @disallow_slave += 1 if which == :master
 
       switch_to_slave = @disallow_slave.zero?
-      old_options = current_shard_selection.options
+      old_options = current_slave_selection
 
       switch_connection(slave: switch_to_slave)
 
@@ -71,7 +71,7 @@ module ActiveRecordShards
       end
     ensure
       @disallow_slave -= 1 if which == :master
-      switch_connection(old_options) if old_options
+      switch_connection(slave: old_options)
     end
 
     def current_slave_selection=(on_slave)
@@ -79,7 +79,11 @@ module ActiveRecordShards
     end
 
     def current_slave_selection
-      Thread.current[:slave_selection] ||= true
+      Thread.current[:slave_selection] ||= false
+    end
+
+    def connection_config
+      super.merge(slave: current_slave_selection)
     end
 
     class MasterSlaveProxy

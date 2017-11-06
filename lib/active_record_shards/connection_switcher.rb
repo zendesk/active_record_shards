@@ -107,7 +107,7 @@ module ActiveRecordShards
         end
 
         if options.key?(:slave)
-          current_shard_selection.on_slave = options[:slave]
+          self.current_slave_selection = options[:slave]
         end
 
         ensure_shard_connection
