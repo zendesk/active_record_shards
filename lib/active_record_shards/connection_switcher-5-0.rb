@@ -1,5 +1,5 @@
 module ActiveRecordShards
-  module ConnectionSwitcher
+  module BaseConfig
     private
 
     def ensure_shard_connection
