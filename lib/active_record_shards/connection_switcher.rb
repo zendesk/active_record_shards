@@ -94,6 +94,8 @@ module ActiveRecordShards
         self.current_shard_selection = selection
 
         ensure_shard_connection
+      else
+        self.current_shard_selection = selection
       end
     end
 
