@@ -5,7 +5,7 @@ module ActiveRecordShards
       include Enumerable
 
       def each(&block)
-        ActiveRecord::Base.on_all_shards(&block)
+        ActiveRecordShards::ShardedModel.on_all_shards(&block)
       end
     end
 
