@@ -38,23 +38,18 @@ module ActiveRecordShards
     end
 
     module InstanceMethods
-      def initialize_shard_and_slave
+      def initialize_slave
         @from_slave = !!self.class.current_slave_selection
-        @from_shard = self.class.current_shard_selection.options[:shard]
       end
 
       def from_slave?
         @from_slave
       end
-
-      def from_shard
-        @from_shard
-      end
     end
 
     def self.extended(base)
       base.send(:include, InstanceMethods)
-      base.after_initialize :initialize_shard_and_slave
+      base.after_initialize :initialize_slave
     end
   end
 end

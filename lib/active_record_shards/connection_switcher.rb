@@ -73,6 +73,10 @@ module ActiveRecordShards
       config[SHARD_NAMES_CONFIG_KEY]
     end
 
+    def table_exists_with_default_shard?
+      with_default_shard { table_exists_without_default_shard? }
+    end
+
     private
 
     def switch_connection(options)
@@ -85,10 +89,6 @@ module ActiveRecordShards
             raise "Did not find shard #{options[:shard]} in configurations"
           end
           current_shard_selection.shard = options[:shard]
-        end
-
-        if options.key?(:slave)
-          self.current_slave_selection = options[:slave]
         end
 
         ensure_shard_connection
@@ -109,10 +109,6 @@ module ActiveRecordShards
 
     def load_schema_with_default_shard!
       with_default_shard { load_schema_without_default_shard! }
-    end
-
-    def table_exists_with_default_shard?
-      with_default_shard { table_exists_without_default_shard? }
     end
 
     class MasterSlaveProxy

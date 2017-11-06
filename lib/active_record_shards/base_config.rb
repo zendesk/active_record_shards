@@ -1,7 +1,7 @@
 module ActiveRecordShards
   module BaseConfig
     def connection_config
-      {}
+      { shard: nil, sharded: false }
     end
 
     def connection_specification_name
