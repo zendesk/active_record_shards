@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 require 'active_record'
 require 'active_record/base'
+require 'active_record_shards/connection_resolver'
 require 'active_record_shards/configuration_parser'
 require 'active_record_shards/model'
 require 'active_record_shards/sharded_model'
