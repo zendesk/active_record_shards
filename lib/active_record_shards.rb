@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 require 'active_record'
 require 'active_record/base'
+require 'active_record_shards/base_config'
 require 'active_record_shards/connection_resolver'
 require 'active_record_shards/configuration_parser'
 require 'active_record_shards/model'
@@ -19,6 +20,7 @@ module ActiveRecordShards
   end
 end
 
+ActiveRecord::Base.extend(ActiveRecordShards::BaseConfig)
 ActiveRecord::Base.extend(ActiveRecordShards::ConfigurationParser)
 ActiveRecord::Base.extend(ActiveRecordShards::Model)
 ActiveRecord::Base.extend(ActiveRecordShards::ConnectionSwitcher)

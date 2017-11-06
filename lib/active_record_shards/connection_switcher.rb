@@ -125,7 +125,7 @@ module ActiveRecordShards
     end
 
     def connection_config
-      current_shard_selection.options.merge(sharded: is_sharded?)
+      super.merge(current_shard_selection.options.merge(sharded: is_sharded?))
     end
 
     def connection_resolver
