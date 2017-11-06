@@ -24,7 +24,6 @@ end
 ActiveRecord::Base.extend(ActiveRecordShards::BaseConfig)
 ActiveRecord::Base.extend(ActiveRecordShards::ConfigurationParser)
 ActiveRecord::Base.extend(ActiveRecordShards::Model)
-ActiveRecord::Base.extend(ActiveRecordShards::ConnectionSwitcher)
 ActiveRecord::Base.extend(ActiveRecordShards::SlaveDb)
 ActiveRecord::Base.extend(ActiveRecordShards::DefaultSlavePatches)
 ActiveRecord::Relation.include(ActiveRecordShards::DefaultSlavePatches::ActiveRelationPatches)
