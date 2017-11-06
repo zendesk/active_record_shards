@@ -73,6 +73,10 @@ module ActiveRecordShards
       config[SHARD_NAMES_CONFIG_KEY]
     end
 
+    def table_exists_with_default_shard?
+      with_default_shard { table_exists_without_default_shard? }
+    end
+
     private
 
     def switch_connection(options)
@@ -105,10 +109,6 @@ module ActiveRecordShards
 
     def load_schema_with_default_shard!
       with_default_shard { load_schema_without_default_shard! }
-    end
-
-    def table_exists_with_default_shard?
-      with_default_shard { table_exists_without_default_shard? }
     end
 
     class MasterSlaveProxy
