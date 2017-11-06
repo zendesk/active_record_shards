@@ -10,6 +10,13 @@ describe "connection switching" do
   end
 
   describe "shard switching" do
+    it "raises when retrieving connection spec name without being connected to a shard" do
+      Ticket.on_shard(0) { Ticket.connection_specification_name }
+      assert_raises ActiveRecordShards::NoShardSelection::NoShardSelected do
+        Ticket.connection_specification_name
+      end
+    end
+
     it "only switch connection on sharded models" do
       Ticket.on_shard(0) do
         assert_using_database('ars_test_shard0', Ticket)
@@ -154,7 +161,7 @@ describe "connection switching" do
       end
 
       it "gets columns from the slave shard" do
-        assert Ticket.column_names.include?('foo')
+        assert Ticket.on_shard(0) { Ticket.column_names.include?('foo') }
       end
 
       it "have correct from_shard" do
@@ -253,7 +260,7 @@ describe "connection switching" do
 
         ActiveRecord::Base.on_slave { assert_using_master_db }
         Account.on_slave { assert_using_master_db }
-        Ticket.on_slave  { assert_using_master_db }
+        Ticket.on_shard(0) { Ticket.on_slave { assert_using_master_db } }
       end
 
       it "successfully execute queries" do
@@ -517,7 +524,9 @@ describe "connection switching" do
         it "does not support implicit joins between an unsharded and a sharded table" do
           accounts = Account.includes(:tickets).order('tickets.id')
           accounts = accounts.references(:tickets)
-          assert_raises(ActiveRecord::StatementInvalid) { accounts.first }
+          assert_raises(ActiveRecord::StatementInvalid) do
+            Ticket.on_shard(0) { accounts.first }
+          end
         end
 
         it "does not support explicit joins between an unsharded and a sharded table" do
