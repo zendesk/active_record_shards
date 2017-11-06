@@ -115,13 +115,17 @@ module ActiveRecordShards
     end
 
     def connection_specification_name
-      name = connection_resolver.resolve_connection_name(current_shard_selection.options.merge(sharded: is_sharded?))
+      name = connection_resolver.resolve_connection_name(connection_config)
 
       unless configurations[name] || name == "primary"
         raise ActiveRecord::AdapterNotSpecified, "No database defined by #{name} in your database config. (configurations: #{configurations.inspect})"
       end
 
       name
+    end
+
+    def connection_config
+      current_shard_selection.options.merge(sharded: is_sharded?)
     end
 
     def connection_resolver
