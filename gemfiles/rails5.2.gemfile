@@ -1,0 +1,5 @@
+eval_gemfile(File.expand_path('common.rb', __dir__))
+
+gem 'activerecord',  '>= 5.2.0.alpha', github: 'rails/rails', branch: 'master'
+gem 'activesupport', '>= 5.2.0.alpha', github: 'rails/rails', branch: 'master'
+gem 'arel',          '>= 9.0.0.alpha', github: 'rails/arel',  branch: 'master'
