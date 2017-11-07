@@ -10,6 +10,16 @@ describe "connection switching" do
   end
 
   describe "shard switching" do
+    it "is not on_shard? when no shard is selected" do
+      refute ActiveRecordShards::ShardedModel.on_shard?
+    end
+
+    it "is on_shard? when shard is selected" do
+      ActiveRecordShards::ShardedModel.on_first_shard do
+        assert ActiveRecordShards::ShardedModel.on_shard?
+      end
+    end
+
     it "raises when retrieving connection spec name without being connected to a shard" do
       Ticket.on_shard(0) { Ticket.connection_specification_name }
       assert_raises ActiveRecordShards::NoShardSelection::NoShardSelected do

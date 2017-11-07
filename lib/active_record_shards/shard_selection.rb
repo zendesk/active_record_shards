@@ -10,5 +10,9 @@ module ActiveRecordShards
     def connection_config
       { shard: shard }
     end
+
+    def on_shard?
+      true
+    end
   end
 end

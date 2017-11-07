@@ -64,6 +64,10 @@ module ActiveRecordShards
       current_shard_selection.shard
     end
 
+    def on_shard?
+      current_shard_selection.on_shard?
+    end
+
     def shard_names
       unless config = configurations[shard_env]
         raise "Did not find #{shard_env} in configurations, did you forget to add it to your database config? (configurations: #{configurations.inspect})"
