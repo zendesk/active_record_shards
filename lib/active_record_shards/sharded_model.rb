@@ -13,7 +13,7 @@ module ActiveRecordShards
 
       module InstanceMethods
         def initialize_shard
-          @from_shard = self.class.current_shard_selection.options[:shard]
+          @from_shard = self.class.current_shard_selection.shard
         end
 
         def from_shard

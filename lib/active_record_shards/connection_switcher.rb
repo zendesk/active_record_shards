@@ -14,11 +14,11 @@ module ActiveRecordShards
     end
 
     def on_shard(shard)
-      old_options = current_shard_selection.options
-      switch_connection(shard: shard) if supports_sharding?
+      old_selection = current_shard_selection
+      switch_connection(ShardSelection.new(shard)) if supports_sharding?
       yield
     ensure
-      switch_connection(old_options)
+      switch_connection(old_selection)
     end
 
     def on_first_shard
@@ -31,21 +31,21 @@ module ActiveRecordShards
     end
 
     def on_all_shards
-      old_options = current_shard_selection.options
+      old_selection = current_shard_selection
       if supports_sharding?
         shard_names.map do |shard|
-          switch_connection(shard: shard)
+          switch_connection(ShardSelection.new(shard))
           yield(shard)
         end
       else
         [yield]
       end
     ensure
-      switch_connection(old_options)
+      switch_connection(old_selection)
     end
 
     def connection_config
-      super.merge(current_shard_selection.options.merge(sharded: is_sharded?))
+      super.merge(current_shard_selection.connection_config.merge(sharded: is_sharded?))
     end
 
     def supports_sharding?
@@ -53,7 +53,11 @@ module ActiveRecordShards
     end
 
     def current_shard_selection
-      Thread.current[:shard_selection] ||= ShardSelection.new(shard_names.first)
+      Thread.current[:shard_selection] ||= NoShardSelection.new
+    end
+
+    def current_shard_selection=(shard_selection)
+      Thread.current[:shard_selection] = shard_selection
     end
 
     def current_shard_id
@@ -79,19 +83,19 @@ module ActiveRecordShards
 
     private
 
-    def switch_connection(options)
-      if options.any?
-        if options.key?(:shard)
-          unless config = configurations[shard_env]
-            raise "Did not find #{shard_env} in configurations, did you forget to add it to your database config? (configurations: #{configurations.inspect})"
-          end
-          unless config['shard_names'].include?(options[:shard])
-            raise "Did not find shard #{options[:shard]} in configurations"
-          end
-          current_shard_selection.shard = options[:shard]
+    def switch_connection(selection)
+      if selection.is_a?(ShardSelection)
+        unless config = configurations[shard_env]
+          raise "Did not find #{shard_env} in configurations, did you forget to add it to your database config? (configurations: #{configurations.inspect})"
         end
+        unless config['shard_names'].include?(selection.shard)
+          raise "Did not find shard #{selection.shard} in configurations"
+        end
+        self.current_shard_selection = selection
 
         ensure_shard_connection
+      else
+        self.current_shard_selection = selection
       end
     end
 
