@@ -79,7 +79,7 @@ module ActiveRecordShards
     end
 
     def current_slave_selection
-      Thread.current[:slave_selection] ||= false
+      !!Thread.current[:slave_selection]
     end
 
     def connection_config
