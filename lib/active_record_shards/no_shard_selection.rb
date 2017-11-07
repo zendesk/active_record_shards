@@ -10,5 +10,9 @@ module ActiveRecordShards
     def connection_config
       raise NoShardSelected, "No shard selected, can't connect"
     end
+
+    def on_shard?
+      false
+    end
   end
 end
