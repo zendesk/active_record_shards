@@ -118,17 +118,6 @@ module ActiveRecordShards
     def load_schema_with_default_shard!
       with_default_shard { load_schema_without_default_shard! }
     end
-
-    class MasterSlaveProxy
-      def initialize(target, which)
-        @target = target
-        @which = which
-      end
-
-      def method_missing(method, *args, &block) # rubocop:disable Style/MethodMissing
-        @target.on_master_or_slave(@which) { @target.send(method, *args, &block) }
-      end
-    end
   end
 end
 
