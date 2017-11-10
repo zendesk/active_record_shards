@@ -48,7 +48,7 @@ module ActiveRecordShards
     end
 
     def self.extended(base)
-      base.send(:include, InstanceMethods)
+      base.include(InstanceMethods)
       base.after_initialize :initialize_slave
     end
   end
