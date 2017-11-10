@@ -75,11 +75,11 @@ module ActiveRecordShards
     end
 
     def current_slave_selection=(on_slave)
-      Thread.current[:slave_selection] = on_slave
+      Thread.current[slave_thread_variable_name] = on_slave
     end
 
     def current_slave_selection
-      !!Thread.current[:slave_selection]
+      !!Thread.current[slave_thread_variable_name]
     end
 
     def connection_config

@@ -4,6 +4,10 @@ module ActiveRecordShards
       { shard: nil, sharded: false }
     end
 
+    def slave_thread_variable_name
+      :unsharded_slave_selection
+    end
+
     def connection_specification_name
       name = connection_resolver.resolve_connection_name(connection_config)
 

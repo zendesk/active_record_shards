@@ -21,6 +21,10 @@ module ActiveRecordShards
       switch_connection(old_selection)
     end
 
+    def slave_thread_variable_name
+      :sharded_slave_selection
+    end
+
     def on_first_shard
       shard_name = shard_names.first
       on_shard(shard_name) { yield }
