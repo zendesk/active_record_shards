@@ -10,6 +10,19 @@ describe "connection switching" do
   end
 
   describe "shard switching" do
+    it "can use sharded master database" do
+      ActiveRecord::Base.connection_handler.connection_pool_list.clear
+      # Connect to a shard
+      ActiveRecordShards::ShardedModel.on_shard(0) do
+        ticket = Ticket.create(title: "On master")
+        # Connect to the unsharded slave database
+        ActiveRecord::Base.on_slave do
+          # Retrieve from the sharded master database
+          assert Ticket.exists?(ticket.id)
+        end
+      end
+    end
+
     it "is not on_shard? when no shard is selected" do
       refute ActiveRecordShards::ShardedModel.on_shard?
     end
