@@ -2,7 +2,7 @@ module ActiveRecordShards
   module BaseConfig
     private
 
-    def ensure_shard_connection
+    def ensure_db_connection
       # See if we've connected before. If not, call `#establish_connection`
       # so that ActiveRecord can resolve connection_specification_name to an
       # ARS connection.
