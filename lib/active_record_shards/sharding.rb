@@ -2,7 +2,7 @@
 require 'active_record_shards/shard_support'
 
 module ActiveRecordShards
-  module ConnectionSwitcher
+  module Sharding
     SHARD_NAMES_CONFIG_KEY = 'shard_names'.freeze
 
     def self.extended(base)
