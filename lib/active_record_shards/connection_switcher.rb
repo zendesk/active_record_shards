@@ -108,7 +108,7 @@ module ActiveRecordShards
     end
 
     def with_default_shard
-      if is_sharded? && current_shard_id.nil? && table_name != ActiveRecord::SchemaMigration.table_name
+      if is_sharded? && !on_shard? && table_name != ActiveRecord::SchemaMigration.table_name
         on_first_shard { yield }
       else
         yield
