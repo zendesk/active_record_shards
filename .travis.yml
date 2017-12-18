@@ -16,8 +16,6 @@ branches:
   only:
     - v4
 matrix:
-  allow_failures:
-    - gemfile: gemfiles/rails5.2.gemfile
   include:
     - rvm: 2.4.2
       env:
