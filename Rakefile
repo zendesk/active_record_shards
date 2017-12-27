@@ -16,6 +16,7 @@ task default: ["rubocop", "wwtd:local"]
 
 RuboCop::RakeTask.new
 
+desc 'Run an IRB console with ActiveRecordShards loaded'
 task :console do
   require 'irb'
   require 'irb/completion'

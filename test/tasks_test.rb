@@ -5,6 +5,9 @@ require_relative 'helper'
 # ActiveRecord needs to be loaded first.
 Rake::Application.new.rake_require("active_record/railties/databases")
 require 'active_record_shards/tasks'
+task :environment do
+  # Only required as a dependency
+end
 
 describe "Database rake tasks" do
   def capture_stderr

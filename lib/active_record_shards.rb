@@ -30,7 +30,7 @@ when '3.2'
   require 'active_record_shards/patches-3-2'
 when '4.2'
   require 'active_record_shards/patches-4-2'
-when '5.0', '5.1'
+when '5.0', '5.1', '5.2'
   require 'active_record_shards/patches-5-0'
 else
   raise "ActiveRecordShards is not compatible with #{ActiveRecord::VERSION::STRING}"

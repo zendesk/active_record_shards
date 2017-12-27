@@ -1,13 +1,13 @@
 rvm:
-  - 2.1.10
-  - 2.2.4
-  - 2.3.3
-  - 2.4.0
+  - 2.2
+  - 2.3
+  - 2.4
 gemfile:
   - gemfiles/rails3.2.gemfile
   - gemfiles/rails4.2.gemfile
   - gemfiles/rails5.0.gemfile
   - gemfiles/rails5.1.gemfile
+  - gemfiles/rails5.2.gemfile
 bundler_args: --no-deployment
 script: bundle exec rake $TASK
 env:
@@ -22,13 +22,9 @@ branches:
     - 3-7-0
 matrix:
   exclude:
-    - rvm: 2.4.0
+    - rvm: 2.4
       gemfile: gemfiles/rails3.2.gemfile
-    - rvm: 2.1.10
-      gemfile: gemfiles/rails5.0.gemfile
-    - rvm: 2.1.10
-      gemfile: gemfiles/rails5.1.gemfile
   include:
-    - rvm: 2.4.0
+    - rvm: 2.4
       env:
         - TASK=rubocop
