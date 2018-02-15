@@ -1,18 +1,31 @@
 # frozen_string_literal: true
 module ActiveRecord
   class Migrator
-    class << self
-      [:up, :down, :run].each do |m|
-        define_method("#{m}_with_sharding") do |*args|
-          ActiveRecord::Base.on_shard(nil) do
-            send("#{m}_without_sharding", *args)
-          end
-          ActiveRecord::Base.on_all_shards do
-            send("#{m}_without_sharding", *args)
-          end
+    if ActiveRecord::VERSION::STRING >= '5.2.0'
+      define_method(:run_with_sharding) do |*args|
+        ActiveRecord::Base.on_shard(nil) do
+          send(:run_without_sharding, *args)
         end
-        alias_method :"#{m}_without_sharding", m.to_sym
-        alias_method m.to_sym, :"#{m}_with_sharding"
+        ActiveRecord::Base.on_all_shards do
+          send(:run_without_sharding, *args)
+        end
+      end
+      alias_method :run_without_sharding, :run
+      alias_method :run, :run_with_sharding
+    else
+      class << self
+        [:up, :down, :run].each do |m|
+          define_method("#{m}_with_sharding") do |*args|
+            ActiveRecord::Base.on_shard(nil) do
+              send("#{m}_without_sharding", *args)
+            end
+            ActiveRecord::Base.on_all_shards do
+              send("#{m}_without_sharding", *args)
+            end
+          end
+          alias_method :"#{m}_without_sharding", m.to_sym
+          alias_method m.to_sym, :"#{m}_with_sharding"
+        end
       end
     end
 
