@@ -52,7 +52,7 @@ namespace :db do
   task abort_if_pending_migrations: :environment do
     if defined? ActiveRecord
       pending_migrations =
-        ActiveRecord::Base.on_shard(nil) { ActiveRecord::Migrator.open(ActiveRecord::Migrator.migrations_paths).pending_migrations }
+        ActiveRecord::Migrator.open(ActiveRecord::Migrator.migrations_paths).pending_migrations
 
       if pending_migrations.any?
         puts "You have #{pending_migrations.size} pending migrations:"
