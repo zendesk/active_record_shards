@@ -139,7 +139,7 @@ module ActiveRecordShards
 
     def shard_names
       unless config = configurations[shard_env]
-        raise "Did not find #{shard_env} in configurations, did you forget to add it to your database config? (configurations: #{configurations.inspect})"
+        raise "Did not find #{shard_env} in configurations, did you forget to add it to your database config? (configurations: #{configurations.keys.inspect})"
       end
       unless config.fetch(SHARD_NAMES_CONFIG_KEY, []).all? { |shard_name| shard_name.is_a?(Integer) }
         raise "All shard names must be integers: #{config[SHARD_NAMES_CONFIG_KEY].inspect}."
@@ -157,7 +157,7 @@ module ActiveRecordShards
 
         if options.key?(:shard)
           unless configurations[shard_env]
-            raise "Did not find #{shard_env} in configurations, did you forget to add it to your database config? (configurations: #{configurations.inspect})"
+            raise "Did not find #{shard_env} in configurations, did you forget to add it to your database config? (configurations: #{configurations.keys.inspect})"
           end
           current_shard_selection.shard = options[:shard]
         end
