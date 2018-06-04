@@ -2,7 +2,7 @@
 require 'active_record_shards/shard_support'
 
 module ActiveRecordShards
-  module ConnectionSwitcher
+  module Sharding
     SHARD_NAMES_CONFIG_KEY = 'shard_names'.freeze
 
     def self.extended(base)
@@ -97,7 +97,7 @@ module ActiveRecordShards
         end
         self.current_shard_selection = selection
 
-        ensure_shard_connection
+        ensure_db_connection
       else
         self.current_shard_selection = selection
       end
@@ -123,9 +123,9 @@ end
 
 case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
 when '5.0'
-  require 'active_record_shards/connection_switcher_5_0'
+  require 'active_record_shards/db_connection_5_0'
 when '5.1', '5.2'
-  require 'active_record_shards/connection_switcher_5_1'
+  require 'active_record_shards/db_connection_5_1'
 else
   raise "ActiveRecordShards is not compatible with #{ActiveRecord::VERSION::STRING}"
 end

@@ -88,7 +88,7 @@ module ActiveRecordShards
 
     def switch_slave_connection(options)
       self.current_slave_selection = options[:slave]
-      ensure_shard_connection
+      ensure_db_connection
     end
 
     class MasterSlaveProxy

@@ -2,7 +2,7 @@ module ActiveRecordShards
   module Ext
     module ShardedModel
       def self.extended(base)
-        base.extend(ActiveRecordShards::ConnectionSwitcher)
+        base.extend(ActiveRecordShards::Sharding)
         base.include(InstanceMethods)
         base.after_initialize :initialize_shard
       end
