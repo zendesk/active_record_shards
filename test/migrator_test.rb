@@ -7,10 +7,9 @@ describe ActiveRecord::Migrator do
   before { ActiveRecord::Base.establish_connection(RAILS_ENV.to_sym) }
 
   it "migrates" do
-    migration_path = File.join(File.dirname(__FILE__), "/migrations")
-
     refute ActiveRecord::Base.current_shard_id
-    ActiveRecord::Migrator.migrate(migration_path)
+
+    migrator.migrate
 
     ActiveRecord::Base.on_all_shards do
       assert ActiveRecord::Base.connection.public_send(connection_exist_method, :schema_migrations), "Schema Migrations doesn't exist"
@@ -29,48 +28,48 @@ describe ActiveRecord::Migrator do
     end
 
     # now test down/ up
-    ActiveRecord::Migrator.run(:down, migration_path, 20110824010216)
+    migrator(:down, 'migrations', 20110824010216).run
     ActiveRecord::Base.on_all_shards do
       assert !table_has_column?("tickets", "sharded_column")
     end
 
-    ActiveRecord::Migrator.run(:down, migration_path, 20110829215912)
+    migrator(:down, 'migrations', 20110829215912).run
     ActiveRecord::Base.on_shard(nil) do
       assert !table_has_column?("accounts", "non_sharded_column")
     end
 
-    ActiveRecord::Migrator.run(:up, migration_path, 20110824010216)
+    migrator(:up, 'migrations', 20110824010216).run
     ActiveRecord::Base.on_all_shards do
       assert table_has_column?("tickets", "sharded_column")
     end
 
-    ActiveRecord::Migrator.run(:up, migration_path, 20110829215912)
+    migrator(:up, 'migrations', 20110829215912).run
     ActiveRecord::Base.on_shard(nil) do
       assert table_has_column?("accounts", "non_sharded_column")
     end
   end
 
   it "does not migrate bad migrations" do
-    migration_path = File.join(File.dirname(__FILE__), "/cowardly_migration")
     assert_raises StandardError do
-      ActiveRecord::Migrator.migrate(migration_path)
+      migrator(:up, 'cowardly_migration').migrate
     end
   end
 
   it "fails with failing migrations" do
     # like, if you have to break a migration in the middle somewhere.
-    migration_path = File.join(File.dirname(__FILE__), "/failure_migration")
-
-    assert failure_migration_pending?(migration_path)
+    assert failure_migration_pending?('failure_migration')
     begin
-      ActiveRecord::Migrator.migrate(migration_path)
-    rescue
+      migrator(:up, 'failure_migration').migrate
+    rescue => e
+      unless e.message.include?("ERROR_IN_MIGRATION")
+        raise e
+      end
       # after first fail, should still be pending
-      assert failure_migration_pending?(migration_path)
+      assert failure_migration_pending?('failure_migration')
       retry
     end
 
-    assert !failure_migration_pending?(migration_path)
+    assert !failure_migration_pending?('failure_migration')
     ActiveRecord::Base.on_all_shards do
       assert table_has_column?("tickets", "sharded_column")
     end
@@ -93,11 +92,6 @@ describe ActiveRecord::Migrator do
   private
 
   def failure_migration_pending?(migration_path)
-    if ActiveRecord::VERSION::MAJOR >= 4
-      migrations = ActiveRecord::Migrator.migrations(migration_path)
-      ActiveRecord::Migrator.new(:up, migrations).pending_migrations.detect { |f| f.name == "FailureMigration" }
-    else
-      ActiveRecord::Migrator.new(:up, migration_path).pending_migrations.detect { |f| f.name == "FailureMigration" }
-    end
+    migrator(:up, migration_path).pending_migrations.detect { |f| f.name == "FailureMigration" }
   end
 end
