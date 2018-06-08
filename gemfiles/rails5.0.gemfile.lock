@@ -1,0 +1,78 @@
+PATH
+  remote: /Users/bquorning/Code/zendesk/active_record_shards
+  specs:
+    active_record_shards (3.11.5)
+      activerecord (>= 3.2.16, < 5.2)
+      activesupport (>= 3.2.16, < 5.2)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    activemodel (5.0.7)
+      activesupport (= 5.0.7)
+    activerecord (5.0.7)
+      activemodel (= 5.0.7)
+      activesupport (= 5.0.7)
+      arel (~> 7.0)
+    activesupport (5.0.7)
+      concurrent-ruby (~> 1.0, >= 1.0.2)
+      i18n (>= 0.7, < 2)
+      minitest (~> 5.1)
+      tzinfo (~> 1.1)
+    arel (7.1.4)
+    ast (2.4.0)
+    bump (0.6.1)
+    byebug (10.0.2)
+    concurrent-ruby (1.0.5)
+    i18n (1.0.1)
+      concurrent-ruby (~> 1.0)
+    metaclass (0.0.4)
+    minitest (5.11.3)
+    minitest-rg (5.2.0)
+      minitest (~> 5.0)
+    mocha (1.5.0)
+      metaclass (~> 0.0.1)
+    mysql2 (0.4.10)
+    parallel (1.12.1)
+    parser (2.5.1.0)
+      ast (~> 2.4.0)
+    phenix (0.5.0)
+      activerecord (>= 3.2, < 6.0)
+      bundler
+    powerpack (0.1.1)
+    rainbow (2.2.2)
+      rake
+    rake (12.3.1)
+    rubocop (0.50.0)
+      parallel (~> 1.10)
+      parser (>= 2.3.3.1, < 3.0)
+      powerpack (~> 0.1)
+      rainbow (>= 2.2.2, < 3.0)
+      ruby-progressbar (~> 1.7)
+      unicode-display_width (~> 1.0, >= 1.0.1)
+    ruby-progressbar (1.9.0)
+    thread_safe (0.3.6)
+    tzinfo (1.2.5)
+      thread_safe (~> 0.1)
+    unicode-display_width (1.4.0)
+    wwtd (1.3.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  active_record_shards!
+  activerecord (~> 5.0.0)
+  bump
+  byebug
+  minitest
+  minitest-rg
+  mocha
+  mysql2 (>= 0.3.18, < 0.5)
+  phenix (>= 0.2.0)
+  rake (~> 12.0)
+  rubocop (= 0.50.0)
+  wwtd
+
+BUNDLED WITH
+   1.16.1

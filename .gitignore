@@ -3,6 +3,5 @@ pkg/*
 .bundle
 *.log
 Gemfile.lock
-gemfiles/*.lock
 .tags*
 tmp/*
