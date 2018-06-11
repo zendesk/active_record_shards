@@ -5,7 +5,7 @@ class FailureMigration < BaseMigration
   def self.up
     @@fail_at_two ||= 0
     @@fail_at_two += 1
-    raise "FAIL FAIL FAIL" if @@fail_at_two == 2
+    raise "ERROR_IN_MIGRATION" if @@fail_at_two == 2
     add_column :tickets, :sharded_column, :integer
   end
 

@@ -100,7 +100,10 @@ module ActiveRecordShards
 
     module ActiveRelationPatches
       def self.included(base)
-        [:calculate, :exists?, :pluck, :find_with_associations].each do |m|
+        [
+          :calculate, :exists?, :pluck,
+          ActiveRecord::VERSION::MAJOR >= 4 ? :load : :find_with_associations
+        ].each do |m|
           ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(false, base, m)
         end
       end

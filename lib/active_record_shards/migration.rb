@@ -1,25 +1,32 @@
 # frozen_string_literal: true
 module ActiveRecord
   class Migrator
-    class << self
-      [:up, :down, :run].each do |m|
-        define_method("#{m}_with_sharding") do |*args|
-          ActiveRecord::Base.on_shard(nil) do
-            send("#{m}_without_sharding", *args)
-          end
-          ActiveRecord::Base.on_all_shards do
-            send("#{m}_without_sharding", *args)
-          end
-        end
-        alias_method :"#{m}_without_sharding", m.to_sym
-        alias_method m.to_sym, :"#{m}_with_sharding"
+    def self.shards_migration_context
+      if ActiveRecord::VERSION::STRING >= '5.2.0'
+        ActiveRecord::MigrationContext.new(['db/migrate'])
+      else
+        self
       end
     end
+
+    def run_with_sharding
+      ActiveRecord::Base.on_shard(nil) { run_without_sharding }
+      ActiveRecord::Base.on_all_shards { run_without_sharding }
+    end
+    alias_method :run_without_sharding, :run
+    alias_method :run, :run_with_sharding
+
+    def migrate_with_sharding
+      ActiveRecord::Base.on_shard(nil) { migrate_without_sharding }
+      ActiveRecord::Base.on_all_shards { migrate_without_sharding }
+    end
+    alias_method :migrate_without_sharding, :migrate
+    alias_method :migrate, :migrate_with_sharding
 
     # don't allow Migrator class to cache versions
     undef migrated
     def migrated
-      self.class.get_all_versions
+      self.class.shards_migration_context.get_all_versions
     end
 
     # list of pending migrations is any migrations that haven't run on all shards.
@@ -38,7 +45,7 @@ module ActiveRecord
       missing = {}
 
       collect = lambda do |shard|
-        migrated = get_all_versions
+        migrated = shards_migration_context.get_all_versions
 
         p = versions - migrated
         pending[shard] = p if p.any?

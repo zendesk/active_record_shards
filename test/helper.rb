@@ -89,6 +89,19 @@ Minitest::Spec.class_eval do
     !ActiveRecord::Base.connection.select_values("desc #{table}").grep(column).empty?
   end
 
+  def migrator(direction = :up, path = 'migrations', target_version = nil)
+    migration_path = File.join(File.dirname(__FILE__), "/", path)
+    if ActiveRecord::VERSION::STRING >= "5.2.0"
+      migrations = ActiveRecord::MigrationContext.new(migration_path).migrations
+      ActiveRecord::Migrator.new(direction, migrations, target_version)
+    elsif ActiveRecord::VERSION::MAJOR >= 4
+      migrations = ActiveRecord::Migrator.migrations(migration_path)
+      ActiveRecord::Migrator.new(direction, migrations, target_version)
+    else
+      ActiveRecord::Migrator.new(direction, migration_path, target_version)
+    end
+  end
+
   # create all databases and then tear them down after test
   # avoid doing any shard switching while preparing our databases
   def self.with_phenix
