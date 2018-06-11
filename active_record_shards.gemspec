@@ -1,6 +1,6 @@
 Gem::Specification.new "active_record_shards", "4.0.0.beta9" do |s|
-  s.authors     = ["Mick Staugaard", "Eric Chapweske", "Ben Osheroff"]
-  s.email       = ["mick@staugaard.com", "eac@zendesk.com", "ben@gimbo.net"]
+  s.authors     = ["Benjamin Quorning", "Gabe Martin-Dempesy", "Pierre Schambacher", "Mick Staugaard", "Jacob Atzen", "Eric Chapweske", "Ben Osheroff"]
+  s.email       = ["bquorning@zendesk.com", "gabe@zendesk.com", "pschambacher@zendesk.com", "mick@staugaard.com"]
   s.homepage    = "https://github.com/zendesk/active_record_shards"
   s.summary     = "Simple database switching for ActiveRecord."
   s.description = "Easily run queries on shard and slave databases."
