@@ -249,6 +249,30 @@ describe "connection switching" do
     end
   end
 
+  describe "in an environment without slave" do
+    switch_rails_env('test3')
+    def spec_name
+      ActiveRecord::Base.connection_pool.spec.name
+    end
+
+    describe "shard switching" do
+      it "just stay on the master db" do
+        main_spec_name = spec_name
+        shard_spec_name = ActiveRecordShards::ShardedModel.on_shard(0) { spec_name }
+
+        ActiveRecord::Base.on_slave do
+          assert_using_database('ars_test3', Account)
+          assert_equal main_spec_name, spec_name
+
+          ActiveRecordShards::ShardedModel.on_shard(0) do
+            assert_using_database('ars_test3_shard0', Ticket)
+            assert_equal shard_spec_name, spec_name
+          end
+        end
+      end
+    end
+  end
+
   describe "slave driving" do
     describe "without slave configuration" do
       before do
