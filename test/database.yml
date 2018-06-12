@@ -40,3 +40,13 @@ test2:
 test2_slave:
   <<: *MYSQL
   database: ars_test2_slave
+
+test3:
+  <<: *MYSQL
+  database: ars_test3
+  shard_names: [0]
+
+test3_shard_0:
+  <<: *MYSQL
+  database: ars_test3_shard0
+

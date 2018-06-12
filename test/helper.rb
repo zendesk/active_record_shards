@@ -102,6 +102,18 @@ Minitest::Spec.class_eval do
     end
   end
 
+  def self.switch_rails_env(env)
+    before do
+      silence_warnings { Object.const_set("RAILS_ENV", env) }
+      ActiveRecord::Base.establish_connection(::RAILS_ENV.to_sym)
+    end
+    after do
+      silence_warnings { Object.const_set("RAILS_ENV", 'test') }
+      ActiveRecord::Base.establish_connection(::RAILS_ENV.to_sym)
+      assert_using_database('ars_test', Ticket)
+    end
+  end
+
   # create all databases and then tear them down after test
   # avoid doing any shard switching while preparing our databases
   def self.with_phenix
