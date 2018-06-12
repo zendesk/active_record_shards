@@ -47,6 +47,13 @@ jobs:
     environment:
       - BUNDLE_GEMFILE: gemfiles/rails4.2.gemfile
     <<: *test
+  ruby-2.5-rails-4.2-test:
+    docker:
+      - image: circleci/ruby:2.5
+      - image: circleci/mysql:5.7-ram
+    environment:
+      - BUNDLE_GEMFILE: gemfiles/rails4.2.gemfile
+    <<: *test
 
   # Rails 5.0
   ruby-2.2-rails-5.0-test:
@@ -93,6 +100,13 @@ jobs:
     environment:
       - BUNDLE_GEMFILE: gemfiles/rails5.1.gemfile
     <<: *test
+  ruby-2.5-rails-5.1-test:
+    docker:
+      - image: circleci/ruby:2.5
+      - image: circleci/mysql:5.7-ram
+    environment:
+      - BUNDLE_GEMFILE: gemfiles/rails5.1.gemfile
+    <<: *test
 
   # Rails 5.2
   ruby-2.2-rails-5.2-test:
@@ -116,11 +130,18 @@ jobs:
     environment:
       - BUNDLE_GEMFILE: gemfiles/rails5.2.gemfile
     <<: *test
+  ruby-2.5-rails-5.2-test:
+    docker:
+      - image: circleci/ruby:2.5
+      - image: circleci/mysql:5.7-ram
+    environment:
+      - BUNDLE_GEMFILE: gemfiles/rails5.2.gemfile
+    <<: *test
 
   # Rubocop
   rubocop:
     docker:
-      - image: circleci/ruby:2.4
+      - image: circleci/ruby:2.5
     steps:
       - checkout
       - run: bundle install
@@ -138,6 +159,7 @@ workflows:
       - ruby-2.2-rails-4.2-test
       - ruby-2.3-rails-4.2-test
       - ruby-2.4-rails-4.2-test
+      - ruby-2.5-rails-4.2-test
 
       - ruby-2.2-rails-5.0-test
       - ruby-2.3-rails-5.0-test
@@ -146,7 +168,9 @@ workflows:
       - ruby-2.2-rails-5.1-test
       - ruby-2.3-rails-5.1-test
       - ruby-2.4-rails-5.1-test
+      - ruby-2.5-rails-5.1-test
 
       - ruby-2.2-rails-5.2-test
       - ruby-2.3-rails-5.2-test
       - ruby-2.4-rails-5.2-test
+      - ruby-2.5-rails-5.2-test
