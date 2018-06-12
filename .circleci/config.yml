@@ -49,23 +49,9 @@ jobs:
     <<: *test
 
   # Rails 5.0
-  ruby-2.2-rails-5.0-test:
+  ruby-2.5-rails-5.0-test:
     docker:
-      - image: circleci/ruby:2.2
-      - image: circleci/mysql:5.7-ram
-    environment:
-      - BUNDLE_GEMFILE: gemfiles/rails5.0.gemfile
-    <<: *test
-  ruby-2.3-rails-5.0-test:
-    docker:
-      - image: circleci/ruby:2.3
-      - image: circleci/mysql:5.7-ram
-    environment:
-      - BUNDLE_GEMFILE: gemfiles/rails5.0.gemfile
-    <<: *test
-  ruby-2.4-rails-5.0-test:
-    docker:
-      - image: circleci/ruby:2.4
+      - image: circleci/ruby:2.5
       - image: circleci/mysql:5.7-ram
     environment:
       - BUNDLE_GEMFILE: gemfiles/rails5.0.gemfile
@@ -153,9 +139,7 @@ workflows:
       - ruby-2.4-rails-4.2-test
       - ruby-2.5-rails-4.2-test
 
-      - ruby-2.2-rails-5.0-test
-      - ruby-2.3-rails-5.0-test
-      - ruby-2.4-rails-5.0-test
+      - ruby-2.5-rails-5.0-test
 
       - ruby-2.2-rails-5.1-test
       - ruby-2.3-rails-5.1-test
