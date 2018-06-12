@@ -17,13 +17,6 @@ jobs:
     environment:
       - BUNDLE_GEMFILE: gemfiles/rails3.2.gemfile
     <<: *test
-  ruby-2.3-rails-3.2-test:
-    docker:
-      - image: circleci/ruby:2.3
-      - image: circleci/mysql:5.6-ram # Not compatible with MySQL 5.7
-    environment:
-      - BUNDLE_GEMFILE: gemfiles/rails3.2.gemfile
-    <<: *test
 
   # Rails 4.2
   ruby-2.2-rails-4.2-test:
@@ -154,7 +147,6 @@ workflows:
       - rubocop
 
       - ruby-2.2-rails-3.2-test
-      - ruby-2.3-rails-3.2-test
 
       - ruby-2.2-rails-4.2-test
       - ruby-2.3-rails-4.2-test
