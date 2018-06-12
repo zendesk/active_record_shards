@@ -1,0 +1,152 @@
+version: 2
+
+test: &test
+  steps:
+    - checkout
+    - run: sudo apt install -y mysql-client
+    - run: bundle install
+    - run: rake test
+
+jobs:
+
+  # Rails 3.2
+  ruby-2.2-rails-3.2-test:
+    docker:
+      - image: circleci/ruby:2.2
+      - image: circleci/mysql:5.6-ram # Not compatible with MySQL 5.7
+    environment:
+      - BUNDLE_GEMFILE: gemfiles/rails3.2.gemfile
+    <<: *test
+  ruby-2.3-rails-3.2-test:
+    docker:
+      - image: circleci/ruby:2.3
+      - image: circleci/mysql:5.6-ram # Not compatible with MySQL 5.7
+    environment:
+      - BUNDLE_GEMFILE: gemfiles/rails3.2.gemfile
+    <<: *test
+
+  # Rails 4.2
+  ruby-2.2-rails-4.2-test:
+    docker:
+      - image: circleci/ruby:2.2
+      - image: circleci/mysql:5.7-ram
+    environment:
+      - BUNDLE_GEMFILE: gemfiles/rails4.2.gemfile
+    <<: *test
+  ruby-2.3-rails-4.2-test:
+    docker:
+      - image: circleci/ruby:2.3
+      - image: circleci/mysql:5.7-ram
+    environment:
+      - BUNDLE_GEMFILE: gemfiles/rails4.2.gemfile
+    <<: *test
+  ruby-2.4-rails-4.2-test:
+    docker:
+      - image: circleci/ruby:2.4
+      - image: circleci/mysql:5.7-ram
+    environment:
+      - BUNDLE_GEMFILE: gemfiles/rails4.2.gemfile
+    <<: *test
+
+  # Rails 5.0
+  ruby-2.2-rails-5.0-test:
+    docker:
+      - image: circleci/ruby:2.2
+      - image: circleci/mysql:5.7-ram
+    environment:
+      - BUNDLE_GEMFILE: gemfiles/rails5.0.gemfile
+    <<: *test
+  ruby-2.3-rails-5.0-test:
+    docker:
+      - image: circleci/ruby:2.3
+      - image: circleci/mysql:5.7-ram
+    environment:
+      - BUNDLE_GEMFILE: gemfiles/rails5.0.gemfile
+    <<: *test
+  ruby-2.4-rails-5.0-test:
+    docker:
+      - image: circleci/ruby:2.4
+      - image: circleci/mysql:5.7-ram
+    environment:
+      - BUNDLE_GEMFILE: gemfiles/rails5.0.gemfile
+    <<: *test
+
+  # Rails 5.1
+  ruby-2.2-rails-5.1-test:
+    docker:
+      - image: circleci/ruby:2.2
+      - image: circleci/mysql:5.7-ram
+    environment:
+      - BUNDLE_GEMFILE: gemfiles/rails5.1.gemfile
+    <<: *test
+  ruby-2.3-rails-5.1-test:
+    docker:
+      - image: circleci/ruby:2.3
+      - image: circleci/mysql:5.7-ram
+    environment:
+      - BUNDLE_GEMFILE: gemfiles/rails5.1.gemfile
+    <<: *test
+  ruby-2.4-rails-5.1-test:
+    docker:
+      - image: circleci/ruby:2.4
+      - image: circleci/mysql:5.7-ram
+    environment:
+      - BUNDLE_GEMFILE: gemfiles/rails5.1.gemfile
+    <<: *test
+
+  # Rails 5.2
+  ruby-2.2-rails-5.2-test:
+    docker:
+      - image: circleci/ruby:2.2
+      - image: circleci/mysql:5.7-ram
+    environment:
+      - BUNDLE_GEMFILE: gemfiles/rails5.2.gemfile
+    <<: *test
+  ruby-2.3-rails-5.2-test:
+    docker:
+      - image: circleci/ruby:2.3
+      - image: circleci/mysql:5.7-ram
+    environment:
+      - BUNDLE_GEMFILE: gemfiles/rails5.2.gemfile
+    <<: *test
+  ruby-2.4-rails-5.2-test:
+    docker:
+      - image: circleci/ruby:2.4
+      - image: circleci/mysql:5.7-ram
+    environment:
+      - BUNDLE_GEMFILE: gemfiles/rails5.2.gemfile
+    <<: *test
+
+  # Rubocop
+  rubocop:
+    docker:
+      - image: circleci/ruby:2.4
+    steps:
+      - checkout
+      - run: bundle install
+      - run: rake rubocop
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - rubocop
+
+      - ruby-2.2-rails-3.2-test
+      - ruby-2.3-rails-3.2-test
+
+      - ruby-2.2-rails-4.2-test
+      - ruby-2.3-rails-4.2-test
+      - ruby-2.4-rails-4.2-test
+
+      - ruby-2.2-rails-5.0-test
+      - ruby-2.3-rails-5.0-test
+      - ruby-2.4-rails-5.0-test
+
+      - ruby-2.2-rails-5.1-test
+      - ruby-2.3-rails-5.1-test
+      - ruby-2.4-rails-5.1-test
+
+      - ruby-2.2-rails-5.2-test
+      - ruby-2.3-rails-5.2-test
+      - ruby-2.4-rails-5.2-test

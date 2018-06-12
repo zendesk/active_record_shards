@@ -4,7 +4,7 @@ require 'minitest/autorun'
 require 'minitest/rg'
 require 'rake'
 
-require 'mocha/mini_test'
+require 'mocha/minitest'
 Bundler.require
 
 if defined?(Debugger)
