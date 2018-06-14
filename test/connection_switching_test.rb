@@ -663,6 +663,42 @@ describe "connection switching" do
     end
   end
 
+  describe "when models are not sharded by default" do
+    before do
+      # At the beginning of all tests
+      # all models are considered not sharded
+      ActiveRecord::Base.sharded = false
+    end
+    after do
+      ActiveRecord::Base.sharded = true
+      Account.sharded = false
+    end
+
+    it "inherits sharded state" do
+      refute Ticket.is_sharded?
+      refute Account.is_sharded?
+      refute AccountInherited.is_sharded?
+      Account.sharded = true
+      assert Account.is_sharded?
+      assert AccountInherited.is_sharded?
+      refute Ticket.is_sharded?
+    end
+
+    it "doesn't allow to set sharding on non-base class" do
+      assert_raises(ArgumentError) do
+        AccountInherited.sharded = true
+      end
+    end
+
+    it "establishes connection" do
+      assert Account.table_exists?
+      Account.sharded = true
+      ActiveRecord::Base.on_shard(0) do
+        refute Account.table_exists?
+      end
+    end
+  end
+
   if ActiveRecord::VERSION::MAJOR < 5
 
     it "raises an exception if a connection is not found" do
