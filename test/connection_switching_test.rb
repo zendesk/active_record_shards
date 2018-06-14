@@ -322,18 +322,37 @@ describe "connection switching" do
     end
   end
 
-  describe "in an unsharded environment" do
-    before do
-      silence_warnings { ::RAILS_ENV = 'test2'.freeze }
-      ActiveRecord::Base.establish_connection(::RAILS_ENV.to_sym)
-      assert_using_database('ars_test2', Ticket)
+  describe "in an environment without slave" do
+    switch_rails_env('test3')
+    def spec_name
+      ActiveRecord::Base.connection_pool.spec.name
     end
 
-    after do
-      silence_warnings { ::RAILS_ENV = 'test'.freeze }
-      ActiveRecord::Base.establish_connection(::RAILS_ENV.to_sym)
-      assert_using_database('ars_test', Ticket)
+    describe "shard switching" do
+      it "just stay on the master db" do
+        if ActiveRecord::VERSION::MAJOR >= 5
+          main_spec_name = spec_name
+          shard_spec_name = ActiveRecord::Base.on_shard(0) { spec_name }
+        end
+        ActiveRecord::Base.on_slave do
+          assert_using_database('ars_test3', Account)
+          if ActiveRecord::VERSION::MAJOR >= 5
+            assert_equal main_spec_name, spec_name
+          end
+
+          ActiveRecord::Base.on_shard(0) do
+            assert_using_database('ars_test3_shard0', Ticket)
+            if ActiveRecord::VERSION::MAJOR >= 5
+              assert_equal shard_spec_name, spec_name
+            end
+          end
+        end
+      end
     end
+  end
+
+  describe "in an unsharded environment" do
+    switch_rails_env('test2')
 
     describe "shard switching" do
       it "just stay on the main db" do
