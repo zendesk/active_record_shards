@@ -32,11 +32,3 @@ test_shard_1:
 test_shard_1_slave:
   <<: *MYSQL
   database: ars_test_shard1_slave
-
-test2:
-  <<: *MYSQL
-  database: ars_test2
-
-test2_slave:
-  <<: *MYSQL
-  database: ars_test2_slave
