@@ -19,7 +19,7 @@ module ActiveRecordShards
 end
 
 ActiveRecord::Base.extend(ActiveRecordShards::ConfigurationParser)
-ActiveRecord::Base.extend(ActiveRecordShards::Model)
+ActiveRecord::Base.include(ActiveRecordShards::Model)
 ActiveRecord::Base.extend(ActiveRecordShards::ConnectionSwitcher)
 ActiveRecord::Base.extend(ActiveRecordShards::DefaultSlavePatches)
 ActiveRecord::Relation.include(ActiveRecordShards::DefaultSlavePatches::ActiveRelationPatches)

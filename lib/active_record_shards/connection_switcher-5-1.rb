@@ -16,7 +16,7 @@ module ActiveRecordShards
       # See if we've connected before. If not, call `#establish_connection`
       # so that ActiveRecord can resolve connection_specification_name to an
       # ARS connection.
-      spec_name = connection_specification_name
+      spec_name = current_shard_selection.resolve_connection_name(sharded: true, configurations: configurations)
 
       pool = connection_handler.retrieve_connection_pool(spec_name)
       connection_handler.establish_connection(spec_name.to_sym) if pool.nil?

@@ -99,11 +99,18 @@ end
 ## Usage
 
 Normally you have some models that live on a shared database, and you might need to query this data in order to know what shard to switch to.
-All the models that live on the shared database must be marked as not\_sharded:
+All models are considered sharded by default, but it can be changed with:
+
+``` ruby
+ActiveRecord::Base.sharded = false
+```
+
+Individual models can override this setting.
+All the models that live on the shared database must be marked as not sharded:
 
 ```ruby
 class Account < ActiveRecord::Base
-  not_sharded
+  self.sharded = false
 
   has_many :projects
 end
