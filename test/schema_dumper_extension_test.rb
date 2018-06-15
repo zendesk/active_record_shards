@@ -26,7 +26,7 @@ if ActiveRecord::VERSION::MAJOR >= 4
         load(schema_file)
 
         ActiveRecord::Base.on_all_shards do
-          assert ActiveRecord::Base.connection.public_send(connection_exist_method, :schema_migrations), "Schema Migrations doesn't exist"
+          assert table_exists?(:schema_migrations), "Schema Migrations doesn't exist"
           assert ActiveRecord::Base.connection.select_value("select version from schema_migrations where version = '20110824010216'")
           assert ActiveRecord::Base.connection.select_value("select version from schema_migrations where version = '20110829215912'")
         end
