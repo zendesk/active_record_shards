@@ -25,8 +25,9 @@ ActiveRecord::Base.logger = Logger.new(File.dirname(__FILE__) + "/test.log")
 ActiveSupport.test_order = :sorted if ActiveSupport.respond_to?(:test_order=)
 ActiveSupport::Deprecation.behavior = :raise
 
-def connection_exist_method
-  ActiveRecord::VERSION::MAJOR == 5 ? :data_source_exists? : :table_exists?
+def table_exists?(name)
+  method = ActiveRecord::VERSION::MAJOR == 5 ? :data_source_exists? : :table_exists?
+  ActiveRecord::Base.connection.send(method, name)
 end
 
 BaseMigration = (ActiveRecord::VERSION::MAJOR >= 5 ? ActiveRecord::Migration[4.2] : ActiveRecord::Migration) # rubocop:disable Naming/ConstantName
@@ -110,7 +111,6 @@ Minitest::Spec.class_eval do
     after do
       silence_warnings { Object.const_set("RAILS_ENV", 'test') }
       ActiveRecord::Base.establish_connection(::RAILS_ENV.to_sym)
-      assert_using_database('ars_test', Ticket)
     end
   end
 

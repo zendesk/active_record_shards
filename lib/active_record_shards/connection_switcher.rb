@@ -54,6 +54,11 @@ module ActiveRecordShards
       switch_connection(old_options)
     end
 
+    def on_all_databases
+      on_shard(nil) { yield }
+      on_all_shards { yield }
+    end
+
     def on_slave_if(condition, &block)
       condition ? on_slave(&block) : yield
     end

@@ -1,63 +1,73 @@
 # frozen_string_literal: true
-module ActiveRecord
-  class Migrator
-    def self.shards_migration_context
-      if ActiveRecord::VERSION::STRING >= '5.2.0'
-        ActiveRecord::MigrationContext.new(['db/migrate'])
-      else
-        self
+module ActiveRecordShards
+  module MigratorExtension
+    def initialize(*)
+      super
+      # Rails makes these only on the shared DB
+      # Making them manually for shards
+      ActiveRecord::Base.on_all_shards do
+        if ActiveRecord::VERSION::MAJOR > 3
+          ActiveRecord::SchemaMigration.create_table
+        else
+          ActiveRecord::Base.connection.initialize_schema_migrations_table
+        end
+        if ActiveRecord::VERSION::MAJOR >= 5
+          ActiveRecord::InternalMetadata.create_table
+        end
       end
     end
 
-    def run_with_sharding
-      ActiveRecord::Base.on_shard(nil) { run_without_sharding }
-      ActiveRecord::Base.on_all_shards { run_without_sharding }
+    def run
+      ActiveRecord::Base.on_all_databases { super }
     end
-    alias_method :run_without_sharding, :run
-    alias_method :run, :run_with_sharding
 
-    def migrate_with_sharding
-      ActiveRecord::Base.on_shard(nil) { migrate_without_sharding }
-      ActiveRecord::Base.on_all_shards { migrate_without_sharding }
+    def migrate
+      ActiveRecord::Base.on_all_databases { super }
     end
-    alias_method :migrate_without_sharding, :migrate
-    alias_method :migrate, :migrate_with_sharding
 
     # don't allow Migrator class to cache versions
-    undef migrated
     def migrated
       self.class.shards_migration_context.get_all_versions
     end
 
     # list of pending migrations is any migrations that haven't run on all shards.
-    undef pending_migrations
     def pending_migrations
       pending, _missing = self.class.shard_status(migrations.map(&:version))
       pending = pending.values.flatten
       migrations.select { |m| pending.include?(m.version) }
     end
 
-    # public
-    # list of pending and missing versions per shard
-    # [{1 => [1234567]}, {1 => [2345678]}]
-    def self.shard_status(versions)
-      pending = {}
-      missing = {}
+    module ClassMethods
+      # public
+      # list of pending and missing versions per shard
+      # [{1 => [1234567]}, {1 => [2345678]}]
+      def shard_status(versions)
+        pending = {}
+        missing = {}
 
-      collect = lambda do |shard|
-        migrated = shards_migration_context.get_all_versions
+        collect = lambda do |shard|
+          migrated = shards_migration_context.get_all_versions
 
-        p = versions - migrated
-        pending[shard] = p if p.any?
+          p = versions - migrated
+          pending[shard] = p if p.any?
 
-        m = migrated - versions
-        missing[shard] = m if m.any?
+          m = migrated - versions
+          missing[shard] = m if m.any?
+        end
+
+        ActiveRecord::Base.on_shard(nil) { collect.call(nil) }
+        ActiveRecord::Base.on_all_shards { |shard| collect.call(shard) }
+
+        [pending, missing]
       end
 
-      ActiveRecord::Base.on_shard(nil) { collect.call(nil) }
-      ActiveRecord::Base.on_all_shards { |shard| collect.call(shard) }
-
-      [pending, missing]
+      def shards_migration_context
+        if ActiveRecord::VERSION::STRING >= '5.2.0'
+          ActiveRecord::MigrationContext.new(['db/migrate'])
+        else
+          self
+        end
+      end
     end
   end
 end
@@ -95,6 +105,8 @@ module ActiveRecordShards
     end
   end
 end
+ActiveRecord::Migrator.prepend(ActiveRecordShards::MigratorExtension)
+ActiveRecord::Migrator.extend(ActiveRecordShards::MigratorExtension::ClassMethods)
 
 ActiveRecord::Migration.class_eval do
   extend ActiveRecordShards::MigrationClassExtension

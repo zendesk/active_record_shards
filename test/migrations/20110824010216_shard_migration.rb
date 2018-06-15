@@ -3,6 +3,11 @@ class ShardMigration < BaseMigration
   shard :all
 
   def self.up
+    unless table_exists?(:tickets)
+      create_table :tickets do |t|
+        t.string :name
+      end
+    end
     add_column :tickets, :sharded_column, :integer
   end
 

@@ -6,15 +6,42 @@ describe ActiveRecord::Migrator do
 
   before { ActiveRecord::Base.establish_connection(RAILS_ENV.to_sym) }
 
+  describe "when DB is empty" do
+    # Using env without slave
+    # because cleanup all DBs and recreate only master
+    # There is no real reprica so slave doesn't catch up
+    switch_rails_env('test3')
+    before do
+      ActiveRecord::Base.on_all_databases do
+        if ActiveRecord::VERSION::MAJOR == 5 && ActiveRecord::VERSION::MINOR.zero?
+          ActiveSupport::Deprecation.behavior = :silence
+        end
+        ActiveRecord::Base.connection.tables.each do |table|
+          ActiveRecord::Base.connection.drop_table(table)
+        end
+      end
+    end
+    it "makes meta tables" do
+      migrator.migrate
+      ActiveRecord::Base.on_all_shards do
+        assert table_exists?(:schema_migrations), "Schema Migrations doesn't exist"
+        assert table_exists?(:tickets)
+        refute table_exists?(:accounts)
+        assert ActiveRecord::Base.connection.select_value("select version from schema_migrations where version = '20110824010216'")
+        assert ActiveRecord::Base.connection.select_value("select version from schema_migrations where version = '20110829215912'")
+      end
+    end
+  end
+
   it "migrates" do
     refute ActiveRecord::Base.current_shard_id
 
     migrator.migrate
 
     ActiveRecord::Base.on_all_shards do
-      assert ActiveRecord::Base.connection.public_send(connection_exist_method, :schema_migrations), "Schema Migrations doesn't exist"
-      assert ActiveRecord::Base.connection.public_send(connection_exist_method, :tickets)
-      refute ActiveRecord::Base.connection.public_send(connection_exist_method, :accounts)
+      assert table_exists?(:schema_migrations), "Schema Migrations doesn't exist"
+      assert table_exists?(:tickets)
+      refute table_exists?(:accounts)
       assert ActiveRecord::Base.connection.select_value("select version from schema_migrations where version = '20110824010216'")
       assert ActiveRecord::Base.connection.select_value("select version from schema_migrations where version = '20110829215912'")
     end
