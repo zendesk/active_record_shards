@@ -10,15 +10,13 @@ module ActiveRecord
     end
 
     def run_with_sharding
-      ActiveRecord::Base.on_shard(nil) { run_without_sharding }
-      ActiveRecord::Base.on_all_shards { run_without_sharding }
+      ActiveRecord::Base.on_all_databases { run_without_sharding }
     end
     alias_method :run_without_sharding, :run
     alias_method :run, :run_with_sharding
 
     def migrate_with_sharding
-      ActiveRecord::Base.on_shard(nil) { migrate_without_sharding }
-      ActiveRecord::Base.on_all_shards { migrate_without_sharding }
+      ActiveRecord::Base.on_all_databases { migrate_without_sharding }
     end
     alias_method :migrate_without_sharding, :migrate
     alias_method :migrate, :migrate_with_sharding
