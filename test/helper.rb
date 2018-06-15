@@ -91,7 +91,9 @@ Minitest::Spec.class_eval do
     after do
       silence_warnings { Object.const_set("RAILS_ENV", 'test') }
       ActiveRecord::Base.establish_connection(::RAILS_ENV.to_sym)
-      assert_using_database('ars_test', Ticket)
+      Ticket.on_first_shard do
+        assert_using_database('ars_test_shard0', Ticket)
+      end
     end
   end
 
