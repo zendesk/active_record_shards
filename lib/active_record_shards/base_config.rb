@@ -8,7 +8,7 @@ module ActiveRecordShards
       name = connection_resolver.resolve_connection_name(connection_config)
 
       unless configurations[name] || name == "primary"
-        raise ActiveRecord::AdapterNotSpecified, "No database defined by #{name} in your database config. (configurations: #{configurations.inspect})"
+        raise ActiveRecord::AdapterNotSpecified, "No database defined by #{name} in your database config. (configurations: #{configurations.keys.inspect})"
       end
 
       name

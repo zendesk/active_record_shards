@@ -4,7 +4,7 @@ require 'minitest/autorun'
 require 'minitest/rg'
 require 'rake'
 
-require 'mocha/mini_test'
+require 'mocha/minitest'
 Bundler.require
 
 if defined?(Debugger)
@@ -81,6 +81,20 @@ Minitest::Spec.class_eval do
 
   def table_has_column?(table, column)
     !ActiveRecord::Base.connection.select_values("desc #{table}").grep(column).empty?
+  end
+
+  def self.switch_rails_env(env)
+    before do
+      silence_warnings { Object.const_set("RAILS_ENV", env) }
+      ActiveRecord::Base.establish_connection(::RAILS_ENV.to_sym)
+    end
+    after do
+      silence_warnings { Object.const_set("RAILS_ENV", 'test') }
+      ActiveRecord::Base.establish_connection(::RAILS_ENV.to_sym)
+      Ticket.on_first_shard do
+        assert_using_database('ars_test_shard0', Ticket)
+      end
+    end
   end
 
   # create all databases and then tear them down after test

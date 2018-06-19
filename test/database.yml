@@ -33,10 +33,11 @@ test_shard_1_slave:
   <<: *MYSQL
   database: ars_test_shard1_slave
 
-test2:
+test3:
   <<: *MYSQL
-  database: ars_test2
+  database: ars_test3
+  shard_names: [0]
 
-test2_slave:
+test3_shard_0:
   <<: *MYSQL
-  database: ars_test2_slave
+  database: ars_test3_shard0

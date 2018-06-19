@@ -9,22 +9,21 @@ module ActiveRecordShards
     PRIMARY = "primary".freeze
     def resolve_connection_name(slave:, shard:, sharded:)
       resolved_shard = sharded ? shard : nil
+      env = ActiveRecordShards.rails_env
 
-      if !resolved_shard && !slave
-        return PRIMARY
-      end
-
-      @shard_names ||= {}
-      @shard_names[ActiveRecordShards.rails_env] ||= {}
-      @shard_names[ActiveRecordShards.rails_env][resolved_shard] ||= {}
-      @shard_names[ActiveRecordShards.rails_env][resolved_shard][slave] ||= begin
-        s = ActiveRecordShards.rails_env.dup
-        s << "_shard_#{resolved_shard}" if resolved_shard
-
-        if slave && configurations["#{s}_slave"] # fall back to master connection
-          s << "_slave"
+      @connection_names ||= {}
+      @connection_names[env] ||= {}
+      @connection_names[env][resolved_shard] ||= {}
+      @connection_names[env][resolved_shard][slave] ||= begin
+        name = env.dup
+        name << "_shard_#{resolved_shard}" if resolved_shard
+        if slave && configurations["#{name}_slave"]
+          "#{name}_slave"
+        else
+          # ActiveRecord always names its default connection pool 'primary'
+          # while everything else is named by the configuration name
+          resolved_shard ? name : PRIMARY
         end
-        s
       end
     end
   end

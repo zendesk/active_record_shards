@@ -70,7 +70,7 @@ module ActiveRecordShards
 
     def shard_names
       unless config = configurations[shard_env]
-        raise "Did not find #{shard_env} in configurations, did you forget to add it to your database config? (configurations: #{configurations.inspect})"
+        raise "Did not find #{shard_env} in configurations, did you forget to add it to your database config? (configurations: #{configurations.keys.inspect})"
       end
       unless config[SHARD_NAMES_CONFIG_KEY]
         raise "No shards configured for #{shard_env}"
@@ -90,7 +90,7 @@ module ActiveRecordShards
     def switch_connection(selection)
       if selection.is_a?(ShardSelection)
         unless config = configurations[shard_env]
-          raise "Did not find #{shard_env} in configurations, did you forget to add it to your database config? (configurations: #{configurations.inspect})"
+          raise "Did not find #{shard_env} in configurations, did you forget to add it to your database config? (configurations: #{configurations.keys.inspect})"
         end
         unless config['shard_names'].include?(selection.shard)
           raise "Did not find shard #{selection.shard} in configurations"
