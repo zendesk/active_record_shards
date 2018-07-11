@@ -89,17 +89,19 @@ end
 
 module ActiveRecordShards
   module Tasks
-    if ActiveRecord::VERSION::MAJOR < 5
+    if ActiveRecord::VERSION::MAJOR >= 4
       def self.root_connection(conf)
-        ActiveRecord::Base.send("#{conf['adapter']}_connection", conf.merge('database' => nil))
-      end
-    else
-      def self.root_connection(conf)
-        # this will trigger rails to load the adapter
         conf = conf.merge('database' => nil)
         resolver = ActiveRecord::ConnectionAdapters::ConnectionSpecification::Resolver.new(ActiveRecord::Base.configurations)
         resolver.spec(conf)
         ActiveRecord::Base.send("#{conf['adapter']}_connection", conf)
+      end
+    else
+      def self.root_connection(conf)
+        conf = conf.merge('database' => nil)
+        resolver = ActiveRecordShards::ConnectionSpecification::Resolver.new conf, ActiveRecord::Base.configurations
+        spec = resolver.spec
+        ActiveRecord::Base.send("#{conf['adapter']}_connection", spec.config)
       end
     end
   end
