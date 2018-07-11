@@ -1,6 +1,6 @@
 <% mysql = URI(ENV['MYSQL_URL'] || 'mysql://root@127.0.0.1:3306') %>
-test:
-  adapter: mysql2
+
+mysql: &MYSQL
   encoding: utf8
   database: ars_tasks_test
   username: <%= mysql.user %>
@@ -14,3 +14,11 @@ test:
       database: ars_tasks_test_shard_a
     1:
       database: ars_tasks_test_shard_b
+
+test:
+  <<: *MYSQL
+  adapter: mysql2
+
+test_flexmaster:
+  <<: *MYSQL
+  adapter: mysql_flexmaster

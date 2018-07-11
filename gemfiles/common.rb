@@ -3,4 +3,7 @@ source 'https://rubygems.org'
 
 gemspec path: Bundler.root.to_s.sub('/gemfiles', '')
 
-gem "byebug", platforms: [:mri]
+group :test do
+  gem 'byebug', platforms: [:mri]
+  gem 'ar_mysql_flexmaster'
+end
