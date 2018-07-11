@@ -30,23 +30,19 @@ namespace :db do
   task create: :load_config do
     ActiveRecord::Base.configurations.each do |key, conf|
       next if !key.starts_with?(ActiveRecordShards.rails_env) || key.ends_with?("_slave")
-      if ActiveRecord::VERSION::MAJOR >= 4
-        begin
-          # MysqlAdapter takes charset instead of encoding in Rails 4
-          # https://github.com/rails/rails/commit/78b30fed9336336694fb2cb5d2825f95800b541c
-          symbolized_configuration = conf.symbolize_keys
-          symbolized_configuration[:charset] = symbolized_configuration[:encoding]
+      begin
+        # MysqlAdapter takes charset instead of encoding in Rails 3.2 or greater
+        # https://github.com/rails/rails/blob/3-2-stable/activerecord/lib/active_record/railties/databases.rake#L68-L82
+        symbolized_configuration = conf.symbolize_keys
+        symbolized_configuration[:charset] = symbolized_configuration[:encoding]
 
-          ActiveRecordShards::Tasks.root_connection(conf).create_database(conf['database'], symbolized_configuration)
-        rescue ActiveRecord::StatementInvalid => ex
-          if ex.message.include?('database exists')
-            puts "#{conf['database']} already exists"
-          else
-            raise ex
-          end
+        ActiveRecordShards::Tasks.root_connection(conf).create_database(conf['database'], symbolized_configuration)
+      rescue ActiveRecord::StatementInvalid => ex
+        if ex.message.include?('database exists')
+          puts "#{conf['database']} already exists"
+        else
+          raise ex
         end
-      else
-        create_database(conf)
       end
     end
     ActiveRecord::Base.establish_connection(ActiveRecordShards.rails_env.to_sym)
