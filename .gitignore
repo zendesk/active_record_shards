@@ -4,5 +4,7 @@ pkg/*
 *.log
 Gemfile.lock
 gemfiles/*.lock
+vendor
+gemfiles/vendor
 .tags*
 tmp/*
