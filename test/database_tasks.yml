@@ -2,11 +2,15 @@
 
 mysql: &MYSQL
   encoding: utf8
-  database: ars_tasks_test
   username: <%= mysql.user %>
   password: <%= mysql.password %>
   host: <%= mysql.host %>
   port: <%= mysql.port %>
+
+test:
+  <<: *MYSQL
+  adapter: mysql2
+  database: ars_tasks_test
   slave:
     database: ars_tasks_test_slave
   shards:
@@ -15,10 +19,14 @@ mysql: &MYSQL
     1:
       database: ars_tasks_test_shard_b
 
-test:
-  <<: *MYSQL
-  adapter: mysql2
-
 test_flexmaster:
   <<: *MYSQL
   adapter: mysql_flexmaster
+  database: ars_tasks_flex_test
+  slave:
+    database: ars_tasks_flex_test_slave
+  shards:
+    0:
+      database: ars_tasks_flex_test_shard_a
+    1:
+      database: ars_tasks_flex_test_shard_b
