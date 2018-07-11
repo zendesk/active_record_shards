@@ -87,16 +87,21 @@ module ActiveRecordShards
   module Tasks
     def self.root_connection(conf)
       conf = conf.merge('database' => nil)
+      spec = spec_for(conf)
 
-      spec = if ActiveRecord::VERSION::MAJOR >= 4
+      ActiveRecord::Base.send("#{conf['adapter']}_connection", spec.config)
+    end
+
+    private
+
+    def self.spec_for(conf)
+      if ActiveRecord::VERSION::MAJOR >= 4
         resolver = ActiveRecord::ConnectionAdapters::ConnectionSpecification::Resolver.new(ActiveRecord::Base.configurations)
         resolver.spec(conf)
       else
         resolver = ActiveRecordShards::ConnectionSpecification::Resolver.new conf, ActiveRecord::Base.configurations
         resolver.spec
       end
-
-      ActiveRecord::Base.send("#{conf['adapter']}_connection", spec.config)
     end
   end
 end
