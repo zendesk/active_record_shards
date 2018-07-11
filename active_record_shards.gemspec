@@ -18,7 +18,7 @@ Gem::Specification.new "active_record_shards", "3.12.0.beta2" do |s|
   s.add_development_dependency("rubocop", "0.50.0")
   s.add_development_dependency("minitest")
   s.add_development_dependency("minitest-rg")
-  s.add_development_dependency("mocha")
+  s.add_development_dependency("mocha", ">= 1.4.0")
   s.add_development_dependency("phenix", ">= 0.2.0")
 
   s.files = Dir["lib/**/*"] + ["README.md"]

@@ -168,4 +168,4 @@ ActiveRecordShards::SqlComments.enable
 Copyright (c) 2011 Zendesk. See LICENSE for details.
 
 ## Authors
-Mick Staugaard, Eric Chapweske
+Mick Staugaard, Eric Chapweske 
