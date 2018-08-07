@@ -31,8 +31,8 @@ namespace :db do
     ActiveRecord::Base.configurations.each do |key, conf|
       next if !key.starts_with?(ActiveRecordShards.rails_env) || key.ends_with?("_slave")
       begin
-        # MysqlAdapter takes charset instead of encoding in Rails 3.2 or greater
-        # https://github.com/rails/rails/blob/3-2-stable/activerecord/lib/active_record/railties/databases.rake#L68-L82
+        # MysqlAdapter takes charset instead of encoding in Rails 4.2 or greater
+        # https://github.com/rails/rails/blob/4-2-stable/activerecord/lib/active_record/tasks/mysql_database_tasks.rb#L85-L96
         symbolized_configuration = conf.symbolize_keys
         symbolized_configuration[:charset] = symbolized_configuration[:encoding]
 
@@ -55,10 +55,8 @@ namespace :db do
         if ActiveRecord::VERSION::STRING >= "5.2.0"
           migrations = ActiveRecord::MigrationContext.new(ActiveRecord::Migrator.migrations_paths).migrations
           ActiveRecord::Migrator.new(:up, migrations).pending_migrations
-        elsif ActiveRecord::VERSION::MAJOR >= 4
-          ActiveRecord::Base.on_shard(nil) { ActiveRecord::Migrator.open(ActiveRecord::Migrator.migrations_paths).pending_migrations }
         else
-          ActiveRecord::Base.on_shard(nil) { ActiveRecord::Migrator.new(:up, 'db/migrate').pending_migrations }
+          ActiveRecord::Base.on_shard(nil) { ActiveRecord::Migrator.open(ActiveRecord::Migrator.migrations_paths).pending_migrations }
         end
 
       if pending_migrations.any?
@@ -99,13 +97,8 @@ module ActiveRecordShards
       private
 
       def spec_for(conf)
-        if ActiveRecord::VERSION::MAJOR >= 4
-          resolver = ActiveRecord::ConnectionAdapters::ConnectionSpecification::Resolver.new(ActiveRecord::Base.configurations)
-          resolver.spec(conf)
-        else
-          resolver = ActiveRecordShards::ConnectionSpecification::Resolver.new conf, ActiveRecord::Base.configurations
-          resolver.spec
-        end
+        resolver = ActiveRecord::ConnectionAdapters::ConnectionSpecification::Resolver.new(ActiveRecord::Base.configurations)
+        resolver.spec(conf)
       end
     end
   end

@@ -25,23 +25,12 @@ module ActiveRecordShards
         raise ActiveRecord::AdapterNotSpecified, "No database defined by #{name} in your database config. (configurations: #{configurations.keys.inspect})"
       end
 
-      # in 3.2 rails is asking for a connection pool in a map of these ConnectionSpecifications.  If we want to re-use connections,
-      # we need to re-use specs.
-      if ActiveRecord::VERSION::MAJOR >= 4
-        specification_cache[name] ||= begin
-          resolver = ActiveRecordShards::ConnectionSpecification::Resolver.new configurations
-          resolver.spec(spec)
-        end
-
-        connection_handler.establish_connection(self, specification_cache[name])
-      else
-        specification_cache[name] ||= begin
-          resolver = ActiveRecordShards::ConnectionSpecification::Resolver.new spec, configurations
-          resolver.spec
-        end
-
-        connection_handler.establish_connection(connection_pool_name, specification_cache[name])
+      specification_cache[name] ||= begin
+        resolver = ActiveRecordShards::ConnectionSpecification::Resolver.new configurations
+        resolver.spec(spec)
       end
+
+      connection_handler.establish_connection(self, specification_cache[name])
     end
 
     def specification_cache
@@ -58,11 +47,7 @@ module ActiveRecordShards
     end
 
     def connected_to_shard?
-      if ActiveRecord::VERSION::MAJOR >= 4
-        specs_to_pools = Hash[connection_handler.connection_pool_list.map { |pool| [pool.spec, pool] }]
-      else
-        specs_to_pools = connection_handler.connection_pools
-      end
+      specs_to_pools = Hash[connection_handler.connection_pool_list.map { |pool| [pool.spec, pool] }]
 
       specs_to_pools.key?(connection_pool_key)
     end
