@@ -1,4 +1,4 @@
-[![Build Status](https://secure.travis-ci.org/zendesk/active_record_shards.png)](http://travis-ci.org/zendesk/active_record_shards)
+[![CircleCI build status](https://circleci.com/gh/zendesk/active_record_shards/tree/master.svg?style=svg)](https://circleci.com/gh/zendesk/active_record_shards/tree/master)
 
 # ActiveRecord Shards
 
@@ -168,4 +168,4 @@ ActiveRecordShards::SqlComments.enable
 Copyright (c) 2011 Zendesk. See LICENSE for details.
 
 ## Authors
-Mick Staugaard, Eric Chapweske 
+Mick Staugaard, Eric Chapweske
