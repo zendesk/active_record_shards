@@ -40,6 +40,9 @@ Style/FormatString:
 
 # Disabled cops
 
+Style/FormatStringToken:
+  Enabled: false
+
 Layout/EmptyLineAfterMagicComment:
   Enabled: false
 

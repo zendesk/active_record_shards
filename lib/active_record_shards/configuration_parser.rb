@@ -23,9 +23,9 @@ module ActiveRecordShards
       end
 
       conf.to_a.each do |env_name, env_config|
-        if slave_conf = env_config.delete('slave')
-          expand_child!(env_config, slave_conf)
-          conf["#{env_name}_slave"] = slave_conf
+        if replica_conf = env_config.delete('replica')
+          expand_child!(env_config, replica_conf)
+          conf["#{env_name}_replica"] = replica_conf
         end
       end
 
@@ -34,7 +34,7 @@ module ActiveRecordShards
 
     def expand_child!(parent, child)
       parent.each do |key, value|
-        unless ['slave', 'shards'].include?(key) || value.is_a?(Hash)
+        unless ['replica', 'shards'].include?(key) || value.is_a?(Hash)
           child[key] ||= value
         end
       end

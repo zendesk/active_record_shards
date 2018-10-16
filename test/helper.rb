@@ -73,12 +73,12 @@ Minitest::Spec.class_eval do
     Rake::Task[name].invoke
   end
 
-  def assert_using_master_db
+  def assert_using_primary_db
     assert_using_database('ars_test')
   end
 
-  def assert_using_slave_db
-    assert_using_database('ars_test_slave')
+  def assert_using_replica_db
+    assert_using_database('ars_test_replica')
   end
 
   def assert_using_database(db_name, model = ActiveRecord::Base)
@@ -124,7 +124,7 @@ Minitest::Spec.class_eval do
       Phenix.configure do |config|
         config.schema_path = File.join(Dir.pwd, 'test', 'unsharded_schema.rb')
         config.skip_database = lambda do |name, _|
-          %w[test_shard_0 test_shard_0_slave test_shard_1 test_shard_1_slave].include?(name)
+          %w[test_shard_0 test_shard_0_replica test_shard_1 test_shard_1_replica].include?(name)
         end
       end
       Phenix.rise!(with_schema: true)
@@ -133,7 +133,7 @@ Minitest::Spec.class_eval do
       Phenix.configure do |config|
         config.schema_path = File.join(Dir.pwd, 'test', 'sharded_schema.rb')
         config.skip_database = lambda do |name, _|
-          %w[test test_slave test2 test2_slave].include?(name)
+          %w[test test_replica test2 test2_replica].include?(name)
         end
       end
       Phenix.rise!(with_schema: true)

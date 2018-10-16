@@ -9,7 +9,7 @@ namespace :db do
   desc 'Drops the database for the current RAILS_ENV including shards'
   task drop: :load_config do
     ActiveRecord::Base.configurations.each do |key, conf|
-      next if !key.starts_with?(ActiveRecordShards.rails_env) || key.ends_with?("_slave")
+      next if !key.starts_with?(ActiveRecordShards.rails_env) || key.ends_with?("_replica")
       begin
         ActiveRecordShards::Tasks.root_connection(conf).drop_database(conf['database'])
       # rescue ActiveRecord::NoDatabaseError # TODO: exists in AR but never is raised here ...
@@ -29,7 +29,7 @@ namespace :db do
   desc "Create the database defined in config/database.yml for the current RAILS_ENV including shards"
   task create: :load_config do
     ActiveRecord::Base.configurations.each do |key, conf|
-      next if !key.starts_with?(ActiveRecordShards.rails_env) || key.ends_with?("_slave")
+      next if !key.starts_with?(ActiveRecordShards.rails_env) || key.ends_with?("_replica")
       begin
         # MysqlAdapter takes charset instead of encoding in Rails 3.2 or greater
         # https://github.com/rails/rails/blob/3-2-stable/activerecord/lib/active_record/railties/databases.rake#L68-L82

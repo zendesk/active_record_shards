@@ -8,4 +8,4 @@ ActiveRecordShards::ConnectionSpecification = ActiveRecord::Base::ConnectionSpec
 methods_to_override = [:remove_connection]
 ActiveRecordShards.override_connection_handler_methods(methods_to_override)
 
-ActiveRecord::Associations::Preloader::HasAndBelongsToMany.include(ActiveRecordShards::DefaultSlavePatches::HasAndBelongsToManyPreloaderPatches)
+ActiveRecord::Associations::Preloader::HasAndBelongsToMany.include(ActiveRecordShards::DefaultReplicaPatches::HasAndBelongsToManyPreloaderPatches)

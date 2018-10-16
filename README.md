@@ -2,7 +2,7 @@
 
 # ActiveRecord Shards
 
-ActiveRecord Shards is an extension for ActiveRecord that provides support for sharded database and slaves. Basically it is just a nice way to
+ActiveRecord Shards is an extension for ActiveRecord that provides support for sharded database and replicas. Basically it is just a nice way to
 switch between database connections. We've made the implementation very small, and have tried not to reinvent any wheels already present in ActiveRecord.
 
 ActiveRecord Shards has been used and tested on Rails 3.2, 4.2 and 5.0 and has in some form or another been used in production on a large Rails app for several years.
@@ -24,7 +24,7 @@ and make sure to require 'active\_record\_shards' in some way.
 
 ## Configuration
 
-Add the slave and shard configuration to config/database.yml:
+Add the replica and shard configuration to config/database.yml:
 
 ```yaml
 production:
@@ -35,19 +35,19 @@ production:
   host: db1
   username: root
   password:
-  slave:
-    host: db1_slave
+  replica:
+    host: db1_replica
   shards:
     1:
       host: db_shard1
       database: my_app_shard
-      slave:
-        host: db_shard1_slave
+      replica:
+        host: db_shard1_replica
     2:
       host: db_shard2
       database: my_app_shard
-      slave:
-        host: db_shard2_slave
+      replica:
+        host: db_shard2_replica
 ```
 
 basically connections inherit configuration from the parent configuration file.
@@ -140,23 +140,23 @@ class AccountMiddleware
 end
 ```
 
-You can switch to the slave databases at any point by wrapping your code in an on\_slave block:
+You can switch to the replica databases at any point by wrapping your code in an on\_replica block:
 
 ```ruby
-ActiveRecord::Base.on_slave do
+ActiveRecord::Base.on_replica do
   Account.find_by_big_expensive_query
 end
 ```
 
-This will perform the query on the slave, and mark the returned instances as read only. There is also a shortcut for this:
+This will perform the query on the replica, and mark the returned instances as read only. There is also a shortcut for this:
 
 ```ruby
-Account.on_slave.find_by_big_expensive_query
+Account.on_replica.find_by_big_expensive_query
 ```
 
 ## Debugging
 
-Show if a query went to master or slave in the logs:
+Show if a query went to primary or replica in the logs:
 
 ```Ruby
 require 'active_record_shards/sql_comments'

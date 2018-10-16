@@ -30,29 +30,29 @@ describe "connection switching" do
 
     it "switch to shard and back" do
       assert_using_database('ars_test')
-      ActiveRecord::Base.on_slave { assert_using_database('ars_test_slave') }
+      ActiveRecord::Base.on_replica { assert_using_database('ars_test_replica') }
 
       ActiveRecord::Base.on_shard(0) do
         assert_using_database('ars_test_shard0')
-        ActiveRecord::Base.on_slave { assert_using_database('ars_test_shard0_slave') }
+        ActiveRecord::Base.on_replica { assert_using_database('ars_test_shard0_replica') }
 
         ActiveRecord::Base.on_shard(nil) do
           assert_using_database('ars_test')
-          ActiveRecord::Base.on_slave { assert_using_database('ars_test_slave') }
+          ActiveRecord::Base.on_replica { assert_using_database('ars_test_replica') }
         end
 
         assert_using_database('ars_test_shard0')
-        ActiveRecord::Base.on_slave { assert_using_database('ars_test_shard0_slave') }
+        ActiveRecord::Base.on_replica { assert_using_database('ars_test_shard0_replica') }
       end
 
       assert_using_database('ars_test')
-      ActiveRecord::Base.on_slave { assert_using_database('ars_test_slave') }
+      ActiveRecord::Base.on_replica { assert_using_database('ars_test_replica') }
     end
 
     it "does not fail on unrelated ensure error when current_shard_selection fails" do
       ActiveRecord::Base.expects(:current_shard_selection).raises(ArgumentError)
       assert_raises ArgumentError do
-        ActiveRecord::Base.on_slave { 1 }
+        ActiveRecord::Base.on_replica { 1 }
       end
     end
 
@@ -66,12 +66,12 @@ describe "connection switching" do
 
     describe "on_all_shards" do
       before do
-        @shard_0_master = ActiveRecord::Base.on_shard(0) { ActiveRecord::Base.connection }
-        @shard_1_master = ActiveRecord::Base.on_shard(1) { ActiveRecord::Base.connection }
-        refute_equal(@shard_0_master.select_value("SELECT DATABASE()"), @shard_1_master.select_value("SELECT DATABASE()"))
+        @shard_0_primary = ActiveRecord::Base.on_shard(0) { ActiveRecord::Base.connection }
+        @shard_1_primary = ActiveRecord::Base.on_shard(1) { ActiveRecord::Base.connection }
+        refute_equal(@shard_0_primary.select_value("SELECT DATABASE()"), @shard_1_primary.select_value("SELECT DATABASE()"))
       end
 
-      it "execute the block on all shard masters" do
+      it "execute the block on all shard primarys" do
         result = ActiveRecord::Base.on_all_shards do |shard|
           [ActiveRecord::Base.connection.select_value("SELECT DATABASE()"), shard]
         end
@@ -79,8 +79,8 @@ describe "connection switching" do
         database_shards = result.map(&:last)
 
         assert_equal(2, database_names.size)
-        assert_includes(database_names, @shard_0_master.select_value("SELECT DATABASE()"))
-        assert_includes(database_names, @shard_1_master.select_value("SELECT DATABASE()"))
+        assert_includes(database_names, @shard_0_primary.select_value("SELECT DATABASE()"))
+        assert_includes(database_names, @shard_1_primary.select_value("SELECT DATABASE()"))
 
         assert_equal(2, database_shards.size)
         assert_includes(database_shards, 0)
@@ -183,35 +183,35 @@ describe "connection switching" do
 
     describe "for unsharded models" do
       before do
-        Account.on_slave do
+        Account.on_replica do
           Account.connection.execute("alter table accounts add column foo int")
           Account.reset_column_information
         end
       end
 
       after do
-        Account.on_slave do
+        Account.on_replica do
           ActiveRecord::Base.connection.execute("alter table accounts drop column foo")
           Account.reset_column_information
           refute Account.column_names.include?('foo')
         end
       end
 
-      it "use the non-sharded slave connection" do
+      it "use the non-sharded replica connection" do
         assert_using_database('ars_test', Account)
         assert Account.column_names.include?('foo')
       end
 
-      it "ignores master/transactions" do
+      it "ignores primary/transactions" do
         assert_using_database('ars_test', Account)
-        Account.on_master { assert Account.column_names.include?('foo') }
+        Account.on_primary { assert Account.column_names.include?('foo') }
       end
     end
 
     describe "for sharded models" do
       before do
         ActiveRecord::Base.on_first_shard do
-          ActiveRecord::Base.on_slave do
+          ActiveRecord::Base.on_replica do
             ActiveRecord::Base.connection.execute("alter table tickets add column foo int")
             Ticket.reset_column_information
           end
@@ -220,14 +220,14 @@ describe "connection switching" do
 
       after do
         ActiveRecord::Base.on_first_shard do
-          ActiveRecord::Base.on_slave do
+          ActiveRecord::Base.on_replica do
             ActiveRecord::Base.connection.execute("alter table tickets drop column foo")
             Ticket.reset_column_information
           end
         end
       end
 
-      it "gets columns from the slave shard" do
+      it "gets columns from the replica shard" do
         assert Ticket.column_names.include?('foo')
       end
 
@@ -259,28 +259,28 @@ describe "connection switching" do
     if ActiveRecord::VERSION::MAJOR >= 5
       describe "for InternalMetadata" do
         before do
-          ActiveRecord::InternalMetadata.on_slave do
+          ActiveRecord::InternalMetadata.on_replica do
             ActiveRecord::InternalMetadata.connection.execute("alter table ar_internal_metadata add column foo int")
             ActiveRecord::InternalMetadata.reset_column_information
           end
         end
 
         after do
-          ActiveRecord::InternalMetadata.on_slave do
+          ActiveRecord::InternalMetadata.on_replica do
             ActiveRecord::Base.connection.execute("alter table ar_internal_metadata drop column foo")
             ActiveRecord::InternalMetadata.reset_column_information
             refute ActiveRecord::InternalMetadata.column_names.include?('foo')
           end
         end
 
-        it "use the non-sharded slave connection" do
+        it "use the non-sharded replica connection" do
           assert_using_database('ars_test', ActiveRecord::InternalMetadata)
           assert ActiveRecord::InternalMetadata.column_names.include?('foo')
         end
 
-        it "ignores master/transactions" do
+        it "ignores primary/transactions" do
           assert_using_database('ars_test', ActiveRecord::InternalMetadata)
-          ActiveRecord::InternalMetadata.on_master { assert ActiveRecord::InternalMetadata.column_names.include?('foo') }
+          ActiveRecord::InternalMetadata.on_primary { assert ActiveRecord::InternalMetadata.column_names.include?('foo') }
         end
       end
     end
@@ -292,12 +292,12 @@ describe "connection switching" do
     end
 
     describe "for unsharded models" do
-      it "use the unsharded slave connection" do
+      it "use the unsharded replica connection" do
         class UnshardedModel < ActiveRecord::Base
           not_sharded
         end
 
-        UnshardedModel.on_slave { UnshardedModel.connection.execute("create table unsharded_models (id int)") }
+        UnshardedModel.on_replica { UnshardedModel.connection.execute("create table unsharded_models (id int)") }
         assert UnshardedModel.table_exists?
 
         ActiveRecord::Base.on_all_shards do
@@ -307,12 +307,12 @@ describe "connection switching" do
     end
 
     describe "for sharded models" do
-      it "uses the first shard slave" do
+      it "uses the first shard replica" do
         class ShardedModel < ActiveRecord::Base
         end
 
         ActiveRecord::Base.on_first_shard do
-          ShardedModel.on_slave do
+          ShardedModel.on_replica do
             ShardedModel.connection.execute("create table sharded_models (id int)")
           end
         end
@@ -322,19 +322,19 @@ describe "connection switching" do
     end
   end
 
-  describe "in an environment without slave" do
+  describe "in an environment without replica" do
     switch_rails_env('test3')
     def spec_name
       ActiveRecord::Base.connection_pool.spec.name
     end
 
     describe "shard switching" do
-      it "just stay on the master db" do
+      it "just stay on the primary db" do
         if ActiveRecord::VERSION::MAJOR >= 5
           main_spec_name = spec_name
           shard_spec_name = ActiveRecord::Base.on_shard(0) { spec_name }
         end
-        ActiveRecord::Base.on_slave do
+        ActiveRecord::Base.on_replica do
           assert_using_database('ars_test3', Account)
           if ActiveRecord::VERSION::MAJOR >= 5
             assert_equal main_spec_name, spec_name
@@ -374,103 +374,103 @@ describe "connection switching" do
         end
       end
 
-      it "execute the block on all shard masters" do
+      it "execute the block on all shard primarys" do
         assert_equal([ActiveRecord::Base.connection.select_value("SELECT DATABASE()")], @database_names)
       end
     end
   end
 
-  describe "slave driving" do
-    describe "without slave configuration" do
+  describe "replica driving" do
+    describe "without replica configuration" do
       before do
-        @saved_config = ActiveRecord::Base.configurations.delete('test_slave')
+        @saved_config = ActiveRecord::Base.configurations.delete('test_replica')
         Thread.current[:shard_selection] = nil # drop caches
         clear_connection_pool
         ActiveRecord::Base.establish_connection(:test)
       end
 
       after do
-        ActiveRecord::Base.configurations['test_slave'] = @saved_config
+        ActiveRecord::Base.configurations['test_replica'] = @saved_config
         Thread.current[:shard_selection] = nil # drop caches
       end
 
-      it "default to the master database" do
+      it "default to the primary database" do
         Account.create!
 
-        ActiveRecord::Base.on_slave { assert_using_master_db }
-        Account.on_slave { assert_using_master_db }
-        Ticket.on_slave  { assert_using_master_db }
+        ActiveRecord::Base.on_replica { assert_using_primary_db }
+        Account.on_replica { assert_using_primary_db }
+        Ticket.on_replica  { assert_using_primary_db }
       end
 
       it "successfully execute queries" do
         Account.create!
-        assert_using_master_db
+        assert_using_primary_db
 
-        assert_equal(Account.count, ActiveRecord::Base.on_slave { Account.count })
-        assert_equal(Account.count, Account.on_slave { Account.count })
+        assert_equal(Account.count, ActiveRecord::Base.on_replica { Account.count })
+        assert_equal(Account.count, Account.on_replica { Account.count })
       end
     end
 
-    describe "with slave configuration" do
+    describe "with replica configuration" do
       it "successfully execute queries" do
-        assert_using_master_db
+        assert_using_primary_db
         Account.create!
 
         assert_equal(1, Account.count)
-        assert_equal(0, ActiveRecord::Base.on_slave { Account.count })
+        assert_equal(0, ActiveRecord::Base.on_replica { Account.count })
       end
 
-      it "support global on_slave blocks" do
-        assert_using_master_db
-        assert_using_master_db
+      it "support global on_replica blocks" do
+        assert_using_primary_db
+        assert_using_primary_db
 
-        ActiveRecord::Base.on_slave do
-          assert_using_slave_db
-          assert_using_slave_db
+        ActiveRecord::Base.on_replica do
+          assert_using_replica_db
+          assert_using_replica_db
         end
 
-        assert_using_master_db
-        assert_using_master_db
+        assert_using_primary_db
+        assert_using_primary_db
       end
 
       it "support conditional methods" do
-        assert_using_master_db
+        assert_using_primary_db
 
-        Account.on_slave_if(true) do
-          assert_using_slave_db
+        Account.on_replica_if(true) do
+          assert_using_replica_db
         end
 
-        assert_using_master_db
+        assert_using_primary_db
 
-        Account.on_slave_if(false) do
-          assert_using_master_db
+        Account.on_replica_if(false) do
+          assert_using_primary_db
         end
 
-        Account.on_slave_unless(true) do
-          assert_using_master_db
+        Account.on_replica_unless(true) do
+          assert_using_primary_db
         end
 
-        Account.on_slave_unless(false) do
-          assert_using_slave_db
+        Account.on_replica_unless(false) do
+          assert_using_replica_db
         end
       end
 
-      describe "a model loaded with the slave" do
+      describe "a model loaded with the replica" do
         before do
-          Account.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'master_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
+          Account.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'primary_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
           assert(Account.find(1000))
-          assert_equal('master_name', Account.find(1000).name)
+          assert_equal('primary_name', Account.find(1000).name)
 
-          Account.on_slave.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'slave_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
+          Account.on_replica.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'replica_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
 
-          @model = Account.on_slave.find(1000)
+          @model = Account.on_replica.find(1000)
           assert(@model)
-          assert_equal('slave_name', @model.name)
+          assert_equal('replica_name', @model.name)
         end
 
-        it "read from master on reload" do
+        it "read from primary on reload" do
           @model.reload
-          assert_equal('master_name', @model.name)
+          assert_equal('primary_name', @model.name)
         end
 
         it "be marked as read only" do
@@ -481,16 +481,16 @@ describe "connection switching" do
           assert(@model.readonly?)
         end
 
-        it "be marked as comming from the slave" do
-          assert(@model.from_slave?)
+        it "be marked as comming from the replica" do
+          assert(@model.from_replica?)
         end
       end
 
       describe "a inherited model without cached columns hash" do
         # before columns -> with_scope -> type-condition -> columns == loop
-        it "not loop when on slave by default" do
-          Person.on_slave_by_default = true
-          assert User.on_slave_by_default?
+        it "not loop when on replica by default" do
+          Person.on_replica_by_default = true
+          assert User.on_replica_by_default?
           assert User.finder_needs_type_condition?
 
           User.instance_variable_set(:@columns_hash, nil)
@@ -498,16 +498,16 @@ describe "connection switching" do
         end
       end
 
-      describe "a model loaded with the master" do
+      describe "a model loaded with the primary" do
         before do
-          Account.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'master_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
+          Account.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'primary_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
           @model = Account.first
           assert(@model)
-          assert_equal('master_name', @model.name)
+          assert_equal('primary_name', @model.name)
         end
 
         it "not unset readonly" do
-          @model = Account.on_master.readonly.first
+          @model = Account.on_primary.readonly.first
           assert(@model.readonly?)
         end
 
@@ -515,106 +515,106 @@ describe "connection switching" do
           assert(!@model.readonly?)
         end
 
-        it "not be marked as comming from the slave" do
-          assert(!@model.from_slave?)
+        it "not be marked as comming from the replica" do
+          assert(!@model.from_replica?)
         end
       end
 
-      describe "with finds routed to the slave by default" do
+      describe "with finds routed to the replica by default" do
         before do
-          Account.on_slave_by_default = true
-          Person.on_slave_by_default = true
-          Account.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'master_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
-          Account.on_slave.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'slave_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
-          Account.on_slave.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1001, 'slave_name2', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
+          Account.on_replica_by_default = true
+          Person.on_replica_by_default = true
+          Account.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'primary_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
+          Account.on_replica.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'replica_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
+          Account.on_replica.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1001, 'replica_name2', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
 
-          Person.connection.execute("REPLACE INTO people(id, name) VALUES(10, 'master person')")
-          Person.on_slave.connection.execute("REPLACE INTO people(id, name) VALUES(20, 'slave person')")
+          Person.connection.execute("REPLACE INTO people(id, name) VALUES(10, 'primary person')")
+          Person.on_replica.connection.execute("REPLACE INTO people(id, name) VALUES(20, 'replica person')")
 
           Account.connection.execute("INSERT INTO account_people(account_id, person_id) VALUES(1000, 10)")
-          Account.on_slave.connection.execute("INSERT INTO account_people(account_id, person_id) VALUES(1001, 20)")
+          Account.on_replica.connection.execute("INSERT INTO account_people(account_id, person_id) VALUES(1001, 20)")
         end
 
-        it "find() by default on the slave" do
+        it "find() by default on the replica" do
           account = Account.find(1000)
-          assert_equal 'slave_name', account.name
+          assert_equal 'replica_name', account.name
         end
 
-        it "count() by default on the slave" do
+        it "count() by default on the replica" do
           count = Account.all.size
           assert_equal 2, count
         end
 
-        it "reload() on the master" do
+        it "reload() on the primary" do
           account = Account.find(1000)
-          assert_equal 'master_name', account.reload.name
+          assert_equal 'primary_name', account.reload.name
         end
 
-        it "do exists? on the slave" do
+        it "do exists? on the replica" do
           if Account.respond_to?(:exists?)
             assert Account.exists?(1001)
           end
         end
 
-        it "does exists? on the slave with a named scope" do
-          AccountThing.on_slave_by_default = true
-          Account.on_slave.connection.execute("INSERT INTO account_things (id, account_id) VALUES(123125, 1000)")
+        it "does exists? on the replica with a named scope" do
+          AccountThing.on_replica_by_default = true
+          Account.on_replica.connection.execute("INSERT INTO account_things (id, account_id) VALUES(123125, 1000)")
           assert AccountThing.enabled.exists?(123125)
-          Account.on_slave.connection.execute("DELETE FROM account_things")
-          AccountThing.on_slave_by_default = false
+          Account.on_replica.connection.execute("DELETE FROM account_things")
+          AccountThing.on_replica_by_default = false
         end
 
-        it "count associations on the slave" do
-          AccountThing.on_slave_by_default = true
-          Account.on_slave.connection.execute("INSERT INTO account_things (id, account_id) VALUES(123123, 1000)")
-          Account.on_slave.connection.execute("INSERT INTO account_things (id, account_id) VALUES(123124, 1000)")
+        it "count associations on the replica" do
+          AccountThing.on_replica_by_default = true
+          Account.on_replica.connection.execute("INSERT INTO account_things (id, account_id) VALUES(123123, 1000)")
+          Account.on_replica.connection.execute("INSERT INTO account_things (id, account_id) VALUES(123124, 1000)")
           assert_equal 2, Account.find(1000).account_things.size
-          AccountThing.on_slave_by_default = false
+          AccountThing.on_replica_by_default = false
         end
 
-        it "Allow override using on_master" do
-          model = Account.on_master.find(1000)
-          assert_equal "master_name", model.name
+        it "Allow override using on_primary" do
+          model = Account.on_primary.find(1000)
+          assert_equal "primary_name", model.name
         end
 
-        it "not override on_master with on_slave" do
-          model = Account.on_master { Account.on_slave.find(1000) }
-          assert_equal "master_name", model.name
+        it "not override on_primary with on_replica" do
+          model = Account.on_primary { Account.on_replica.find(1000) }
+          assert_equal "primary_name", model.name
         end
 
-        it "override on_slave with on_master" do
-          model = Account.on_slave { Account.on_master.find(1000) }
-          assert_equal "master_name", model.name
+        it "override on_replica with on_primary" do
+          model = Account.on_replica { Account.on_primary.find(1000) }
+          assert_equal "primary_name", model.name
         end
 
-        it "propogate the on_slave_by_default reader to inherited classes" do
-          assert AccountInherited.on_slave_by_default?
+        it "propogate the on_replica_by_default reader to inherited classes" do
+          assert AccountInherited.on_replica_by_default?
         end
 
         it "is false on ActiveRecord::Base" do
-          refute ActiveRecord::Base.on_slave_by_default?
+          refute ActiveRecord::Base.on_replica_by_default?
         end
 
-        it "propogate the on_slave_by_default writer to inherited classes" do
+        it "propogate the on_replica_by_default writer to inherited classes" do
           begin
-            AccountInherited.on_slave_by_default = false
-            refute AccountInherited.on_slave_by_default?
-            refute Account.on_slave_by_default?
+            AccountInherited.on_replica_by_default = false
+            refute AccountInherited.on_replica_by_default?
+            refute Account.on_replica_by_default?
           ensure
-            AccountInherited.on_slave_by_default = true
+            AccountInherited.on_replica_by_default = true
           end
         end
 
         it "refuses to set on ActiveRecord::Base" do
           assert_raises ArgumentError do
-            ActiveRecord::Base.on_slave_by_default = true
+            ActiveRecord::Base.on_replica_by_default = true
           end
         end
 
         it "will :include things via has_and_belongs associations correctly" do
           a = Account.where(id: 1001).includes(:people).first
           refute a.people.empty?
-          assert_equal 'slave person', a.people.first.name
+          assert_equal 'replica person', a.people.first.name
         end
 
         it "sets up has and belongs to many sharded-ness correctly" do
@@ -624,18 +624,18 @@ describe "connection switching" do
         end
 
         it "supports .pluck" do
-          assert_equal ["slave_name", "slave_name2"], Account.pluck(:name)
+          assert_equal ["replica_name", "replica_name2"], Account.pluck(:name)
         end
 
         it "supports implicit joins" do
           accounts = Account.includes(:account_things)
           accounts = accounts.references(:account_things) if ActiveRecord::VERSION::MAJOR >= 4
-          assert_equal ["slave_name", "slave_name2"], accounts.order('account_things.id').map(&:name).sort
+          assert_equal ["replica_name", "replica_name2"], accounts.order('account_things.id').map(&:name).sort
         end
 
         it "supports joins" do
           accounts = Account.joins('LEFT OUTER JOIN account_things ON account_things.account_id = accounts.id').map(&:name).sort
-          assert_equal ["slave_name", "slave_name2"], accounts
+          assert_equal ["replica_name", "replica_name2"], accounts
         end
 
         it "does not support implicit joins between an unsharded and a sharded table" do
@@ -650,33 +650,33 @@ describe "connection switching" do
         end
 
         after do
-          Account.on_slave_by_default = false
-          Person.on_slave_by_default = false
+          Account.on_replica_by_default = false
+          Person.on_replica_by_default = false
         end
       end
     end
 
-    describe "slave proxy" do
+    describe "replica proxy" do
       it "successfully execute queries" do
-        assert_using_master_db
+        assert_using_primary_db
         Account.create!
 
-        refute_equal Account.count, Account.on_slave.count
+        refute_equal Account.count, Account.on_replica.count
       end
 
       it "work on association collections" do
-        assert_using_master_db
+        assert_using_primary_db
         account = Account.create!
 
         ActiveRecord::Base.on_shard(0) do
-          account.tickets.create! title: 'master ticket'
+          account.tickets.create! title: 'primary ticket'
 
-          Ticket.on_slave do
-            account.tickets.create! title: 'slave ticket'
+          Ticket.on_replica do
+            account.tickets.create! title: 'replica ticket'
           end
 
-          assert_equal "master ticket", account.tickets.first.title
-          assert_equal "slave ticket", account.tickets.on_slave.first.title
+          assert_equal "primary ticket", account.tickets.first.title
+          assert_equal "replica ticket", account.tickets.on_replica.first.title
         end
       end
     end

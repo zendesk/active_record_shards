@@ -4,7 +4,7 @@ module ActiveRecordShards
     def connection_pool_name # :nodoc:
       name = current_shard_selection.shard_name(self)
 
-      if configurations[name].nil? && on_slave?
+      if configurations[name].nil? && on_replica?
         current_shard_selection.shard_name(self, false)
       else
         name

@@ -8,6 +8,6 @@ ActiveRecordShards::ConnectionSpecification = ActiveRecord::ConnectionAdapters::
 methods_to_override = [:establish_connection, :remove_connection, :pool_for, :pool_from_any_process_for]
 ActiveRecordShards.override_connection_handler_methods(methods_to_override)
 
-ActiveRecord::Associations::Builder::HasAndBelongsToMany.include(ActiveRecordShards::DefaultSlavePatches::Rails41HasAndBelongsToManyBuilderExtension)
+ActiveRecord::Associations::Builder::HasAndBelongsToMany.include(ActiveRecordShards::DefaultReplicaPatches::Rails41HasAndBelongsToManyBuilderExtension)
 
 ActiveRecord::SchemaDumper.prepend(ActiveRecordShards::SchemaDumperExtension)
