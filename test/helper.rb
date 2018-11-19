@@ -7,11 +7,6 @@ require 'rake'
 require 'mocha/minitest'
 Bundler.require
 
-if defined?(Debugger)
-  ::Debugger.start
-  ::Debugger.settings[:autoeval] = true if ::Debugger.respond_to?(:settings)
-end
-
 $LOAD_PATH.unshift(File.join(__dir__, '..', 'lib'))
 $LOAD_PATH.unshift(__dir__)
 require 'active_support'
