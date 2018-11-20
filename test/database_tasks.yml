@@ -19,14 +19,14 @@ test:
     1:
       database: ars_tasks_test_shard_b
 
-test_flexmaster:
+test_adapter:
   <<: *MYSQL
-  adapter: mysql_flexmaster
-  database: ars_tasks_flex_test
+  adapter: mysql2_fake
+  database: ars_tasks_adapter_test
   slave:
-    database: ars_tasks_flex_test_slave
+    database: ars_tasks_adapter_test_slave
   shards:
     0:
-      database: ars_tasks_flex_test_shard_a
+      database: ars_tasks_adapter_test_shard_a
     1:
-      database: ars_tasks_flex_test_shard_b
+      database: ars_tasks_adapter_test_shard_b
