@@ -2,6 +2,9 @@
 require_relative 'helper'
 
 describe "connection switching" do
+  include ConnectionSwitchingSpecHelpers
+  extend RailsEnvSwitch
+
   def clear_connection_pool
     if ActiveRecord::VERSION::MAJOR >= 4
       ActiveRecord::Base.connection_handler.connection_pool_list.clear

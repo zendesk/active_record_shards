@@ -10,6 +10,8 @@ task :environment do
 end
 
 describe "Database rake tasks" do
+  include RakeSpecHelpers
+
   def capture_stderr
     $stderr = StringIO.new
     yield
