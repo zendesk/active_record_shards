@@ -2,6 +2,9 @@
 require_relative 'helper'
 
 describe "connection switching" do
+  include ConnectionSwitchingSpecHelpers
+  extend RailsEnvSwitch
+
   def clear_connection_pool
     if ActiveRecord::VERSION::MAJOR >= 4
       ActiveRecord::Base.connection_handler.connection_pool_list.clear
@@ -301,7 +304,7 @@ describe "connection switching" do
         assert UnshardedModel.table_exists?
 
         ActiveRecord::Base.on_all_shards do
-          refute ActiveRecord::Base.connection.public_send(connection_exist_method, "unsharded_models")
+          refute table_exists?("unsharded_models")
         end
       end
     end

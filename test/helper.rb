@@ -25,38 +25,23 @@ ActiveRecord::Base.logger = Logger.new(File.dirname(__FILE__) + "/test.log")
 ActiveSupport.test_order = :sorted if ActiveSupport.respond_to?(:test_order=)
 ActiveSupport::Deprecation.behavior = :raise
 
-def connection_exist_method
-  ActiveRecord::VERSION::MAJOR == 5 ? :data_source_exists? : :table_exists?
-end
-
 BaseMigration = (ActiveRecord::VERSION::MAJOR >= 5 ? ActiveRecord::Migration[4.2] : ActiveRecord::Migration) # rubocop:disable Naming/ConstantName
 
 require 'active_support/test_case'
 
 # support multiple before/after blocks per example
-Minitest::Spec::DSL.class_eval do
-  remove_method :before
+module SpecDslPatch
   def before(_type = nil, &block)
-    include(Module.new do
-      define_method(:setup) do
-        super()
-        instance_exec(&block)
-      end
-    end)
+    include(Module.new { super })
   end
 
-  remove_method :after
   def after(_type = nil, &block)
-    include(Module.new do
-      define_method(:teardown) do
-        instance_exec(&block)
-        super()
-      end
-    end)
+    include(Module.new { super })
   end
 end
+Minitest::Spec.singleton_class.prepend(SpecDslPatch)
 
-Minitest::Spec.class_eval do
+module RakeSpecHelpers
   def show_databases(config)
     client = Mysql2::Client.new(
       host: config['test']['host'],
@@ -72,7 +57,9 @@ Minitest::Spec.class_eval do
     Rake::Task[name].reenable
     Rake::Task[name].invoke
   end
+end
 
+module ConnectionSwitchingSpecHelpers
   def assert_using_master_db
     assert_using_database('ars_test')
   end
@@ -83,6 +70,16 @@ Minitest::Spec.class_eval do
 
   def assert_using_database(db_name, model = ActiveRecord::Base)
     assert_equal(db_name, model.connection.current_database)
+  end
+end
+
+module SpecHelpers
+  def table_exists?(name)
+    if ActiveRecord::VERSION::MAJOR == 5
+      ActiveRecord::Base.connection.data_source_exists?(name)
+    else
+      ActiveRecord::Base.connection.table_exists?(name)
+    end
   end
 
   def table_has_column?(table, column)
@@ -101,8 +98,11 @@ Minitest::Spec.class_eval do
       ActiveRecord::Migrator.new(direction, migration_path, target_version)
     end
   end
+end
+Minitest::Spec.include(SpecHelpers)
 
-  def self.switch_rails_env(env)
+module RailsEnvSwitch
+  def switch_rails_env(env)
     before do
       silence_warnings { Object.const_set("RAILS_ENV", env) }
       ActiveRecord::Base.establish_connection(::RAILS_ENV.to_sym)
@@ -113,10 +113,12 @@ Minitest::Spec.class_eval do
       assert_using_database('ars_test', Ticket)
     end
   end
+end
 
+module PhenixHelper
   # create all databases and then tear them down after test
   # avoid doing any shard switching while preparing our databases
-  def self.with_phenix
+  def with_phenix
     before do
       ActiveRecord::Base.stubs(:with_default_shard).yields
 
@@ -146,3 +148,4 @@ Minitest::Spec.class_eval do
     end
   end
 end
+Minitest::Spec.extend(PhenixHelper)
