@@ -12,8 +12,8 @@ if defined?(Debugger)
   ::Debugger.settings[:autoeval] = true if ::Debugger.respond_to?(:settings)
 end
 
-$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
-$LOAD_PATH.unshift(File.dirname(__FILE__))
+$LOAD_PATH.unshift(File.join(__dir__, '..', 'lib'))
+$LOAD_PATH.unshift(__dir__)
 require 'active_support'
 require 'active_record_shards'
 require 'logger'
@@ -21,7 +21,7 @@ require 'phenix'
 
 RAILS_ENV = "test".freeze
 
-ActiveRecord::Base.logger = Logger.new(File.dirname(__FILE__) + "/test.log")
+ActiveRecord::Base.logger = Logger.new(__dir__ + "/test.log")
 ActiveSupport.test_order = :sorted if ActiveSupport.respond_to?(:test_order=)
 ActiveSupport::Deprecation.behavior = :raise
 
@@ -87,7 +87,7 @@ module SpecHelpers
   end
 
   def migrator(direction = :up, path = 'migrations', target_version = nil)
-    migration_path = File.join(File.dirname(__FILE__), "/", path)
+    migration_path = File.join(__dir__, "/", path)
     if ActiveRecord::VERSION::STRING >= "5.2.0"
       migrations = ActiveRecord::MigrationContext.new(migration_path).migrations
       ActiveRecord::Migrator.new(direction, migrations, target_version)

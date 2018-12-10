@@ -55,9 +55,6 @@ Lint/RescueWithoutErrorClass:
 Metrics/AbcSize:
   Enabled: false
 
-Metrics/BlockNesting:
-  Enabled: false
-
 Metrics/BlockLength:
   Enabled: false
 
@@ -95,9 +92,6 @@ Style/IfUnlessModifier:
   Enabled: false
 
 Style/NumericLiterals:
-  Enabled: false
-
-Style/SingleLineBlockParams:
   Enabled: false
 
 Style/StringLiterals:
