@@ -24,6 +24,8 @@ module ActiveRecordShards
       def shard_name(klass = nil, try_slave = true)
         the_shard = shard(klass)
 
+        raise "Cannot find connection for sharded class when no shard is selected." if klass.is_sharded? && !the_shard
+
         @shard_names ||= {}
         @shard_names[ActiveRecordShards.rails_env] ||= {}
         @shard_names[ActiveRecordShards.rails_env][the_shard] ||= {}
@@ -39,7 +41,7 @@ module ActiveRecordShards
     else
 
       def shard
-        if @shard.nil? || @shard == NO_SHARD
+        if @shard == NO_SHARD
           nil
         else
           @shard || self.class.default_shard
@@ -50,6 +52,8 @@ module ActiveRecordShards
       def resolve_connection_name(sharded:, configurations:)
         resolved_shard = sharded ? shard : nil
         env = ActiveRecordShards.rails_env
+
+        raise "Cannot find connection for sharded class when no shard is selected." if sharded && !shard
 
         @connection_names ||= {}
         @connection_names[env] ||= {}
