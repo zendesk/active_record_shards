@@ -56,7 +56,7 @@ module ActiveRecordShards
 
     def on_all_databases
       on_shard(nil) { yield }
-      on_all_shards { yield }
+      on_all_shards { |shard| yield(shard) }
     end
 
     def on_slave_if(condition, &block)

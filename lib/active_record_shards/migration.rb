@@ -52,8 +52,7 @@ module ActiveRecord
         missing[shard] = m if m.any?
       end
 
-      ActiveRecord::Base.on_shard(nil) { collect.call(nil) }
-      ActiveRecord::Base.on_all_shards { |shard| collect.call(shard) }
+      ActiveRecord::Base.on_all_databases { |shard| collect.call(shard) }
 
       [pending, missing]
     end
