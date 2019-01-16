@@ -52,16 +52,19 @@ namespace :db do
   task abort_if_pending_migrations: :environment do
     if defined? ActiveRecord
       pending_migrations =
-        if Rails::VERSION::MAJOR >= 4
+        if ActiveRecord::VERSION::STRING >= "5.2.0"
+          migrations = ActiveRecord::MigrationContext.new(ActiveRecord::Migrator.migrations_paths).migrations
+          ActiveRecord::Migrator.new(:up, migrations).pending_migrations
+        elsif ActiveRecord::VERSION::MAJOR >= 4
           ActiveRecord::Base.on_shard(nil) { ActiveRecord::Migrator.open(ActiveRecord::Migrator.migrations_paths).pending_migrations }
         else
           ActiveRecord::Base.on_shard(nil) { ActiveRecord::Migrator.new(:up, 'db/migrate').pending_migrations }
         end
 
       if pending_migrations.any?
-        puts "You have #{pending_migrations.size} pending migrations:"
+        $stderr.puts "You have #{pending_migrations.size} pending migrations:"
         pending_migrations.each do |pending_migration|
-          puts '  %4d %s' % [pending_migration.version, pending_migration.name]
+          $stderr.puts '  %4d %s' % [pending_migration.version, pending_migration.name]
         end
         abort %(Run "rake db:migrate" to update your database then try again.)
       end
