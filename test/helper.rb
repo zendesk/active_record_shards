@@ -110,7 +110,8 @@ module RailsEnvSwitch
     after do
       silence_warnings { Object.const_set("RAILS_ENV", 'test') }
       ActiveRecord::Base.establish_connection(::RAILS_ENV.to_sym)
-      assert_using_database('ars_test', Ticket)
+      tmp_sharded_model = Class.new(ActiveRecord::Base)
+      assert_equal('ars_test', tmp_sharded_model.connection.current_database)
     end
   end
 end
