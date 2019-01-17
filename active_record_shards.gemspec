@@ -11,7 +11,6 @@ Gem::Specification.new "active_record_shards", "3.12.0.beta2" do |s|
   s.add_runtime_dependency("activerecord", ">= 3.2.16", "< 6.0")
   s.add_runtime_dependency("activesupport", ">= 3.2.16", "< 6.0")
 
-  s.add_development_dependency("wwtd")
   s.add_development_dependency("rake", '~> 12.0')
   s.add_development_dependency("mysql2")
   s.add_development_dependency("bump")
