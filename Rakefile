@@ -1,6 +1,5 @@
 require 'bundler/setup'
 require 'bump/tasks'
-require 'wwtd/tasks'
 require 'rubocop/rake_task'
 
 Bundler::GemHelper.install_tasks
@@ -12,7 +11,7 @@ Rake::TestTask.new(:test) do |test|
   test.warning = true
 end
 
-task default: ["rubocop", "wwtd:local"]
+task default: ["rubocop", "test"]
 
 RuboCop::RakeTask.new
 
