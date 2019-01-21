@@ -118,11 +118,25 @@ module PhenixHelper
     before do
       ActiveRecord::Base.stubs(:with_default_shard).yields
 
+      # Create intentionally empty databases
+      Phenix.configure do |config|
+        config.skip_database = lambda do |name, _|
+          intentionally_empty_databases = %w[test3 test3_shard_0]
+
+          !intentionally_empty_databases.include?(name)
+        end
+      end
+      Phenix.rise!(with_schema: false)
+
       # Populate unsharded databases
       Phenix.configure do |config|
         config.schema_path = File.join(Dir.pwd, 'test', 'unsharded_schema.rb')
         config.skip_database = lambda do |name, _|
-          %w[test_shard_0 test_shard_0_slave test_shard_1 test_shard_1_slave].include?(name)
+          sharded_databases = %w[test_shard_0 test_shard_0_slave test_shard_1 test_shard_1_slave]
+          intentionally_empty_databases = %w[test3 test3_shard_0]
+
+          sharded_databases.include?(name) ||
+            intentionally_empty_databases.include?(name)
         end
       end
       Phenix.rise!(with_schema: true)
@@ -131,7 +145,11 @@ module PhenixHelper
       Phenix.configure do |config|
         config.schema_path = File.join(Dir.pwd, 'test', 'sharded_schema.rb')
         config.skip_database = lambda do |name, _|
-          %w[test test_slave test2 test2_slave].include?(name)
+          unsharded_databases = %w[test test_slave test2 test2_slave]
+          intentionally_empty_databases = %w[test3 test3_shard_0]
+
+          unsharded_databases.include?(name) ||
+            intentionally_empty_databases.include?(name)
         end
       end
       Phenix.rise!(with_schema: true)

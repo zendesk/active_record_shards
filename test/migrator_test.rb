@@ -6,6 +6,62 @@ describe ActiveRecord::Migrator do
 
   before { ActiveRecord::Base.establish_connection(RAILS_ENV.to_sym) }
 
+  describe "when DB is empty" do
+    extend RailsEnvSwitch
+
+    switch_rails_env('test3')
+
+    it "makes meta tables" do
+      ActiveRecord::Base.on_shard(nil) do
+        refute table_exists?(:unsharded_table)
+        if ActiveRecord::VERSION::MAJOR >= 4
+          refute ActiveRecord::SchemaMigration.table_exists?
+        else
+          refute table_exists?(:schema_migrations)
+        end
+      end
+
+      ActiveRecord::Base.on_all_shards do
+        refute table_exists?(:sharded_table)
+        if ActiveRecord::VERSION::MAJOR >= 4
+          refute ActiveRecord::SchemaMigration.table_exists?
+        else
+          refute table_exists?(:schema_migrations)
+        end
+      end
+
+      migrator(:up, 'separate_migrations').migrate
+
+      ActiveRecord::Base.on_shard(nil) do
+        assert table_exists?(:unsharded_table)
+        if ActiveRecord::VERSION::MAJOR >= 4
+          assert ActiveRecord::SchemaMigration.table_exists?
+        else
+          assert table_exists?(:schema_migrations)
+        end
+        if ActiveRecord::VERSION::MAJOR >= 5
+          assert ActiveRecord::InternalMetadata.table_exists?
+        end
+        assert ActiveRecord::Base.connection.select_value("select version from schema_migrations where version = '20190121112233'")
+        assert ActiveRecord::Base.connection.select_value("select version from schema_migrations where version = '20190121112234'")
+      end
+
+      ActiveRecord::Base.on_all_shards do
+        assert table_exists?(:sharded_table)
+        if ActiveRecord::VERSION::MAJOR >= 4
+          assert ActiveRecord::SchemaMigration.table_exists?
+        else
+          assert table_exists?(:schema_migrations)
+        end
+        if ActiveRecord::VERSION::MAJOR >= 5
+          assert ActiveRecord::InternalMetadata.table_exists?
+        end
+        assert ActiveRecord::Base.connection.select_value("select version from schema_migrations where version = '20190121112233'")
+        assert ActiveRecord::Base.connection.select_value("select version from schema_migrations where version = '20190121112234'")
+      end
+    end
+  end
+
   it "migrates" do
     refute ActiveRecord::Base.current_shard_id
 
