@@ -69,6 +69,16 @@ module ConnectionSwitchingSpecHelpers
 end
 
 module SpecHelpers
+  def clear_global_connection_handler_state
+    # Use a fresh connection handler
+    ActiveRecord::Base.connection_handler = ActiveRecord::ConnectionAdapters::ConnectionHandler.new
+
+    if ActiveRecord::VERSION::MAJOR <= 4
+      # Clear out our own global state
+      ActiveRecord::Base.send(:clear_specification_cache)
+    end
+  end
+
   def table_exists?(name)
     if ActiveRecord::VERSION::MAJOR == 5
       ActiveRecord::Base.connection.data_source_exists?(name)
@@ -116,6 +126,8 @@ module PhenixHelper
   # avoid doing any shard switching while preparing our databases
   def with_phenix
     before do
+      clear_global_connection_handler_state
+
       ActiveRecord::Base.stubs(:with_default_shard).yields
 
       # Create intentionally empty databases

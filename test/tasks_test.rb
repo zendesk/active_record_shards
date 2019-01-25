@@ -27,6 +27,8 @@ describe "Database rake tasks" do
   let(:database_names) { shard_names + [master_name, slave_name] }
 
   before do
+    clear_global_connection_handler_state
+
     if ActiveRecord::VERSION::MAJOR >= 4
       ActiveRecord::Tasks::DatabaseTasks.database_configuration = config
       ActiveRecord::Tasks::DatabaseTasks.env = RAILS_ENV

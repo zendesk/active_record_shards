@@ -48,6 +48,11 @@ module ActiveRecordShards
       @@specification_cache ||= {}
     end
 
+    # Helper method to clear global state when testing.
+    def clear_specification_cache
+      @@specification_cache = {}
+    end
+
     def connection_pool_key
       specification_cache[connection_pool_name]
     end
