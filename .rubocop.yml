@@ -5,7 +5,7 @@ AllCops:
     - .git/**/*
     - gemfiles/vendor/**/*
     - vendor/**/*
-  TargetRubyVersion: 2.1
+  TargetRubyVersion: 2.3
 
 # Configured cops
 
@@ -85,6 +85,9 @@ Style/Documentation:
 Style/DoubleNegation:
   Enabled: false
 
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
 Style/GuardClause:
   Enabled: false
 
@@ -92,6 +95,9 @@ Style/IfUnlessModifier:
   Enabled: false
 
 Style/NumericLiterals:
+  Enabled: false
+
+Style/RedundantFreeze:
   Enabled: false
 
 Style/StringLiterals:

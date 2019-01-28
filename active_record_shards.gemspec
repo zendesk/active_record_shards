@@ -6,7 +6,7 @@ Gem::Specification.new "active_record_shards", "3.13.0" do |s|
   s.description = "Easily run queries on shard and slave databases."
   s.license     = "MIT"
 
-  s.required_ruby_version = "~> 2.0"
+  s.required_ruby_version = ">= 2.3"
 
   s.add_runtime_dependency("activerecord", ">= 3.2.16", "< 6.0")
   s.add_runtime_dependency("activesupport", ">= 3.2.16", "< 6.0")
