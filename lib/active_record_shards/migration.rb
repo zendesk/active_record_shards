@@ -9,6 +9,25 @@ module ActiveRecord
       end
     end
 
+    def initialize_with_sharding(*args)
+      initialize_without_sharding(*args)
+
+      # Rails creates the internal tables on the unsharded DB. We make them
+      # manually on the sharded DBs.
+      ActiveRecord::Base.on_all_shards do
+        if ActiveRecord::VERSION::MAJOR >= 4
+          ActiveRecord::SchemaMigration.create_table
+        else
+          ActiveRecord::Base.connection.initialize_schema_migrations_table
+        end
+        if ActiveRecord::VERSION::MAJOR >= 5
+          ActiveRecord::InternalMetadata.create_table
+        end
+      end
+    end
+    alias_method :initialize_without_sharding, :initialize
+    alias_method :initialize, :initialize_with_sharding
+
     def run_with_sharding
       ActiveRecord::Base.on_shard(nil) { run_without_sharding }
       ActiveRecord::Base.on_all_shards { run_without_sharding }

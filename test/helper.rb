@@ -69,6 +69,16 @@ module ConnectionSwitchingSpecHelpers
 end
 
 module SpecHelpers
+  def clear_global_connection_handler_state
+    # Use a fresh connection handler
+    ActiveRecord::Base.connection_handler = ActiveRecord::ConnectionAdapters::ConnectionHandler.new
+
+    if ActiveRecord::VERSION::MAJOR <= 4
+      # Clear out our own global state
+      ActiveRecord::Base.send(:clear_specification_cache)
+    end
+  end
+
   def table_exists?(name)
     if ActiveRecord::VERSION::MAJOR == 5
       ActiveRecord::Base.connection.data_source_exists?(name)
@@ -116,13 +126,29 @@ module PhenixHelper
   # avoid doing any shard switching while preparing our databases
   def with_phenix
     before do
+      clear_global_connection_handler_state
+
       ActiveRecord::Base.stubs(:with_default_shard).yields
+
+      # Create intentionally empty databases
+      Phenix.configure do |config|
+        config.skip_database = lambda do |name, _|
+          intentionally_empty_databases = %w[test3 test3_shard_0]
+
+          !intentionally_empty_databases.include?(name)
+        end
+      end
+      Phenix.rise!(with_schema: false)
 
       # Populate unsharded databases
       Phenix.configure do |config|
         config.schema_path = File.join(Dir.pwd, 'test', 'unsharded_schema.rb')
         config.skip_database = lambda do |name, _|
-          %w[test_shard_0 test_shard_0_slave test_shard_1 test_shard_1_slave].include?(name)
+          sharded_databases = %w[test_shard_0 test_shard_0_slave test_shard_1 test_shard_1_slave]
+          intentionally_empty_databases = %w[test3 test3_shard_0]
+
+          sharded_databases.include?(name) ||
+            intentionally_empty_databases.include?(name)
         end
       end
       Phenix.rise!(with_schema: true)
@@ -131,7 +157,11 @@ module PhenixHelper
       Phenix.configure do |config|
         config.schema_path = File.join(Dir.pwd, 'test', 'sharded_schema.rb')
         config.skip_database = lambda do |name, _|
-          %w[test test_slave test2 test2_slave].include?(name)
+          unsharded_databases = %w[test test_slave test2 test2_slave]
+          intentionally_empty_databases = %w[test3 test3_shard_0]
+
+          unsharded_databases.include?(name) ||
+            intentionally_empty_databases.include?(name)
         end
       end
       Phenix.rise!(with_schema: true)
