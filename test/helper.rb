@@ -70,6 +70,9 @@ end
 
 module SpecHelpers
   def clear_global_connection_handler_state
+    # Close active connections
+    ActiveRecord::Base.connection_handler.clear_all_connections!
+
     # Use a fresh connection handler
     ActiveRecord::Base.connection_handler = ActiveRecord::ConnectionAdapters::ConnectionHandler.new
 
