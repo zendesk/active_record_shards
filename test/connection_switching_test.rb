@@ -258,35 +258,6 @@ describe "connection switching" do
         table_has_column?('schema_migrations', 'foo')
       end
     end
-
-    if ActiveRecord::VERSION::MAJOR >= 5
-      describe "for InternalMetadata" do
-        before do
-          ActiveRecord::InternalMetadata.on_slave do
-            ActiveRecord::InternalMetadata.connection.execute("alter table ar_internal_metadata add column foo int")
-            ActiveRecord::InternalMetadata.reset_column_information
-          end
-        end
-
-        after do
-          ActiveRecord::InternalMetadata.on_slave do
-            ActiveRecord::Base.connection.execute("alter table ar_internal_metadata drop column foo")
-            ActiveRecord::InternalMetadata.reset_column_information
-            refute ActiveRecord::InternalMetadata.column_names.include?('foo')
-          end
-        end
-
-        it "use the non-sharded slave connection" do
-          assert_using_database('ars_test', ActiveRecord::InternalMetadata)
-          assert ActiveRecord::InternalMetadata.column_names.include?('foo')
-        end
-
-        it "ignores master/transactions" do
-          assert_using_database('ars_test', ActiveRecord::InternalMetadata)
-          ActiveRecord::InternalMetadata.on_master { assert ActiveRecord::InternalMetadata.column_names.include?('foo') }
-        end
-      end
-    end
   end
 
   describe "ActiveRecord::Base.table_exists?" do
