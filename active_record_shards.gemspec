@@ -1,4 +1,4 @@
-Gem::Specification.new "active_record_shards", "3.13.0" do |s|
+Gem::Specification.new "active_record_shards", "3.13.1" do |s|
   s.authors     = ["Benjamin Quorning", "Gabe Martin-Dempesy", "Pierre Schambacher", "Mick Staugaard", "Eric Chapweske", "Ben Osheroff"]
   s.email       = ["bquorning@zendesk.com", "gabe@zendesk.com", "pschambacher@zendesk.com", "mick@staugaard.com"]
   s.homepage    = "https://github.com/zendesk/active_record_shards"
