@@ -431,9 +431,11 @@ describe "connection switching" do
 
       describe "a model loaded with the slave" do
         before do
-          Account.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'master_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
-          assert(Account.find(1000))
-          assert_equal('master_name', Account.find(1000).name)
+          Account.on_slave_by_default = true
+
+          Account.on_master.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'master_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
+          assert(Account.on_master.find(1000))
+          assert_equal('master_name', Account.on_master.find(1000).name)
 
           Account.on_slave.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'slave_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
 
@@ -442,9 +444,9 @@ describe "connection switching" do
           assert_equal('slave_name', @model.name)
         end
 
-        it "read from master on reload" do
+        it "read from replica on reload" do
           @model.reload
-          assert_equal('master_name', @model.name)
+          assert_equal('slave_name', @model.name)
         end
 
         it "be marked as read only" do
@@ -457,6 +459,10 @@ describe "connection switching" do
 
         it "be marked as comming from the slave" do
           assert(@model.from_slave?)
+        end
+
+        after do
+          Account.on_slave_by_default = false
         end
       end
 
@@ -519,9 +525,9 @@ describe "connection switching" do
           assert_equal 2, count
         end
 
-        it "reload() on the master" do
+        it "reload() on the replica" do
           account = Account.find(1000)
-          assert_equal 'master_name', account.reload.name
+          assert_equal 'slave_name', account.reload.name
         end
 
         it "do exists? on the slave" do

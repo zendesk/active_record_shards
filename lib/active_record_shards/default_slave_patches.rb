@@ -56,10 +56,6 @@ module ActiveRecordShards
       def quote_value(*args, &block)
         self.class.quote_value(*args, &block)
       end
-
-      def reload_with_slave_off(*args, &block)
-        self.class.on_master { reload_without_slave_off(*args, &block) }
-      end
     end
 
     CLASS_SLAVE_METHODS = [:find_by_sql, :count_by_sql, :calculate, :find_one, :find_some, :find_every, :exists?].freeze
@@ -69,9 +65,6 @@ module ActiveRecordShards
 
       base.class_eval do
         include InstanceMethods
-
-        alias_method :reload_without_slave_off, :reload
-        alias_method :reload, :reload_with_slave_off
 
         class << self
           alias_method :columns_without_force_slave, :columns
