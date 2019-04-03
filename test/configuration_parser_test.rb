@@ -8,8 +8,8 @@ describe ActiveRecordShards::ConfigurationParser do
       @exploded_conf = ActiveRecordShards::ConfigurationParser.explode(YAML.safe_load(IO.read(File.dirname(__FILE__) + '/database_parse_test.yml')))
     end
 
-    describe "main slave" do
-      before { @conf = @exploded_conf["test_slave"] }
+    describe "main replica" do
+      before { @conf = @exploded_conf["test_replica"] }
       it "be exploded" do
         @conf["shard_names"] = @conf["shard_names"].to_set
         assert_equal({
@@ -19,7 +19,7 @@ describe ActiveRecordShards::ConfigurationParser do
           "port"        => 123,
           "username"    => "root",
           "password"    => nil,
-          "host"        => "main_slave_host",
+          "host"        => "main_replica_host",
           "shard_names" => [500, 501].to_set
         }, @conf)
       end
@@ -43,8 +43,8 @@ describe ActiveRecordShards::ConfigurationParser do
         end
       end
 
-      describe "slave" do
-        before { @conf = @exploded_conf["test_shard_500_slave"] }
+      describe "replica" do
+        before { @conf = @exploded_conf["test_shard_500_replica"] }
         it "be exploded" do
           @conf["shard_names"] = @conf["shard_names"].to_set
           assert_equal({
@@ -54,7 +54,7 @@ describe ActiveRecordShards::ConfigurationParser do
             "port"        => 123,
             "username"    => "root",
             "password"    => nil,
-            "host"        => "shard_500_slave_host",
+            "host"        => "shard_500_replica_host",
             "shard_names" => [500, 501].to_set
           }, @conf)
         end
@@ -79,14 +79,14 @@ describe ActiveRecordShards::ConfigurationParser do
         end
       end
 
-      describe "slave" do
-        before { @conf = @exploded_conf["test_shard_501_slave"] }
+      describe "replica" do
+        before { @conf = @exploded_conf["test_shard_501_replica"] }
         it "be exploded" do
           @conf["shard_names"] = @conf["shard_names"].to_set
           assert_equal({
             "adapter"     => "mysql",
             "encoding"    => "utf8",
-            "database"    => "ars_test_shard_501_slave",
+            "database"    => "ars_test_shard_501_replica",
             "port"        => 123,
             "username"    => "root",
             "password"    => nil,

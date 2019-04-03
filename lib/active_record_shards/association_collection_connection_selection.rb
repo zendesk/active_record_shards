@@ -2,12 +2,22 @@
 
 module ActiveRecordShards
   module AssociationCollectionConnectionSelection
-    def on_slave_if(condition)
-      condition ? on_slave : self
+    def on_replica_if(condition)
+      condition ? on_replica : self
     end
 
-    def on_slave_unless(condition)
-      on_slave_if(!condition)
+    def on_slave_if(*args)
+      # TODO
+      on_replica_if(*args)
+    end
+
+    def on_replica_unless(condition)
+      on_replica_if(!condition)
+    end
+
+    def on_slave_unless(*args)
+      # TODO
+      on_replica_unless(*args)
     end
 
     def on_master_if(condition)
@@ -18,15 +28,20 @@ module ActiveRecordShards
       on_master_if(!condition)
     end
 
+    def on_replica
+      MasterReplicaProxy.new(self, :replica)
+    end
+
     def on_slave
-      MasterSlaveProxy.new(self, :slave)
+      # TODO
+      on_replica
     end
 
     def on_master
-      MasterSlaveProxy.new(self, :master)
+      MasterReplicaProxy.new(self, :master)
     end
 
-    class MasterSlaveProxy
+    class MasterReplicaProxy
       def initialize(association_collection, which)
         @association_collection = association_collection
         @which = which
@@ -37,5 +52,7 @@ module ActiveRecordShards
         reflection.klass.on_cx_switch_block(@which) { @association_collection.send(method, *args, &block) }
       end
     end
+
+    MasterSlaveProxy = MasterReplicaProxy
   end
 end

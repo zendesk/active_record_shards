@@ -60,8 +60,8 @@ module ConnectionSwitchingSpecHelpers
     assert_using_database('ars_test')
   end
 
-  def assert_using_slave_db
-    assert_using_database('ars_test_slave')
+  def assert_using_replica_db
+    assert_using_database('ars_test_replica')
   end
 
   def assert_using_database(db_name, model = ActiveRecord::Base)
@@ -173,7 +173,7 @@ module PhenixHelper
       Phenix.configure do |config|
         config.schema_path = File.join(Dir.pwd, 'test', 'unsharded_schema.rb')
         config.skip_database = lambda do |name, _|
-          sharded_databases = %w[test_shard_0 test_shard_0_slave test_shard_1 test_shard_1_slave]
+          sharded_databases = %w[test_shard_0 test_shard_0_replica test_shard_1 test_shard_1_replica]
           intentionally_empty_databases = %w[test3 test3_shard_0]
 
           sharded_databases.include?(name) ||
@@ -186,7 +186,7 @@ module PhenixHelper
       Phenix.configure do |config|
         config.schema_path = File.join(Dir.pwd, 'test', 'sharded_schema.rb')
         config.skip_database = lambda do |name, _|
-          unsharded_databases = %w[test test_slave test2 test2_slave]
+          unsharded_databases = %w[test test_replica test2 test2_replica]
           intentionally_empty_databases = %w[test3 test3_shard_0]
 
           unsharded_databases.include?(name) ||

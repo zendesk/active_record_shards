@@ -11,8 +11,8 @@ test:
   <<: *MYSQL
   adapter: mysql2
   database: ars_tasks_test
-  slave:
-    database: ars_tasks_test_slave
+  replica:
+    database: ars_tasks_test_replica
   shards:
     0:
       database: ars_tasks_test_shard_a
@@ -23,8 +23,8 @@ test_adapter:
   <<: *MYSQL
   adapter: mysql2_fake
   database: ars_tasks_adapter_test
-  slave:
-    database: ars_tasks_adapter_test_slave
+  replica:
+    database: ars_tasks_adapter_test_replica
   shards:
     0:
       database: ars_tasks_adapter_test_shard_a

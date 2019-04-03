@@ -13,33 +13,33 @@ test:
   database: ars_test
   shard_names: [0, 1]
 
-test_slave:
+test_replica:
   <<: *MYSQL
-  database: ars_test_slave
+  database: ars_test_replica
 
 test_shard_0:
   <<: *MYSQL
   database: ars_test_shard0
 
-test_shard_0_slave:
+test_shard_0_replica:
   <<: *MYSQL
-  database: ars_test_shard0_slave
+  database: ars_test_shard0_replica
 
 test_shard_1:
   <<: *MYSQL
   database: ars_test_shard1
 
-test_shard_1_slave:
+test_shard_1_replica:
   <<: *MYSQL
-  database: ars_test_shard1_slave
+  database: ars_test_shard1_replica
 
 test2:
   <<: *MYSQL
   database: ars_test2
 
-test2_slave:
+test2_replica:
   <<: *MYSQL
-  database: ars_test2_slave
+  database: ars_test2_replica
 
 test3:
   <<: *MYSQL

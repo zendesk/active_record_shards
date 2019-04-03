@@ -59,12 +59,22 @@ module ActiveRecordShards
       switch_connection(old_options)
     end
 
-    def on_slave_if(condition, &block)
-      condition ? on_slave(&block) : yield
+    def on_replica_if(condition, &block)
+      condition ? on_replica(&block) : yield
     end
 
-    def on_slave_unless(condition, &block)
-      on_slave_if(!condition, &block)
+    def on_slave_if(*args, &block)
+      # TODO
+      on_replica_if(*args, &block)
+    end
+
+    def on_replica_unless(condition, &block)
+      on_replica_if(!condition, &block)
+    end
+
+    def on_slave_unless(*args, &block)
+      # TODO
+      on_replica_unless(*args, &block)
     end
 
     def on_master_if(condition, &block)
@@ -75,54 +85,64 @@ module ActiveRecordShards
       on_master_if(!condition, &block)
     end
 
-    def on_master_or_slave(which, &block)
+    def on_master_or_replica(which, &block)
       if block_given?
         on_cx_switch_block(which, &block)
       else
-        MasterSlaveProxy.new(self, which)
+        MasterReplicaProxy.new(self, which)
       end
     end
 
-    # Executes queries using the slave database. Fails over to master if no slave is found.
-    # if you want to execute a block of code on the slave you can go:
-    #   Account.on_slave do
+    def on_master_or_slave(*args, &block)
+      # TODO
+      on_master_or_replica(*args, &block)
+    end
+
+    # Executes queries using the replica database. Fails over to master if no replica is found.
+    # if you want to execute a block of code on the replica you can go:
+    #   Account.on_replica do
     #     Account.first
     #   end
-    # the first account will be found on the slave DB
+    # the first account will be found on the replica DB
     #
     # For one-liners you can simply do
-    #   Account.on_slave.first
+    #   Account.on_replica.first
+    def on_replica(&block)
+      on_master_or_replica(:replica, &block)
+    end
+
     def on_slave(&block)
-      on_master_or_slave(:slave, &block)
+      # TODO
+      on_replica(&block)
     end
 
     def on_master(&block)
-      on_master_or_slave(:master, &block)
+      on_master_or_replica(:master, &block)
     end
 
     # just to ease the transition from replica to active_record_shards
-    alias_method :with_slave, :on_slave
-    alias_method :with_slave_if, :on_slave_if
-    alias_method :with_slave_unless, :on_slave_unless
+    alias_method :with_replica, :on_replica
+    alias_method :with_replica_if, :on_replica_if
+    alias_method :with_replica_unless, :on_replica_unless
 
     def on_cx_switch_block(which, force: false, construct_ro_scope: nil, &block)
-      @disallow_slave ||= 0
-      @disallow_slave += 1 if which == :master
+      @disallow_replica ||= 0
+      @disallow_replica += 1 if which == :master
 
-      switch_to_slave = force || @disallow_slave.zero?
+      switch_to_replica = force || @disallow_replica.zero?
       old_options = current_shard_selection.options
 
-      switch_connection(slave: switch_to_slave)
+      switch_connection(replica: switch_to_replica)
 
       # we avoid_readonly_scope to prevent some stack overflow problems, like when
       # .columns calls .with_scope which calls .columns and onward, endlessly.
-      if self == ActiveRecord::Base || !switch_to_slave || construct_ro_scope == false
+      if self == ActiveRecord::Base || !switch_to_replica || construct_ro_scope == false
         yield
       else
         readonly.scoping(&block)
       end
     ensure
-      @disallow_slave -= 1 if which == :master
+      @disallow_replica -= 1 if which == :master
       switch_connection(old_options) if old_options
     end
 
@@ -130,8 +150,13 @@ module ActiveRecordShards
       shard_names.any?
     end
 
+    def on_replica?
+      current_shard_selection.on_replica?
+    end
+
     def on_slave?
-      current_shard_selection.on_slave?
+      # TODO
+      on_replica?
     end
 
     def current_shard_selection
@@ -158,7 +183,12 @@ module ActiveRecordShards
     def switch_connection(options)
       if options.any?
         if options.key?(:slave)
-          current_shard_selection.on_slave = options[:slave]
+          # TODO
+          options[:replica] = options.delete(:slave)
+        end
+
+        if options.key?(:replica)
+          current_shard_selection.on_replica = options[:replica]
         end
 
         if options.key?(:shard)
@@ -199,16 +229,18 @@ module ActiveRecordShards
       with_default_shard { table_exists_without_default_shard? }
     end
 
-    class MasterSlaveProxy
+    class MasterReplicaProxy
       def initialize(target, which)
         @target = target
         @which = which
       end
 
       def method_missing(method, *args, &block) # rubocop:disable Style/MethodMissingSuper, Style/MissingRespondToMissing
-        @target.on_master_or_slave(@which) { @target.send(method, *args, &block) }
+        @target.on_master_or_replica(@which) { @target.send(method, *args, &block) }
       end
     end
+
+    MasterSlaveProxy = MasterReplicaProxy
   end
 end
 
