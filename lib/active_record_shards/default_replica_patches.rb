@@ -28,7 +28,10 @@ module ActiveRecordShards
     end
 
     def self.wrap_method_in_on_slave(*args)
-      # TODO
+      ActiveRecordShards::Deprecation.deprecation_warning(
+        :'self.wrap_method_in_on_slave',
+        :'self.wrap_method_in_on_replica'
+      )
       wrap_method_in_on_replica(*args)
     end
 
@@ -37,22 +40,14 @@ module ActiveRecordShards
         columns_without_force_replica(*args, &block)
       end
     end
-
-    def columns_with_force_slave(*args, &block)
-      # TODO
-      columns_with_force_replica(*args, &block)
-    end
+    alias_method :columns_with_force_slave, :columns_with_force_replica
 
     def table_exists_with_force_replica?(*args, &block)
       on_cx_switch_block(:replica, construct_ro_scope: false, force: true) do
         table_exists_without_force_replica?(*args, &block)
       end
     end
-
-    def table_exists_with_force_slave?(*args, &block)
-      # TODO
-      table_exists_with_force_replica?(*args, &block)
-    end
+    alias_method :table_exists_with_force_slave?, :table_exists_with_force_replica?
 
     def transaction_with_replica_off(*args, &block)
       if on_replica_by_default?
@@ -67,11 +62,7 @@ module ActiveRecordShards
         transaction_without_replica_off(*args, &block)
       end
     end
-
-    def transaction_with_slave_off(*args, &block)
-      # TODO
-      transaction_with_replica_off(*args, &block)
-    end
+    alias_method :transaction_with_slave_off, :transaction_with_replica_off
 
     module InstanceMethods
       # fix ActiveRecord to do the right thing, and use our aliased quote_value
@@ -128,11 +119,7 @@ module ActiveRecordShards
         yield
       end
     end
-
-    def on_slave_unless_tx(&block)
-      # TODO
-      on_replica_unless_tx(&block)
-    end
+    alias_method :on_slave_unless_tx, :on_replica_unless_tx
 
     module ActiveRelationPatches
       def self.included(base)

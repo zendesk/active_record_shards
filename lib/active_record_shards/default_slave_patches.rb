@@ -1,4 +1,4 @@
-warn '[DEPRECATED] `default_slave_patches` is deprecated, please use `default_replica_patches`.'
+ActiveRecordShards::Deprecation.warn('`DefaultSlavePatches` is deprecated, please use `DefaultReplicaPatches`.')
 
 module ActiveRecordShards
   DefaultSlavePatches = DefaultReplicaPatches

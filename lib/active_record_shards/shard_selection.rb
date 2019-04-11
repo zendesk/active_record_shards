@@ -77,20 +77,12 @@ module ActiveRecordShards
     def on_replica?
       @on_replica
     end
-
-    def on_slave?
-      # TODO
-      on_replica?
-    end
+    alias_method :on_slave?, :on_replica?
 
     def on_replica=(new_replica)
       @on_replica = (new_replica == true)
     end
-
-    def on_slave=(val)
-      # TODO
-      self.on_replica = val
-    end
+    alias_method :on_slave=, :on_replica=
 
     def options
       { shard: @shard, slave: @on_replica, replica: @on_replica }

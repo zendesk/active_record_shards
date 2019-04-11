@@ -62,20 +62,12 @@ module ActiveRecordShards
     def on_replica_if(condition, &block)
       condition ? on_replica(&block) : yield
     end
-
-    def on_slave_if(*args, &block)
-      # TODO
-      on_replica_if(*args, &block)
-    end
+    alias_method :on_slave_if, :on_replica_if
 
     def on_replica_unless(condition, &block)
       on_replica_if(!condition, &block)
     end
-
-    def on_slave_unless(*args, &block)
-      # TODO
-      on_replica_unless(*args, &block)
-    end
+    alias_method :on_slave_unless, :on_replica_unless
 
     def on_master_if(condition, &block)
       condition ? on_master(&block) : yield
@@ -92,11 +84,7 @@ module ActiveRecordShards
         MasterReplicaProxy.new(self, which)
       end
     end
-
-    def on_master_or_slave(*args, &block)
-      # TODO
-      on_master_or_replica(*args, &block)
-    end
+    alias_method :on_master_or_slave, :on_master_or_replica
 
     # Executes queries using the replica database. Fails over to master if no replica is found.
     # if you want to execute a block of code on the replica you can go:
@@ -110,11 +98,7 @@ module ActiveRecordShards
     def on_replica(&block)
       on_master_or_replica(:replica, &block)
     end
-
-    def on_slave(&block)
-      # TODO
-      on_replica(&block)
-    end
+    alias_method :on_slave, :on_replica
 
     def on_master(&block)
       on_master_or_replica(:master, &block)
@@ -153,11 +137,7 @@ module ActiveRecordShards
     def on_replica?
       current_shard_selection.on_replica?
     end
-
-    def on_slave?
-      # TODO
-      on_replica?
-    end
+    alias_method :on_slave?, :on_replica?
 
     def current_shard_selection
       Thread.current[:shard_selection] ||= ShardSelection.new
@@ -187,7 +167,7 @@ module ActiveRecordShards
         end
 
         if options.key?(:slave)
-          # TODO
+          ActiveRecordShards::Deprecation.warn('the `:slave` option should be replaced with `:replica`!')
           options[:replica] ||= options.delete(:slave)
         end
 

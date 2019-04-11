@@ -5,20 +5,12 @@ module ActiveRecordShards
     def on_replica_if(condition)
       condition ? on_replica : self
     end
-
-    def on_slave_if(*args)
-      # TODO
-      on_replica_if(*args)
-    end
+    alias_method :on_slave_if, :on_replica_if
 
     def on_replica_unless(condition)
       on_replica_if(!condition)
     end
-
-    def on_slave_unless(*args)
-      # TODO
-      on_replica_unless(*args)
-    end
+    alias_method :on_slave_unless, :on_replica_unless
 
     def on_master_if(condition)
       condition ? on_master : self
@@ -31,11 +23,7 @@ module ActiveRecordShards
     def on_replica
       MasterReplicaProxy.new(self, :replica)
     end
-
-    def on_slave
-      # TODO
-      on_replica
-    end
+    alias_method :on_slave, :on_replica
 
     def on_master
       MasterReplicaProxy.new(self, :master)

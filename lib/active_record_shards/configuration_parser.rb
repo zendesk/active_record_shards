@@ -30,7 +30,7 @@ module ActiveRecordShards
         end
 
         if replica_conf = env_config.delete('slave')
-          # TODO
+          ActiveRecordShards::Deprecation.warn('`slave` configuration keys should be replaced with `replica` keys!')
           env_config['replica'] ||= replica_conf
         end
       end
@@ -41,7 +41,6 @@ module ActiveRecordShards
     def expand_child!(parent, child)
       parent.each do |key, value|
         unless ['slave', 'replica', 'shards'].include?(key) || value.is_a?(Hash)
-          # TODO
           child[key] ||= value
         end
       end

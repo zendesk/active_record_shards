@@ -5,3 +5,4 @@ ignore:
   - lib/active_record_shards/model.rb
   - lib/active_record_shards/shard_selection.rb
   - lib/active_record_shards/tasks.rb
+  - lib/active_record_shards.rb
