@@ -44,7 +44,7 @@ module ActiveRecordShards
       if self == ActiveRecord::Base
         raise ArgumentError, "Cannot set on_replica_by_default on ActiveRecord::Base"
       else
-        base_class.instance_variable_set(:@on_slave_by_default, value)
+        base_class.instance_variable_set(:@on_replica_by_default, value)
       end
     end
 

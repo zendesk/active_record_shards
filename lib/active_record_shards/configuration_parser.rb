@@ -24,14 +24,14 @@ module ActiveRecordShards
       end
 
       conf.to_a.each do |env_name, env_config|
-        if replica_conf = env_config.delete('slave')
-          # TODO
-          env_config['replica'] = replica_conf
-        end
-
         if replica_conf = env_config.delete('replica')
           expand_child!(env_config, replica_conf)
           conf["#{env_name}_replica"] = replica_conf
+        end
+
+        if replica_conf = env_config.delete('slave')
+          # TODO
+          env_config['replica'] ||= replica_conf
         end
       end
 

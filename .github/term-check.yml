@@ -1,0 +1,7 @@
+ignore:
+  - lib/active_record_shards/association_collection_connection_selection.rb
+  - lib/active_record_shards/configuration_parser.rb
+  - lib/active_record_shards/default_slave_patches.rb
+  - lib/active_record_shards/model.rb
+  - lib/active_record_shards/shard_selection.rb
+  - lib/active_record_shards/tasks.rb

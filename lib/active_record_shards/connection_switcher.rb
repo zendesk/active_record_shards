@@ -121,9 +121,9 @@ module ActiveRecordShards
     end
 
     # just to ease the transition from replica to active_record_shards
-    alias_method :with_replica, :on_replica
-    alias_method :with_replica_if, :on_replica_if
-    alias_method :with_replica_unless, :on_replica_unless
+    alias_method :with_slave, :on_replica
+    alias_method :with_slave_if, :on_replica_if
+    alias_method :with_slave_unless, :on_replica_unless
 
     def on_cx_switch_block(which, force: false, construct_ro_scope: nil, &block)
       @disallow_replica ||= 0
@@ -182,13 +182,13 @@ module ActiveRecordShards
 
     def switch_connection(options)
       if options.any?
-        if options.key?(:slave)
-          # TODO
-          options[:replica] = options.delete(:slave)
-        end
-
         if options.key?(:replica)
           current_shard_selection.on_replica = options[:replica]
+        end
+
+        if options.key?(:slave)
+          # TODO
+          options[:replica] ||= options.delete(:slave)
         end
 
         if options.key?(:shard)
