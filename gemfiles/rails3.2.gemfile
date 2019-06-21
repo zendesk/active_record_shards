@@ -1,5 +1,0 @@
-eval_gemfile 'common.rb'
-
-gem 'activerecord', '~> 3.2.19'
-gem 'mysql2', '~> 0.3.0'
-gem 'test-unit-minitest'

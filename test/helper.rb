@@ -76,7 +76,7 @@ module SpecHelpers
     # Use a fresh connection handler
     ActiveRecord::Base.connection_handler = ActiveRecord::ConnectionAdapters::ConnectionHandler.new
 
-    if ActiveRecord::VERSION::MAJOR <= 4
+    if ActiveRecord::VERSION::MAJOR == 4
       # Clear out our own global state
       ActiveRecord::Base.send(:clear_specification_cache)
     end
@@ -98,13 +98,10 @@ module SpecHelpers
     migration_path = File.join(__dir__, "/", path)
     if ActiveRecord::VERSION::STRING >= "5.2.0"
       migrations = ActiveRecord::MigrationContext.new(migration_path).migrations
-      ActiveRecord::Migrator.new(direction, migrations, target_version)
-    elsif ActiveRecord::VERSION::MAJOR >= 4
-      migrations = ActiveRecord::Migrator.migrations(migration_path)
-      ActiveRecord::Migrator.new(direction, migrations, target_version)
     else
-      ActiveRecord::Migrator.new(direction, migration_path, target_version)
+      migrations = ActiveRecord::Migrator.migrations(migration_path)
     end
+    ActiveRecord::Migrator.new(direction, migrations, target_version)
   end
 end
 Minitest::Spec.include(SpecHelpers)

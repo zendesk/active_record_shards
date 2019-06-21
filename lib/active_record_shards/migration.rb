@@ -15,11 +15,7 @@ module ActiveRecord
       # Rails creates the internal tables on the unsharded DB. We make them
       # manually on the sharded DBs.
       ActiveRecord::Base.on_all_shards do
-        if ActiveRecord::VERSION::MAJOR >= 4
-          ActiveRecord::SchemaMigration.create_table
-        else
-          ActiveRecord::Base.connection.initialize_schema_migrations_table
-        end
+        ActiveRecord::SchemaMigration.create_table
         if ActiveRecord::VERSION::MAJOR >= 5
           ActiveRecord::InternalMetadata.create_table
         end

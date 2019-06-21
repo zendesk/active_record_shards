@@ -14,31 +14,19 @@ describe ActiveRecord::Migrator do
     it "makes meta tables" do
       ActiveRecord::Base.on_shard(nil) do
         refute table_exists?(:unsharded_table)
-        if ActiveRecord::VERSION::MAJOR >= 4
-          refute ActiveRecord::SchemaMigration.table_exists?
-        else
-          refute table_exists?(:schema_migrations)
-        end
+        refute ActiveRecord::SchemaMigration.table_exists?
       end
 
       ActiveRecord::Base.on_all_shards do
         refute table_exists?(:sharded_table)
-        if ActiveRecord::VERSION::MAJOR >= 4
-          refute ActiveRecord::SchemaMigration.table_exists?
-        else
-          refute table_exists?(:schema_migrations)
-        end
+        refute ActiveRecord::SchemaMigration.table_exists?
       end
 
       migrator(:up, 'separate_migrations').migrate
 
       ActiveRecord::Base.on_shard(nil) do
         assert table_exists?(:unsharded_table)
-        if ActiveRecord::VERSION::MAJOR >= 4
-          assert ActiveRecord::SchemaMigration.table_exists?
-        else
-          assert table_exists?(:schema_migrations)
-        end
+        assert ActiveRecord::SchemaMigration.table_exists?
         if ActiveRecord::VERSION::MAJOR >= 5
           assert ActiveRecord::InternalMetadata.table_exists?
         end
@@ -48,11 +36,7 @@ describe ActiveRecord::Migrator do
 
       ActiveRecord::Base.on_all_shards do
         assert table_exists?(:sharded_table)
-        if ActiveRecord::VERSION::MAJOR >= 4
-          assert ActiveRecord::SchemaMigration.table_exists?
-        else
-          assert table_exists?(:schema_migrations)
-        end
+        assert ActiveRecord::SchemaMigration.table_exists?
         if ActiveRecord::VERSION::MAJOR >= 5
           assert ActiveRecord::InternalMetadata.table_exists?
         end
