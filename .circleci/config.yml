@@ -3,7 +3,7 @@ version: 2
 test: &test
   steps:
     - checkout
-    - run: sudo apt install mysql-client || sudo apt-get update && sudo apt install mysql-client
+    - run: sudo apt install default-mysql-client || sudo apt-get update && sudo apt install default-mysql-client
     - run: bundle install
     - run: rake test
 

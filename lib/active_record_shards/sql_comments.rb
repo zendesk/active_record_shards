@@ -10,7 +10,11 @@ module ActiveRecordShards
     end
 
     def self.enable
-      ActiveRecord::Base.on_shard(nil) { ActiveRecord::Base.connection.class.prepend(Methods) }
+      ActiveRecord::Base.on_slave do
+        ActiveRecord::Base.on_shard(nil) do
+          ActiveRecord::Base.connection.class.prepend(Methods)
+        end
+      end
     end
   end
 end

@@ -4,6 +4,7 @@ module ActiveRecordShards
     def connection_pool_name # :nodoc:
       name = current_shard_selection.shard_name(self)
 
+      # e.g. if "production_slave" is not defined in `Configuration`, fall back to "production"
       if configurations[name].nil? && on_slave?
         current_shard_selection.shard_name(self, false)
       else
