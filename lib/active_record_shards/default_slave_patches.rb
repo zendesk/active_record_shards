@@ -83,9 +83,9 @@ module ActiveRecordShards
       end
     end
 
-    def on_slave_unless_tx
+    def on_slave_unless_tx(&block)
       if on_slave_by_default? && !Thread.current[:_active_record_shards_slave_off]
-        on_slave { yield }
+        on_slave(&block)
       else
         yield
       end
@@ -103,8 +103,8 @@ module ActiveRecordShards
         end
       end
 
-      def on_slave_unless_tx
-        @klass.on_slave_unless_tx { yield }
+      def on_slave_unless_tx(&block)
+        @klass.on_slave_unless_tx(&block)
       end
     end
 

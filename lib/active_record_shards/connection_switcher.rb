@@ -31,9 +31,9 @@ module ActiveRecordShards
       switch_connection(old_options)
     end
 
-    def on_first_shard
+    def on_first_shard(&block)
       shard_name = shard_names.first
-      on_shard(shard_name) { yield }
+      on_shard(shard_name, &block)
     end
 
     def shards
@@ -170,9 +170,9 @@ module ActiveRecordShards
       ActiveRecordShards.rails_env
     end
 
-    def with_default_shard
+    def with_default_shard(&block)
       if is_sharded? && current_shard_id.nil? && table_name != ActiveRecord::SchemaMigration.table_name
-        on_first_shard { yield }
+        on_first_shard(&block)
       else
         yield
       end
