@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 module ActiveRecordShards
   module DefaultSlavePatches
-    def self.wrap_method_in_on_slave(class_method, base, method, force_on_slave = false)
+    def self.wrap_method_in_on_slave(class_method, base, method, force_on_slave: false)
       base_methods =
         if class_method
           base.methods + base.private_methods
@@ -69,7 +69,7 @@ module ActiveRecordShards
 
     def self.extended(base)
       CLASS_SLAVE_METHODS.each { |m| ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(true, base, m) }
-      CLASS_FORCE_SLAVE_METHODS.each { |m| ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(true, base, m, true) }
+      CLASS_FORCE_SLAVE_METHODS.each { |m| ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(true, base, m, force_on_slave: true) }
 
       base.class_eval do
         include InstanceMethods
@@ -105,10 +105,10 @@ module ActiveRecordShards
 
         if ActiveRecord::VERSION::MAJOR == 4
           # `where` and `having` clauses call `create_binds`, which will use the master connection
-          ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(false, base, :create_binds, true)
+          ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(false, base, :create_binds, force_on_slave: true)
         end
 
-        ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(false, base, :to_sql, true)
+        ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(false, base, :to_sql, force_on_slave: true)
       end
 
       def on_slave_unless_tx(&block)
