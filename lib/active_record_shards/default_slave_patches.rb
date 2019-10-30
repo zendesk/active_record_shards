@@ -60,6 +60,10 @@ module ActiveRecordShards
 
     CLASS_FORCE_SLAVE_METHODS = [
       :columns,
+      :replace_bind_variable,
+      :replace_bind_variables,
+      :sanitize_sql_array,
+      :sanitize_sql_hash_for_assignment,
       :table_exists?
     ].freeze
 
@@ -103,6 +107,8 @@ module ActiveRecordShards
           # `where` and `having` clauses call `create_binds`, which will use the master connection
           ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(false, base, :create_binds, true)
         end
+
+        ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(false, base, :to_sql, true)
       end
 
       def on_slave_unless_tx(&block)
