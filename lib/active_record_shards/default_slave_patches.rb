@@ -48,8 +48,20 @@ module ActiveRecordShards
       end
     end
 
-    CLASS_SLAVE_METHODS = [:find_by_sql, :count_by_sql, :calculate, :find_one, :find_some, :find_every, :exists?].freeze
-    CLASS_FORCE_SLAVE_METHODS = [:columns, :table_exists?].freeze
+    CLASS_SLAVE_METHODS = [
+      :calculate,
+      :count_by_sql,
+      :exists?,
+      :find_by_sql,
+      :find_every,
+      :find_one,
+      :find_some
+    ].freeze
+
+    CLASS_FORCE_SLAVE_METHODS = [
+      :columns,
+      :table_exists?
+    ].freeze
 
     def self.extended(base)
       CLASS_SLAVE_METHODS.each { |m| ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(true, base, m) }
