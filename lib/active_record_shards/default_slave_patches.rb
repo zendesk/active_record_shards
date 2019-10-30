@@ -101,7 +101,7 @@ module ActiveRecordShards
 
         if ActiveRecord::VERSION::MAJOR == 4
           # `where` and `having` clauses call `create_binds`, which will use the master connection
-          ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(false, base, :create_binds)
+          ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(false, base, :create_binds, true)
         end
       end
 
