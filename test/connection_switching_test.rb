@@ -256,6 +256,22 @@ describe "connection switching" do
     end
   end
 
+  describe ".where.to_sql" do
+    it "doesn't use the master (for escaping)" do
+      with_unsharded_master_unavailable do
+        # This will (on_slave) load the schema for the where statments to bind
+        # with. We could have DefaultSlavePatches wrap load_schema, but this
+        # caused the Phenix test setup gem to have bootstrapping issues.
+        Account.columns
+
+        Account.all.to_sql
+        Account.where('id = 1').to_sql
+        Account.where('id = ?', 1).to_sql
+        Account.where(id: 1).to_sql
+      end
+    end
+  end
+
   describe "ActiveRecord::Base.table_exists?" do
     before do
       ActiveRecord::Base.default_shard = nil
