@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 module ActiveRecordShards
   module DefaultSlavePatches
-    def self.wrap_method_in_on_slave(class_method, base, method)
+    def self.wrap_method_in_on_slave(class_method, base, method, force_on_slave: false)
       base_methods =
         if class_method
           base.methods + base.private_methods
@@ -11,10 +11,12 @@ module ActiveRecordShards
 
       return unless base_methods.include?(method)
       _, method, punctuation = method.to_s.match(/^(.*?)([\?\!]?)$/).to_a
+      # _ALWAYS_ on slave, or only for on `on_slave_by_default = true` models?
+      wrapper = force_on_slave ? 'force_on_slave' : 'on_slave_unless_tx'
       base.class_eval <<-RUBY, __FILE__, __LINE__ + 1
         #{class_method ? 'class << self' : ''}
           def #{method}_with_default_slave#{punctuation}(*args, &block)
-            on_slave_unless_tx do
+            #{wrapper} do
               #{method}_without_default_slave#{punctuation}(*args, &block)
             end
           end
@@ -23,18 +25,6 @@ module ActiveRecordShards
           alias_method :#{method}#{punctuation}, :#{method}_with_default_slave#{punctuation}
         #{class_method ? 'end' : ''}
       RUBY
-    end
-
-    def columns_with_force_slave(*args, &block)
-      on_cx_switch_block(:slave, construct_ro_scope: false, force: true) do
-        columns_without_force_slave(*args, &block)
-      end
-    end
-
-    def table_exists_with_force_slave?(*args, &block)
-      on_cx_switch_block(:slave, construct_ro_scope: false, force: true) do
-        table_exists_without_force_slave?(*args, &block)
-      end
     end
 
     def transaction_with_slave_off(*args, &block)
@@ -58,21 +48,33 @@ module ActiveRecordShards
       end
     end
 
-    CLASS_SLAVE_METHODS = [:find_by_sql, :count_by_sql, :calculate, :find_one, :find_some, :find_every, :exists?].freeze
+    CLASS_SLAVE_METHODS = [
+      :calculate,
+      :count_by_sql,
+      :exists?,
+      :find_by_sql,
+      :find_every,
+      :find_one,
+      :find_some
+    ].freeze
+
+    CLASS_FORCE_SLAVE_METHODS = [
+      :columns,
+      :replace_bind_variable,
+      :replace_bind_variables,
+      :sanitize_sql_array,
+      :sanitize_sql_hash_for_assignment,
+      :table_exists?
+    ].freeze
 
     def self.extended(base)
       CLASS_SLAVE_METHODS.each { |m| ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(true, base, m) }
+      CLASS_FORCE_SLAVE_METHODS.each { |m| ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(true, base, m, force_on_slave: true) }
 
       base.class_eval do
         include InstanceMethods
 
         class << self
-          alias_method :columns_without_force_slave, :columns
-          alias_method :columns, :columns_with_force_slave
-
-          alias_method :table_exists_without_force_slave?, :table_exists?
-          alias_method :table_exists?, :table_exists_with_force_slave?
-
           alias_method :transaction_without_slave_off, :transaction
           alias_method :transaction, :transaction_with_slave_off
         end
@@ -91,6 +93,10 @@ module ActiveRecordShards
       end
     end
 
+    def force_on_slave(&block)
+      on_cx_switch_block(:slave, construct_ro_scope: false, force: true, &block)
+    end
+
     module ActiveRelationPatches
       def self.included(base)
         [:calculate, :exists?, :pluck, :load].each do |m|
@@ -99,8 +105,10 @@ module ActiveRecordShards
 
         if ActiveRecord::VERSION::MAJOR == 4
           # `where` and `having` clauses call `create_binds`, which will use the master connection
-          ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(false, base, :create_binds)
+          ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(false, base, :create_binds, force_on_slave: true)
         end
+
+        ActiveRecordShards::DefaultSlavePatches.wrap_method_in_on_slave(false, base, :to_sql, force_on_slave: true)
       end
 
       def on_slave_unless_tx(&block)

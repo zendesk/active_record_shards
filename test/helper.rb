@@ -69,6 +69,30 @@ module ConnectionSwitchingSpecHelpers
 end
 
 module SpecHelpers
+  # Verifies that a block of code is not using the master by poisoning that
+  # master's connection information.
+  def with_unsharded_master_unavailable
+    db_config = ActiveRecord::Base.configurations.fetch(ActiveRecordShards.rails_env)
+    previous = db_config.slice('host', 'port')
+    # The hostname is so exception messages are clear, the port causes an immediation rejection instead of a timeout
+    db_config['host'] = 'unsharded-master-unavailable-test.localhost'
+    db_config['port'] = 1
+
+    ActiveRecord::Base.send(:clear_specification_cache) if ActiveRecord::VERSION::MAJOR == 4
+    # Force the ConnectionHandler to replace its instance of the "test"
+    # ConnectionPool. Despite naming, these methods only deal with pools.
+    ActiveRecord::Base.connection_handler.remove_connection(Account)
+    ActiveRecord::Base.establish_connection(::RAILS_ENV.to_sym)
+
+    yield
+
+    db_config.merge!(previous)
+    ActiveRecord::Base.send(:clear_specification_cache) if ActiveRecord::VERSION::MAJOR == 4
+
+    ActiveRecord::Base.connection_handler.remove_connection(Account)
+    ActiveRecord::Base.establish_connection(::RAILS_ENV.to_sym)
+  end
+
   def clear_global_connection_handler_state
     # Close active connections
     ActiveRecord::Base.connection_handler.clear_all_connections!
