@@ -67,14 +67,14 @@ describe "Database rake tasks" do
     it "does not fail when db is missing" do
       rake('db:create')
       rake('db:drop')
-      show_databases(config).wont_include master_name
+      _(show_databases(config)).wont_include master_name
     end
 
     it "fails loudly when unknown error occurs" do
       ActiveRecordShards::Tasks.stubs(:root_connection).raises(ArgumentError)
       out = capture_stderr { rake('db:drop') }
-      out.must_include "Couldn't drop "
-      out.must_include "test/helper.rb"
+      _(out).must_include "Couldn't drop "
+      _(out).must_include "test/helper.rb"
     end
   end
 

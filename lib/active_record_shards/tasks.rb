@@ -8,7 +8,7 @@ end
 namespace :db do
   desc 'Drops the database for the current RAILS_ENV including shards'
   task drop: :load_config do
-    ActiveRecord::Base.configurations.each do |key, conf|
+    ActiveRecord::Base.configurations.to_h.each do |key, conf|
       next if !key.starts_with?(ActiveRecordShards.rails_env) || key.ends_with?("_slave")
       begin
         ActiveRecordShards::Tasks.root_connection(conf).drop_database(conf['database'])
@@ -28,7 +28,7 @@ namespace :db do
 
   desc "Create the database defined in config/database.yml for the current RAILS_ENV including shards"
   task create: :load_config do
-    ActiveRecord::Base.configurations.each do |key, conf|
+    ActiveRecord::Base.configurations.to_h.each do |key, conf|
       next if !key.starts_with?(ActiveRecordShards.rails_env) || key.ends_with?("_slave")
       begin
         # MysqlAdapter takes charset instead of encoding in Rails 4.2 or greater
@@ -52,7 +52,10 @@ namespace :db do
   task abort_if_pending_migrations: :environment do
     if defined? ActiveRecord
       pending_migrations =
-        if ActiveRecord::VERSION::STRING >= "5.2.0"
+        if ActiveRecord::VERSION::MAJOR >= 6
+          migrations = ActiveRecord::MigrationContext.new(ActiveRecord::Migrator.migrations_paths, ActiveRecord::SchemaMigration).migrations
+          ActiveRecord::Migrator.new(:up, migrations, ActiveRecord::SchemaMigration).pending_migrations
+        elsif ActiveRecord::VERSION::STRING >= "5.2.0"
           migrations = ActiveRecord::MigrationContext.new(ActiveRecord::Migrator.migrations_paths).migrations
           ActiveRecord::Migrator.new(:up, migrations).pending_migrations
         else

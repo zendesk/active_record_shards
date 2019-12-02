@@ -6,7 +6,7 @@ module ActiveRecordShards
     module_function
 
     def explode(conf)
-      conf = conf.deep_dup
+      conf = conf.to_h.deep_dup
 
       conf.to_a.each do |env_name, env_config|
         next unless shards = env_config.delete('shards')

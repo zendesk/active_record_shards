@@ -72,7 +72,7 @@ module SpecHelpers
   # Verifies that a block of code is not using the master by poisoning that
   # master's connection information.
   def with_unsharded_master_unavailable
-    db_config = ActiveRecord::Base.configurations.fetch(ActiveRecordShards.rails_env)
+    db_config = ActiveRecord::Base.configurations.to_h.fetch(ActiveRecordShards.rails_env)
     previous = db_config.slice('host', 'port')
     # The hostname is so exception messages are clear, the port causes an immediation rejection instead of a timeout
     db_config['host'] = 'unsharded-master-unavailable-test.localhost'
@@ -107,7 +107,7 @@ module SpecHelpers
   end
 
   def table_exists?(name)
-    if ActiveRecord::VERSION::MAJOR == 5
+    if ActiveRecord::VERSION::MAJOR >= 5
       ActiveRecord::Base.connection.data_source_exists?(name)
     else
       ActiveRecord::Base.connection.table_exists?(name)
@@ -120,12 +120,16 @@ module SpecHelpers
 
   def migrator(direction = :up, path = 'migrations', target_version = nil)
     migration_path = File.join(__dir__, "/", path)
-    if ActiveRecord::VERSION::STRING >= "5.2.0"
+    if ActiveRecord::VERSION::MAJOR >= 6
+      migrations = ActiveRecord::MigrationContext.new(migration_path, ActiveRecord::SchemaMigration).migrations
+      ActiveRecord::Migrator.new(direction, migrations, ActiveRecord::SchemaMigration, target_version)
+    elsif ActiveRecord::VERSION::STRING >= "5.2.0"
       migrations = ActiveRecord::MigrationContext.new(migration_path).migrations
+      ActiveRecord::Migrator.new(direction, migrations, target_version)
     else
       migrations = ActiveRecord::Migrator.migrations(migration_path)
+      ActiveRecord::Migrator.new(direction, migrations, target_version)
     end
-    ActiveRecord::Migrator.new(direction, migrations, target_version)
   end
 end
 Minitest::Spec.include(SpecHelpers)
