@@ -15,10 +15,10 @@ Gem::Specification.new "active_record_shards", "3.15.3" do |s|
   s.add_development_dependency("mysql2")
   s.add_development_dependency("bump")
   s.add_development_dependency("rubocop", "0.50.0")
-  s.add_development_dependency("minitest")
+  s.add_development_dependency("minitest", ">= 5.10.0")
   s.add_development_dependency("minitest-rg")
   s.add_development_dependency("mocha", ">= 1.4.0")
-  s.add_development_dependency("phenix", ">= 0.2.0")
+  s.add_development_dependency("phenix", ">= 0.6.0")
 
   s.files = Dir["lib/**/*"] + ["README.md"]
 end
