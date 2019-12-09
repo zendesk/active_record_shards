@@ -1,6 +1,11 @@
+inherit_from: .rubocop_todo.yml
+
+require:
+  - rubocop-minitest
+  - rubocop-performance
+
 AllCops:
   CacheRootDirectory: tmp
-  DisplayCopNames: true
   Exclude:
     - .git/**/*
     - gemfiles/vendor/**/*
@@ -9,11 +14,12 @@ AllCops:
 
 # Configured cops
 
-Layout/IndentHash:
+Layout/FirstHashElementIndentation:
   EnforcedStyle: consistent
 
-Lint/EndAlignment:
-  Enabled: variable
+Layout/HashAlignment:
+  EnforcedHashRocketStyle:
+    - table
 
 Naming/FileName:
   Exclude:
@@ -36,34 +42,13 @@ Style/FormatString:
 Layout/EmptyLineAfterMagicComment:
   Enabled: false
 
-Layout/IndentHeredoc:
+Layout/HeredocIndentation:
   Enabled: false
 
 Lint/AssignmentInCondition:
   Enabled: false
 
-Lint/RescueWithoutErrorClass:
-  Enabled: false
-
-Metrics/AbcSize:
-  Enabled: false
-
-Metrics/BlockLength:
-  Enabled: false
-
-Metrics/CyclomaticComplexity:
-  Enabled: false
-
-Metrics/LineLength:
-  Enabled: false
-
-Metrics/MethodLength:
-  Enabled: false
-
-Metrics/ModuleLength:
-  Enabled: false
-
-Metrics/PerceivedComplexity:
+Metrics:
   Enabled: false
 
 Style/ClassVars:
@@ -76,6 +61,9 @@ Style/Documentation:
   Enabled: false
 
 Style/DoubleNegation:
+  Enabled: false
+
+Style/FormatStringToken:
   Enabled: false
 
 Style/FrozenStringLiteralComment:
@@ -91,6 +79,9 @@ Style/NumericLiterals:
   Enabled: false
 
 Style/RedundantFreeze:
+  Enabled: false
+
+Style/RescueStandardError:
   Enabled: false
 
 Style/StringLiterals:

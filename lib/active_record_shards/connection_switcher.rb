@@ -198,7 +198,7 @@ module ActiveRecordShards
         @which = which
       end
 
-      def method_missing(method, *args, &block) # rubocop:disable Style/MethodMissing
+      def method_missing(method, *args, &block) # rubocop:disable Style/MethodMissingSuper, Style/MissingRespondToMissing
         @target.on_master_or_slave(@which) { @target.send(method, *args, &block) }
       end
     end
