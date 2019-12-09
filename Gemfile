@@ -1,1 +1,1 @@
-eval_gemfile 'gemfiles/rails5.2.gemfile'
+eval_gemfile 'gemfiles/rails6.0.gemfile'

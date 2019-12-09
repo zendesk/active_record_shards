@@ -8,8 +8,8 @@ Gem::Specification.new "active_record_shards", "3.15.3" do |s|
 
   s.required_ruby_version = ">= 2.3"
 
-  s.add_runtime_dependency("activerecord", ">= 4.2", "< 6.0")
-  s.add_runtime_dependency("activesupport", ">= 4.2", "< 6.0")
+  s.add_runtime_dependency("activerecord", ">= 4.2", "< 6.1")
+  s.add_runtime_dependency("activesupport", ">= 4.2", "< 6.1")
 
   s.add_development_dependency("rake", '~> 12.0')
   s.add_development_dependency("mysql2")

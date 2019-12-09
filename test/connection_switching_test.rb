@@ -369,14 +369,23 @@ describe "connection switching" do
   describe "slave driving" do
     describe "without slave configuration" do
       before do
-        @saved_config = ActiveRecord::Base.configurations.delete('test_slave')
+        if ActiveRecord::VERSION::MAJOR >= 6
+          @saved_config = ActiveRecord::Base.configurations.find_db_config('test_slave')
+          ActiveRecord::Base.configurations.configurations.delete(@saved_config)
+        else
+          @saved_config = ActiveRecord::Base.configurations.delete('test_slave')
+        end
         Thread.current[:shard_selection] = nil # drop caches
         clear_connection_pool
         ActiveRecord::Base.establish_connection(:test)
       end
 
       after do
-        ActiveRecord::Base.configurations['test_slave'] = @saved_config
+        if ActiveRecord::VERSION::MAJOR >= 6
+          ActiveRecord::Base.configurations.configurations << @saved_config
+        else
+          ActiveRecord::Base.configurations['test_slave'] = @saved_config
+        end
         Thread.current[:shard_selection] = nil # drop caches
       end
 
