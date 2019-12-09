@@ -117,15 +117,15 @@ describe ActiveRecord::Migrator do
 
   describe "#shard_status" do
     it "shows nothing if everything is ok" do
-      _(ActiveRecord::Migrator.shard_status([1])).must_equal([{}, {}])
+      assert_equal [{}, {}], ActiveRecord::Migrator.shard_status([1])
     end
 
     it "shows missing migrations" do
-      _(ActiveRecord::Migrator.shard_status([])).must_equal([{}, { nil => [1], 0 => [1], 1 => [1] }])
+      assert_equal [{}, { nil => [1], 0 => [1], 1 => [1] }], ActiveRecord::Migrator.shard_status([])
     end
 
     it "shows pending migrations" do
-      _(ActiveRecord::Migrator.shard_status([1, 2])).must_equal([{ nil => [2], 0 => [2], 1 => [2] }, {}])
+      assert_equal [{ nil => [2], 0 => [2], 1 => [2] }, {}], ActiveRecord::Migrator.shard_status([1, 2])
     end
   end
 
