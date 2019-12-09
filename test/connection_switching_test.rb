@@ -419,6 +419,19 @@ describe "connection switching" do
         assert_using_master_db
       end
 
+      it "supports inclusive language aliases" do
+        assert_using_master_db
+        assert_using_master_db
+
+        ActiveRecord::Base.on_replica do
+          assert_using_slave_db
+          assert_using_slave_db
+        end
+
+        assert_using_master_db
+        assert_using_master_db
+      end
+
       it "support conditional methods" do
         assert_using_master_db
 

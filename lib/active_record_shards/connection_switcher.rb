@@ -100,6 +100,11 @@ module ActiveRecordShards
     alias_method :with_slave_if, :on_slave_if
     alias_method :with_slave_unless, :on_slave_unless
 
+    # inclusive language alias
+    alias_method :on_replica, :on_slave
+    alias_method :on_replica_if, :on_slave_if
+    alias_method :on_replica_unless, :on_slave_unless
+
     def on_cx_switch_block(which, force: false, construct_ro_scope: nil, &block)
       @disallow_slave ||= 0
       @disallow_slave += 1 if which == :master
