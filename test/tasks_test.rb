@@ -67,14 +67,14 @@ describe "Database rake tasks" do
     it "does not fail when db is missing" do
       rake('db:create')
       rake('db:drop')
-      _(show_databases(config)).wont_include master_name
+      refute_includes(show_databases(config), master_name)
     end
 
     it "fails loudly when unknown error occurs" do
       ActiveRecordShards::Tasks.stubs(:root_connection).raises(ArgumentError)
       out = capture_stderr { rake('db:drop') }
-      _(out).must_include "Couldn't drop "
-      _(out).must_include "test/helper.rb"
+      assert_includes(out, "Couldn't drop ")
+      assert_includes(out, "test/helper.rb")
     end
   end
 
@@ -86,7 +86,7 @@ describe "Database rake tasks" do
     it "passes when there is no pending migrations" do
       ActiveRecord::Migrator.any_instance.stubs(:pending_migrations).returns([])
       out = capture_stderr { rake('db:abort_if_pending_migrations') }
-      out.must_be_empty
+      assert_empty out
     end
 
     it "fails when migrations are pending" do
@@ -98,7 +98,7 @@ describe "Database rake tasks" do
           ""
         end
       end
-      out.must_match(/You have \d+ pending migrations:/)
+      assert_match(/You have \d+ pending migrations:/, out)
     end
   end
 end
