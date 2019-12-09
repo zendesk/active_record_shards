@@ -10,6 +10,7 @@ module ActiveRecordShards
         end
 
       return unless base_methods.include?(method)
+
       _, method, punctuation = method.to_s.match(/^(.*?)([\?\!]?)$/).to_a
       # _ALWAYS_ on slave, or only for on `on_slave_by_default = true` models?
       wrapper = force_on_slave ? 'force_on_slave' : 'on_slave_unless_tx'

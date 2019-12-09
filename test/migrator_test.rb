@@ -104,6 +104,7 @@ describe ActiveRecord::Migrator do
       unless e.message.include?("ERROR_IN_MIGRATION")
         raise e
       end
+
       # after first fail, should still be pending
       assert failure_migration_pending?('failure_migration')
       retry

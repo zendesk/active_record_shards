@@ -6,6 +6,7 @@ module ActiveRecordShards
       if self != ActiveRecord::Base && self != base_class
         raise "You should only call not_sharded on direct descendants of ActiveRecord::Base"
       end
+
       self.sharded = false
     end
 

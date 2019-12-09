@@ -11,16 +11,16 @@ Gem::Specification.new "active_record_shards", "3.15.3" do |s|
   s.add_runtime_dependency("activerecord", ">= 4.2", "< 6.1")
   s.add_runtime_dependency("activesupport", ">= 4.2", "< 6.1")
 
-  s.add_development_dependency("rake", '~> 12.0')
-  s.add_development_dependency("mysql2")
   s.add_development_dependency("bump")
-  s.add_development_dependency("rubocop", "~> 0.77.0")
-  s.add_development_dependency("rubocop-minitest", "~> 0.5.0")
-  s.add_development_dependency("rubocop-performance", "~> 1.5.1")
   s.add_development_dependency("minitest", ">= 5.10.0")
   s.add_development_dependency("minitest-rg")
   s.add_development_dependency("mocha", ">= 1.4.0")
+  s.add_development_dependency("mysql2")
   s.add_development_dependency("phenix", ">= 0.6.0")
+  s.add_development_dependency("rake", '~> 12.0')
+  s.add_development_dependency("rubocop", "~> 0.77.0")
+  s.add_development_dependency("rubocop-minitest", "~> 0.5.0")
+  s.add_development_dependency("rubocop-performance", "~> 1.5.1")
 
   s.files = Dir["lib/**/*"] + ["README.md"]
 end
