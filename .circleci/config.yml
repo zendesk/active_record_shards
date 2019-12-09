@@ -108,6 +108,22 @@ jobs:
       - BUNDLE_GEMFILE: gemfiles/rails5.2.gemfile
     <<: *test
 
+  # Rails 6.0
+  ruby-2.5-rails-6.0-test:
+    docker:
+      - image: circleci/ruby:2.5
+      - image: circleci/mysql:5.7-ram
+    environment:
+      - BUNDLE_GEMFILE: gemfiles/rails6.0.gemfile
+    <<: *test
+  ruby-2.6-rails-6.0-test:
+    docker:
+      - image: circleci/ruby:2.6
+      - image: circleci/mysql:5.7-ram
+    environment:
+      - BUNDLE_GEMFILE: gemfiles/rails6.0.gemfile
+    <<: *test
+
   # Rubocop
   rubocop:
     docker:
@@ -139,3 +155,6 @@ workflows:
       - ruby-2.4-rails-5.2-test
       - ruby-2.5-rails-5.2-test
       - ruby-2.6-rails-5.2-test
+
+      - ruby-2.5-rails-6.0-test
+      - ruby-2.6-rails-6.0-test
