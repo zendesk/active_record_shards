@@ -40,9 +40,6 @@ Style/FormatString:
 Layout/EmptyLineAfterMagicComment:
   Enabled: false
 
-Layout/HeredocIndentation:
-  Enabled: false
-
 Lint/AssignmentInCondition:
   Enabled: false
 
