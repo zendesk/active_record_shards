@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'bundler/setup'
 require 'minitest/autorun'
 require 'minitest/rg'
@@ -14,7 +15,7 @@ require 'active_record_shards'
 require 'logger'
 require 'phenix'
 
-RAILS_ENV = "test".freeze
+RAILS_ENV = "test"
 
 ActiveRecord::Base.logger = Logger.new(__dir__ + "/test.log")
 ActiveSupport.test_order = :sorted if ActiveSupport.respond_to?(:test_order=)

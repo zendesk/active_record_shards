@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'active_record_shards'
 
 %w[db:drop db:create db:abort_if_pending_migrations db:reset db:test:purge].each do |name|
@@ -10,13 +11,14 @@ namespace :db do
   task drop: :load_config do
     ActiveRecord::Base.configurations.to_h.each do |key, conf|
       next if !key.starts_with?(ActiveRecordShards.rails_env) || key.ends_with?("_slave")
+
       begin
         ActiveRecordShards::Tasks.root_connection(conf).drop_database(conf['database'])
       # rescue ActiveRecord::NoDatabaseError # TODO: exists in AR but never is raised here ...
       #   $stderr.puts "Database '#{conf['database']}' does not exist"
-      rescue StandardError => error
-        $stderr.puts error, *error.backtrace
-        $stderr.puts "Couldn't drop #{conf['database']}"
+      rescue StandardError => e
+        warn e, *e.backtrace
+        warn "Couldn't drop #{conf['database']}"
       end
     end
   end
@@ -30,6 +32,7 @@ namespace :db do
   task create: :load_config do
     ActiveRecord::Base.configurations.to_h.each do |key, conf|
       next if !key.starts_with?(ActiveRecordShards.rails_env) || key.ends_with?("_slave")
+
       begin
         # MysqlAdapter takes charset instead of encoding in Rails 4.2 or greater
         # https://github.com/rails/rails/blob/4-2-stable/activerecord/lib/active_record/tasks/mysql_database_tasks.rb#L85-L96
@@ -37,11 +40,11 @@ namespace :db do
         symbolized_configuration[:charset] = symbolized_configuration[:encoding]
 
         ActiveRecordShards::Tasks.root_connection(conf).create_database(conf['database'], symbolized_configuration)
-      rescue ActiveRecord::StatementInvalid => ex
-        if ex.message.include?('database exists')
+      rescue ActiveRecord::StatementInvalid => e
+        if e.message.include?('database exists')
           puts "#{conf['database']} already exists"
         else
-          raise ex
+          raise e
         end
       end
     end
@@ -63,9 +66,9 @@ namespace :db do
         end
 
       if pending_migrations.any?
-        $stderr.puts "You have #{pending_migrations.size} pending migrations:"
+        warn "You have #{pending_migrations.size} pending migrations:"
         pending_migrations.each do |pending_migration|
-          $stderr.puts '  %4d %s' % [pending_migration.version, pending_migration.name]
+          warn '  %4d %s' % [pending_migration.version, pending_migration.name]
         end
         abort %(Run "rake db:migrate" to update your database then try again.)
       end

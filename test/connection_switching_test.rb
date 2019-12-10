@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require_relative 'helper'
 
 describe "connection switching" do
@@ -192,18 +193,18 @@ describe "connection switching" do
         Account.on_slave do
           ActiveRecord::Base.connection.execute("alter table accounts drop column foo")
           Account.reset_column_information
-          refute Account.column_names.include?('foo')
+          refute_includes(Account.column_names, 'foo')
         end
       end
 
       it "use the non-sharded slave connection" do
         assert_using_database('ars_test', Account)
-        assert Account.column_names.include?('foo')
+        assert_includes(Account.column_names, 'foo')
       end
 
       it "ignores master/transactions" do
         assert_using_database('ars_test', Account)
-        Account.on_master { assert Account.column_names.include?('foo') }
+        Account.on_master { assert_includes(Account.column_names, 'foo') }
       end
     end
 
@@ -227,7 +228,7 @@ describe "connection switching" do
       end
 
       it "gets columns from the slave shard" do
-        assert Ticket.column_names.include?('foo')
+        assert_includes(Ticket.column_names, 'foo')
       end
 
       it "have correct from_shard" do
@@ -612,7 +613,7 @@ describe "connection switching" do
 
         it "will :include things via has_and_belongs associations correctly" do
           a = Account.where(id: 1001).includes(:people).first
-          refute a.people.empty?
+          refute_empty(a.people)
           assert_equal 'slave person', a.people.first.name
         end
 

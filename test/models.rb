@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 class Account < ActiveRecord::Base
   # attributes: id, name, updated_at, created_at
   not_sharded

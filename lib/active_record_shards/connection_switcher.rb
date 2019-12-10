@@ -1,9 +1,10 @@
 # frozen_string_literal: true
+
 require 'active_record_shards/shard_support'
 
 module ActiveRecordShards
   module ConnectionSwitcher
-    SHARD_NAMES_CONFIG_KEY = 'shard_names'.freeze
+    SHARD_NAMES_CONFIG_KEY = 'shard_names'
 
     def self.extended(base)
       if ActiveRecord::VERSION::MAJOR >= 5
@@ -144,6 +145,7 @@ module ActiveRecordShards
       unless config.fetch(SHARD_NAMES_CONFIG_KEY, []).all? { |shard_name| shard_name.is_a?(Integer) }
         raise "All shard names must be integers: #{config[SHARD_NAMES_CONFIG_KEY].inspect}."
       end
+
       config[SHARD_NAMES_CONFIG_KEY] || []
     end
 
@@ -159,6 +161,7 @@ module ActiveRecordShards
           unless configurations[shard_env]
             raise "Did not find #{shard_env} in configurations, did you forget to add it to your database config? (configurations: #{configurations.keys.inspect})"
           end
+
           current_shard_selection.shard = options[:shard]
         end
 
@@ -198,7 +201,7 @@ module ActiveRecordShards
         @which = which
       end
 
-      def method_missing(method, *args, &block) # rubocop:disable Style/MethodMissing
+      def method_missing(method, *args, &block) # rubocop:disable Style/MethodMissingSuper, Style/MissingRespondToMissing
         @target.on_master_or_slave(@which) { @target.send(method, *args, &block) }
       end
     end

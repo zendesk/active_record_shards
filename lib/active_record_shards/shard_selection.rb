@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module ActiveRecordShards
   class ShardSelection
     NO_SHARD = :_no_shard
@@ -46,7 +47,7 @@ module ActiveRecordShards
         end
       end
 
-      PRIMARY = "primary".freeze
+      PRIMARY = "primary"
       def resolve_connection_name(sharded:, configurations:)
         resolved_shard = sharded ? shard : nil
         env = ActiveRecordShards.rails_env

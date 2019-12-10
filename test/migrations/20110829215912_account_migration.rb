@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 class AccountMigration < BaseMigration
   shard :none
 

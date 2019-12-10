@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require_relative 'helper'
 
 describe ActiveRecord::Migrator do
@@ -100,10 +101,11 @@ describe ActiveRecord::Migrator do
     assert failure_migration_pending?('failure_migration')
     begin
       migrator(:up, 'failure_migration').migrate
-    rescue => e
+    rescue StandardError => e
       unless e.message.include?("ERROR_IN_MIGRATION")
         raise e
       end
+
       # after first fail, should still be pending
       assert failure_migration_pending?('failure_migration')
       retry

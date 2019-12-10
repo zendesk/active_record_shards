@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require_relative 'helper'
 
 # ActiveRecordShards overrides some of the ActiveRecord tasks, so
