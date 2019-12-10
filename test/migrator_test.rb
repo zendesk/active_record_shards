@@ -100,7 +100,7 @@ describe ActiveRecord::Migrator do
     assert failure_migration_pending?('failure_migration')
     begin
       migrator(:up, 'failure_migration').migrate
-    rescue => e
+    rescue StandardError => e
       unless e.message.include?("ERROR_IN_MIGRATION")
         raise e
       end
