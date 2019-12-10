@@ -3,7 +3,7 @@ require 'active_record_shards/shard_support'
 
 module ActiveRecordShards
   module ConnectionSwitcher
-    SHARD_NAMES_CONFIG_KEY = 'shard_names'.freeze
+    SHARD_NAMES_CONFIG_KEY = 'shard_names'
 
     def self.extended(base)
       if ActiveRecord::VERSION::MAJOR >= 5

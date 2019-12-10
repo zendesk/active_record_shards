@@ -46,7 +46,7 @@ module ActiveRecordShards
         end
       end
 
-      PRIMARY = "primary".freeze
+      PRIMARY = "primary"
       def resolve_connection_name(sharded:, configurations:)
         resolved_shard = sharded ? shard : nil
         env = ActiveRecordShards.rails_env

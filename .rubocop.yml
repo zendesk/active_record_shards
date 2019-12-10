@@ -73,9 +73,6 @@ Style/IfUnlessModifier:
 Style/NumericLiterals:
   Enabled: false
 
-Style/RedundantFreeze:
-  Enabled: false
-
 Style/RescueStandardError:
   Enabled: false
 
