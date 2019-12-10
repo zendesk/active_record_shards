@@ -37,9 +37,6 @@ Style/FormatString:
 
 # Disabled cops
 
-Layout/EmptyLineAfterMagicComment:
-  Enabled: false
-
 Lint/AssignmentInCondition:
   Enabled: false
 

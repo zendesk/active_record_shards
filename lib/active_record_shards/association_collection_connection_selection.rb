@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module ActiveRecordShards
   module AssociationCollectionConnectionSelection
     def on_slave_if(condition)

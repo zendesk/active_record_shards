@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module ActiveRecordShards
   module DefaultSlavePatches
     def self.wrap_method_in_on_slave(class_method, base, method, force_on_slave: false)

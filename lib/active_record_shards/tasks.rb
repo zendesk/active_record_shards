@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'active_record_shards'
 
 %w[db:drop db:create db:abort_if_pending_migrations db:reset db:test:purge].each do |name|

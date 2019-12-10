@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module ActiveRecordShards
   class ShardSelection
     NO_SHARD = :_no_shard
