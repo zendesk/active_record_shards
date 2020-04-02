@@ -5,7 +5,7 @@ test: &test
     - checkout
     - run: sudo apt install default-mysql-client || sudo apt-get update && sudo apt install default-mysql-client
     - run: bundle install
-    - run: rake test
+    - run: bundle exec rake test
 
 jobs:
 
@@ -131,7 +131,7 @@ jobs:
     steps:
       - checkout
       - run: bundle install
-      - run: rake rubocop
+      - run: bundle exec rake rubocop
 
 workflows:
   version: 2
