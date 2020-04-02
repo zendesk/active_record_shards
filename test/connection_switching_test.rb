@@ -17,6 +17,41 @@ describe "connection switching" do
     require 'models'
   end
 
+  describe "on_primary_db" do
+    after do
+      ActiveRecord::Base.default_shard = nil
+    end
+
+    it "switches to the primary database" do
+      ActiveRecord::Base.on_primary_db do
+        assert_using_database('ars_test')
+      end
+    end
+
+    it "switches to the primary database and back when a default shard is set" do
+      ActiveRecord::Base.default_shard = 0
+      assert_using_database('ars_test_shard0')
+
+      ActiveRecord::Base.on_primary_db do
+        assert_using_database('ars_test')
+      end
+
+      assert_using_database('ars_test_shard0')
+    end
+
+    it "switches to the primary datatbase and back when nested of an on_shard block" do
+      ActiveRecord::Base.on_shard(1) do
+        assert_using_database('ars_test_shard1')
+
+        ActiveRecord::Base.on_primary_db do
+          assert_using_database('ars_test')
+        end
+
+        assert_using_database('ars_test_shard1')
+      end
+    end
+  end
+
   describe "shard switching" do
     it "only switch connection on sharded models" do
       assert_using_database('ars_test', Ticket)

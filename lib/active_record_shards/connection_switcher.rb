@@ -24,6 +24,10 @@ module ActiveRecordShards
       switch_connection(shard: new_default_shard)
     end
 
+    def on_primary_db(&block)
+      on_shard(nil, &block)
+    end
+
     def on_shard(shard)
       old_options = current_shard_selection.options
       switch_connection(shard: shard) if supports_sharding?
