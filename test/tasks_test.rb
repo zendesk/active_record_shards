@@ -23,9 +23,9 @@ describe "Database rake tasks" do
 
   let(:config) { Phenix.load_database_config('test/database_tasks.yml') }
   let(:master_name) { config['test']['database'] }
-  let(:slave_name) { config['test']['slave']['database'] }
+  let(:replica_name) { config['test']['replica']['database'] }
   let(:shard_names) { config['test']['shards'].values.map { |v| v['database'] } }
-  let(:database_names) { shard_names + [master_name, slave_name] }
+  let(:database_names) { shard_names + [master_name, replica_name] }
 
   before do
     clear_global_connection_handler_state
@@ -46,7 +46,7 @@ describe "Database rake tasks" do
       databases = show_databases(config)
 
       assert_includes databases, master_name
-      refute_includes databases, slave_name
+      refute_includes databases, replica_name
       shard_names.each do |name|
         assert_includes databases, name
       end

@@ -6,16 +6,16 @@ test:
   username: root
   password:
   host: main_host
-  slave:
-    host: main_slave_host
+  replica:
+    host: main_replica_host
   shards:
     500:
       database: ars_test_shard_500
       host: shard_500_host
-      slave:
-        host: shard_500_slave_host
+      replica:
+        host: shard_500_replica_host
     501:
       database: ars_test_shard_501
       host: shard_501_host
-      slave:
-        database: ars_test_shard_501_slave
+      replica:
+        database: ars_test_shard_501_replica

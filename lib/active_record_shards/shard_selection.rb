@@ -6,7 +6,7 @@ module ActiveRecordShards
     cattr_accessor :default_shard
 
     def initialize
-      @on_slave = false
+      @on_replica = false
       @shard = nil
     end
 
@@ -22,17 +22,17 @@ module ActiveRecordShards
         end
       end
 
-      def shard_name(klass = nil, try_slave = true)
+      def shard_name(klass = nil, try_replica = true)
         the_shard = shard(klass)
 
         @shard_names ||= {}
         @shard_names[ActiveRecordShards.rails_env] ||= {}
         @shard_names[ActiveRecordShards.rails_env][the_shard] ||= {}
-        @shard_names[ActiveRecordShards.rails_env][the_shard][try_slave] ||= {}
-        @shard_names[ActiveRecordShards.rails_env][the_shard][try_slave][@on_slave] ||= begin
+        @shard_names[ActiveRecordShards.rails_env][the_shard][try_replica] ||= {}
+        @shard_names[ActiveRecordShards.rails_env][the_shard][try_replica][@on_replica] ||= begin
           s = ActiveRecordShards.rails_env.dup
           s << "_shard_#{the_shard}" if the_shard
-          s << "_slave"              if @on_slave && try_slave
+          s << "_replica"            if @on_replica && try_replica
           s
         end
       end
@@ -55,11 +55,11 @@ module ActiveRecordShards
         @connection_names ||= {}
         @connection_names[env] ||= {}
         @connection_names[env][resolved_shard] ||= {}
-        @connection_names[env][resolved_shard][@on_slave] ||= begin
+        @connection_names[env][resolved_shard][@on_replica] ||= begin
           name = env.dup
           name << "_shard_#{resolved_shard}" if resolved_shard
-          if @on_slave && configurations["#{name}_slave"]
-            "#{name}_slave"
+          if @on_replica && configurations["#{name}_replica"]
+            "#{name}_replica"
           else
             # ActiveRecord always names its default connection pool 'primary'
             # while everything else is named by the configuration name
@@ -74,16 +74,18 @@ module ActiveRecordShards
       @shard = (new_shard || NO_SHARD)
     end
 
-    def on_slave?
-      @on_slave
+    def on_replica?
+      @on_replica
     end
+    alias_method :on_slave?, :on_replica?
 
-    def on_slave=(new_slave)
-      @on_slave = (new_slave == true)
+    def on_replica=(new_replica)
+      @on_replica = (new_replica == true)
     end
+    alias_method :on_slave=, :on_replica=
 
     def options
-      { shard: @shard, slave: @on_slave }
+      { shard: @shard, slave: @on_replica, replica: @on_replica }
     end
   end
 end

@@ -1,10 +1,10 @@
-# show which connection was picked to debug master/slave slowness when both servers are the same
+# show which connection was picked to debug master/replica slowness when both servers are the same
 module ActiveRecordShards
   module SqlComments
     module Methods
       def execute(query, name = nil)
-        slave = ActiveRecord::Base.current_shard_selection.on_slave?
-        query += " /* #{slave ? 'slave' : 'master'} */"
+        replica = ActiveRecord::Base.current_shard_selection.on_replica?
+        query += " /* #{replica ? 'replica' : 'master'} */"
         super(query, name)
       end
     end

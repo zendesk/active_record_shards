@@ -3,7 +3,7 @@ Gem::Specification.new "active_record_shards", "3.17.0" do |s|
   s.email       = ["bquorning@zendesk.com", "gabe@zendesk.com", "pschambacher@zendesk.com", "mick@staugaard.com"]
   s.homepage    = "https://github.com/zendesk/active_record_shards"
   s.summary     = "Simple database switching for ActiveRecord."
-  s.description = "Easily run queries on shard and slave databases."
+  s.description = "Easily run queries on shard and replica databases."
   s.license     = "MIT"
 
   s.required_ruby_version = ">= 2.3"

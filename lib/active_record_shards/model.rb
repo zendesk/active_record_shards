@@ -24,34 +24,38 @@ module ActiveRecordShards
       end
     end
 
-    def on_slave_by_default?
+    def on_replica_by_default?
       if self == ActiveRecord::Base
         false
       else
         base = base_class
-        if base.instance_variable_defined?(:@on_slave_by_default)
-          base.instance_variable_get(:@on_slave_by_default)
+        if base.instance_variable_defined?(:@on_replica_by_default)
+          base.instance_variable_get(:@on_replica_by_default)
         end
       end
     end
+    alias_method :on_slave_by_default?, :on_replica_by_default?
 
-    def on_slave_by_default=(value)
+    def on_replica_by_default=(value)
       if self == ActiveRecord::Base
-        raise ArgumentError, "Cannot set on_slave_by_default on ActiveRecord::Base"
+        raise ArgumentError, "Cannot set on_replica_by_default on ActiveRecord::Base"
       else
-        base_class.instance_variable_set(:@on_slave_by_default, value)
+        base_class.instance_variable_set(:@on_replica_by_default, value)
       end
     end
+    alias_method :on_slave_by_default=, :on_replica_by_default=
 
     module InstanceMethods
-      def initialize_shard_and_slave
-        @from_slave = !!self.class.current_shard_selection.options[:slave]
+      def initialize_shard_and_replica
+        @from_replica = !!self.class.current_shard_selection.options[:replica]
         @from_shard = self.class.current_shard_selection.options[:shard]
       end
+      alias_method :initialize_shard_and_slave, :initialize_shard_and_replica
 
-      def from_slave?
-        @from_slave
+      def from_replica?
+        @from_replica
       end
+      alias_method :from_slave?, :from_replica?
 
       def from_shard
         @from_shard
@@ -60,7 +64,7 @@ module ActiveRecordShards
 
     def self.extended(base)
       base.send(:include, InstanceMethods)
-      base.after_initialize :initialize_shard_and_slave
+      base.after_initialize :initialize_shard_and_replica
     end
 
     private
