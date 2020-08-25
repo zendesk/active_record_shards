@@ -1,7 +1,8 @@
 # frozen_string_literal: true
+
 module ActiveRecordShards
   module DefaultReplicaPatches
-    def self.wrap_method_in_on_replica(class_method, base, method)
+    def self.wrap_method_in_on_replica(class_method, base, method, force_on_replica: false)
       base_methods =
         if class_method
           base.methods + base.private_methods
@@ -10,6 +11,7 @@ module ActiveRecordShards
         end
 
       return unless base_methods.include?(method)
+
       _, method, punctuation = method.to_s.match(/^(.*?)([\?\!]?)$/).to_a
       # _ALWAYS_ on replica, or only for on `on_replica_by_default = true` models?
       wrapper = force_on_replica ? 'force_on_replica' : 'on_replica_unless_tx'
@@ -81,7 +83,6 @@ module ActiveRecordShards
       :find_some
     ].freeze
 
-
     CLASS_FORCE_REPLICA_METHODS = [
       :columns,
       :replace_bind_variable,
@@ -120,6 +121,10 @@ module ActiveRecordShards
       end
     end
     alias_method :on_slave_unless_tx, :on_replica_unless_tx
+
+    def force_on_replica(&block)
+      on_cx_switch_block(:replica, construct_ro_scope: false, force: true, &block)
+    end
 
     module ActiveRelationPatches
       def self.included(base)
