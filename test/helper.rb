@@ -57,7 +57,7 @@ module RakeSpecHelpers
 end
 
 module ConnectionSwitchingSpecHelpers
-  def assert_using_master_db
+  def assert_using_primary_db
     assert_using_database('ars_test')
   end
 
@@ -71,13 +71,13 @@ module ConnectionSwitchingSpecHelpers
 end
 
 module SpecHelpers
-  # Verifies that a block of code is not using the master by poisoning that
-  # master's connection information.
-  def with_unsharded_master_unavailable
+  # Verifies that a block of code is not using the primary by poisoning that
+  # primary's connection information.
+  def with_unsharded_primary_unavailable
     db_config = ActiveRecord::Base.configurations.to_h.fetch(ActiveRecordShards.rails_env)
     previous = db_config.slice('host', 'port')
     # The hostname is so exception messages are clear, the port causes an immediation rejection instead of a timeout
-    db_config['host'] = 'unsharded-master-unavailable-test.localhost'
+    db_config['host'] = 'unsharded-primary-unavailable-test.localhost'
     db_config['port'] = 1
 
     ActiveRecord::Base.send(:clear_specification_cache) if ActiveRecord::VERSION::MAJOR == 4

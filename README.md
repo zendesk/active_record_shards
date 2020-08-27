@@ -156,7 +156,7 @@ Account.on_replica.find_by_big_expensive_query
 
 ## Debugging
 
-Show if a query went to master or replica in the logs:
+Show if a query went to primary or replica in the logs:
 
 ```Ruby
 require 'active_record_shards/sql_comments'

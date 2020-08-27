@@ -22,10 +22,10 @@ describe "Database rake tasks" do
   end
 
   let(:config) { Phenix.load_database_config('test/database_tasks.yml') }
-  let(:master_name) { config['test']['database'] }
+  let(:primary_name) { config['test']['database'] }
   let(:replica_name) { config['test']['replica']['database'] }
   let(:shard_names) { config['test']['shards'].values.map { |v| v['database'] } }
-  let(:database_names) { shard_names + [master_name, replica_name] }
+  let(:database_names) { shard_names + [primary_name, replica_name] }
 
   before do
     clear_global_connection_handler_state
@@ -45,7 +45,7 @@ describe "Database rake tasks" do
       rake('db:create')
       databases = show_databases(config)
 
-      assert_includes databases, master_name
+      assert_includes databases, primary_name
       refute_includes databases, replica_name
       shard_names.each do |name|
         assert_includes databases, name
@@ -59,7 +59,7 @@ describe "Database rake tasks" do
       rake('db:drop')
       databases = show_databases(config)
 
-      refute_includes databases, master_name
+      refute_includes databases, primary_name
       shard_names.each do |name|
         refute_includes databases, name
       end
@@ -68,7 +68,7 @@ describe "Database rake tasks" do
     it "does not fail when db is missing" do
       rake('db:create')
       rake('db:drop')
-      refute_includes(show_databases(config), master_name)
+      refute_includes(show_databases(config), primary_name)
     end
 
     it "fails loudly when unknown error occurs" do

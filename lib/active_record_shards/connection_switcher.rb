@@ -69,24 +69,26 @@ module ActiveRecordShards
     end
     alias_method :on_slave_unless, :on_replica_unless
 
-    def on_master_if(condition, &block)
-      condition ? on_master(&block) : yield
+    def on_primary_if(condition, &block)
+      condition ? on_primary(&block) : yield
     end
+    alias_method :on_master_if, :on_primary_if
 
-    def on_master_unless(condition, &block)
-      on_master_if(!condition, &block)
+    def on_primary_unless(condition, &block)
+      on_primary_if(!condition, &block)
     end
+    alias_method :on_master_unless, :on_primary_unless
 
-    def on_master_or_replica(which, &block)
+    def on_primary_or_replica(which, &block)
       if block_given?
         on_cx_switch_block(which, &block)
       else
-        MasterReplicaProxy.new(self, which)
+        PrimaryReplicaProxy.new(self, which)
       end
     end
-    alias_method :on_master_or_slave, :on_master_or_replica
+    alias_method :on_master_or_slave, :on_primary_or_replica
 
-    # Executes queries using the replica database. Fails over to master if no replica is found.
+    # Executes queries using the replica database. Fails over to primary if no replica is found.
     # if you want to execute a block of code on the replica you can go:
     #   Account.on_replica do
     #     Account.first
@@ -96,13 +98,14 @@ module ActiveRecordShards
     # For one-liners you can simply do
     #   Account.on_replica.first
     def on_replica(&block)
-      on_master_or_replica(:replica, &block)
+      on_primary_or_replica(:replica, &block)
     end
     alias_method :on_slave, :on_replica
 
-    def on_master(&block)
-      on_master_or_replica(:master, &block)
+    def on_primary(&block)
+      on_primary_or_replica(:primary, &block)
     end
+    alias_method :on_master, :on_primary
 
     # just to ease the transition from replica to active_record_shards
     alias_method :with_slave, :on_replica
@@ -111,7 +114,9 @@ module ActiveRecordShards
 
     def on_cx_switch_block(which, force: false, construct_ro_scope: nil, &block)
       @disallow_replica ||= 0
-      @disallow_replica += 1 if which == :master
+      @disallow_replica += 1 if [:primary, :master].include?(which)
+
+      ActiveRecordShards::Deprecation.warn('the `:master` option should be replaced with `:primary`!') if which == :master
 
       switch_to_replica = force || @disallow_replica.zero?
       old_options = current_shard_selection.options
@@ -126,7 +131,7 @@ module ActiveRecordShards
         readonly.scoping(&block)
       end
     ensure
-      @disallow_replica -= 1 if which == :master
+      @disallow_replica -= 1 if [:primary, :master].include?(which)
       switch_connection(old_options) if old_options
     end
 
@@ -162,11 +167,6 @@ module ActiveRecordShards
 
     def switch_connection(options)
       if options.any?
-        if options.key?(:slave)
-          ActiveRecordShards::Deprecation.warn('the `:slave` option should be replaced with `:replica`!')
-          options[:replica] ||= options.delete(:slave)
-        end
-
         if options.key?(:replica)
           current_shard_selection.on_replica = options[:replica]
         end
@@ -209,18 +209,18 @@ module ActiveRecordShards
       with_default_shard { table_exists_without_default_shard? }
     end
 
-    class MasterReplicaProxy
+    class PrimaryReplicaProxy
       def initialize(target, which)
         @target = target
         @which = which
       end
 
       def method_missing(method, *args, &block) # rubocop:disable Style/MethodMissingSuper, Style/MissingRespondToMissing
-        @target.on_master_or_replica(@which) { @target.send(method, *args, &block) }
+        @target.on_primary_or_replica(@which) { @target.send(method, *args, &block) }
       end
     end
 
-    MasterSlaveProxy = MasterReplicaProxy
+    MasterSlaveProxy = PrimaryReplicaProxy
   end
 end
 

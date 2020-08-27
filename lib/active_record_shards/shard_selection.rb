@@ -85,7 +85,7 @@ module ActiveRecordShards
     alias_method :on_slave=, :on_replica=
 
     def options
-      { shard: @shard, slave: @on_replica, replica: @on_replica }
+      { shard: @shard, replica: @on_replica }
     end
   end
 end
