@@ -162,13 +162,13 @@ module ActiveRecordShards
 
     def switch_connection(options)
       if options.any?
-        if options.key?(:replica)
-          current_shard_selection.on_replica = options[:replica]
-        end
-
         if options.key?(:slave)
           ActiveRecordShards::Deprecation.warn('the `:slave` option should be replaced with `:replica`!')
           options[:replica] ||= options.delete(:slave)
+        end
+
+        if options.key?(:replica)
+          current_shard_selection.on_replica = options[:replica]
         end
 
         if options.key?(:shard)
