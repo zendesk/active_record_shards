@@ -6,3 +6,5 @@ ignore:
   - lib/active_record_shards/shard_selection.rb
   - lib/active_record_shards/tasks.rb
   - lib/active_record_shards.rb
+  - test/configuration_parser_legacy_test.rb
+  - test/database_parse_legacy_test.yml

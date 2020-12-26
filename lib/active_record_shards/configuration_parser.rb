@@ -29,10 +29,13 @@ module ActiveRecordShards
           conf["#{env_name}_replica"] = replica_conf
         end
 
-        if replica_conf = env_config.delete('slave')
+        # rubocop:disable Style/Next
+        if legacy_replica_conf = env_config.delete('slave')
           ActiveRecordShards::Deprecation.warn('`slave` configuration keys should be replaced with `replica` keys!')
-          env_config['replica'] ||= replica_conf
+          expand_child!(env_config, legacy_replica_conf)
+          conf["#{env_name}_replica"] = legacy_replica_conf
         end
+        # rubocop:enable Style/Next
       end
 
       conf

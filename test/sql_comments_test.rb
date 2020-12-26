@@ -19,6 +19,6 @@ describe ActiveRecordShards::SqlComments do
 
   it "adds sql comment" do
     comment.execute("foo")
-    assert_equal ["foo /* master */"], comment.called
+    assert_equal ["foo /* primary */"], comment.called
   end
 end
