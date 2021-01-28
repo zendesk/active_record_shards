@@ -1,0 +1,7 @@
+#!/bin/bash
+
+export BUNDLE_CMD=$@
+
+echo "Running this command all Gemfiles: $ bundle $BUNDLE_CMD"
+
+find . -maxdepth 2 -iname '*gemfile' | xargs -P10 -L1 -I % sh -c "BUNDLE_GEMFILE="%" bundle $BUNDLE_CMD"
