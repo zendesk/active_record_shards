@@ -163,9 +163,24 @@ require 'active_record_shards/sql_comments'
 ActiveRecordShards::SqlComments.enable
 ```
 
+## Changelog
+
+We use [github-changelog-generator](https://github.com/github-changelog-generator/github-changelog-generator) gem to keep our changelog updated.
+
+```Shell
+bundle exec github_changelog_generator \
+  --user zendesk \
+  --project active_record_shards
+  --token CHANGELOG_GITHUB_TOKEN
+```
+
+*This script can make only 50 requests to GitHub API per hour without a token.*
+Follow instructions to generate a token [here](https://github.com/github-changelog-generator/github-changelog-generator#github-token) (don't forget to enable SSO access).
+
 ## Copyright
 
 Copyright (c) 2011 Zendesk. See LICENSE for details.
 
 ## Authors
+
 Mick Staugaard, Eric Chapweske

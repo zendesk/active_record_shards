@@ -4,6 +4,10 @@ source 'https://rubygems.org'
 
 gemspec path: Bundler.root.to_s.sub('/gemfiles', '')
 
+group :development do
+  gem 'github_changelog_generator'
+end
+
 group :test do
   gem 'byebug', platforms: [:mri]
 end
