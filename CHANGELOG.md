@@ -1,5 +1,10 @@
 # Changelog
 
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) (from 3.17.0 onwards)
+
 ## [Unreleased](https://github.com/zendesk/active_record_shards/tree/HEAD)
 
 [Full Changelog](https://github.com/zendesk/active_record_shards/compare/v3.17.0...HEAD)
@@ -111,6 +116,8 @@
 - Use \_\_dir\_\_ [\#203](https://github.com/zendesk/active_record_shards/pull/203) ([bquorning](https://github.com/bquorning))
 - Clean up test helpers [\#201](https://github.com/zendesk/active_record_shards/pull/201) ([bquorning](https://github.com/bquorning))
 - Test: remove flexmaster dependency [\#200](https://github.com/zendesk/active_record_shards/pull/200) ([dadah89](https://github.com/dadah89))
+- Drop Travis and use only CircleCI [\#198](https://github.com/zendesk/active_record_shards/pull/198) ([bquorning](https://github.com/bquorning))
+- Tasks: correctly require adapters [\#194](https://github.com/zendesk/active_record_shards/pull/194) ([dadah89](https://github.com/dadah89))
 - Require mocha 1.4.0 [\#192](https://github.com/zendesk/active_record_shards/pull/192) ([dadah89](https://github.com/dadah89))
 - 3.12.0.beta2 [\#188](https://github.com/zendesk/active_record_shards/pull/188) ([bquorning](https://github.com/bquorning))
 - Tuning of CI [\#187](https://github.com/zendesk/active_record_shards/pull/187) ([bquorning](https://github.com/bquorning))
@@ -284,6 +291,7 @@
 
 - patch mysql and not mysql-flexmaster [\#122](https://github.com/zendesk/active_record_shards/pull/122) ([grosser](https://github.com/grosser))
 - silence [\#121](https://github.com/zendesk/active_record_shards/pull/121) ([grosser](https://github.com/grosser))
+- Perform load\_schema! on slave connection [\#120](https://github.com/zendesk/active_record_shards/pull/120) ([bquorning](https://github.com/bquorning))
 
 ## [v3.11.0](https://github.com/zendesk/active_record_shards/tree/v3.11.0) (2017-09-05)
 
@@ -294,7 +302,6 @@
 - make on\_slave\_by\_default getter and setter behave consistently [\#118](https://github.com/zendesk/active_record_shards/pull/118) ([grosser](https://github.com/grosser))
 - use simpler require\_relative [\#115](https://github.com/zendesk/active_record_shards/pull/115) ([grosser](https://github.com/grosser))
 - add sql comments debugging helper [\#114](https://github.com/zendesk/active_record_shards/pull/114) ([grosser](https://github.com/grosser))
-- simplify slave/master checking logic [\#110](https://github.com/zendesk/active_record_shards/pull/110) ([grosser](https://github.com/grosser))
 
 ## [v3.10.0](https://github.com/zendesk/active_record_shards/tree/v3.10.0) (2017-09-04)
 
@@ -302,15 +309,14 @@
 
 **Merged pull requests:**
 
-- Perform load\_schema! on slave connection [\#120](https://github.com/zendesk/active_record_shards/pull/120) ([bquorning](https://github.com/bquorning))
 - Upgrade RuboCop [\#119](https://github.com/zendesk/active_record_shards/pull/119) ([bquorning](https://github.com/bquorning))
 - split out rubocop so we have a single failing / obvious run when addi… [\#116](https://github.com/zendesk/active_record_shards/pull/116) ([grosser](https://github.com/grosser))
 - force slave for columns/table\_exist so we do not go to the master eve… [\#113](https://github.com/zendesk/active_record_shards/pull/113) ([grosser](https://github.com/grosser))
 - move simple logic to the top so a raise in current\_shard\_selection do… [\#111](https://github.com/zendesk/active_record_shards/pull/111) ([grosser](https://github.com/grosser))
+- simplify slave/master checking logic [\#110](https://github.com/zendesk/active_record_shards/pull/110) ([grosser](https://github.com/grosser))
 - make it impossible or the reset to break [\#109](https://github.com/zendesk/active_record_shards/pull/109) ([grosser](https://github.com/grosser))
 - reduce top-level files [\#108](https://github.com/zendesk/active_record_shards/pull/108) ([grosser](https://github.com/grosser))
 - silence "method redefined; discarding old retrieve\_connection\_pool" [\#105](https://github.com/zendesk/active_record_shards/pull/105) ([grosser](https://github.com/grosser))
-- Upgrade RuboCop [\#100](https://github.com/zendesk/active_record_shards/pull/100) ([bquorning](https://github.com/bquorning))
 
 ## [v3.9.2](https://github.com/zendesk/active_record_shards/tree/v3.9.2) (2017-06-16)
 
@@ -319,6 +325,7 @@
 **Merged pull requests:**
 
 - Revert "`logging\_query\_plan` uses slave connection by default in Rails 3" [\#103](https://github.com/zendesk/active_record_shards/pull/103) ([pschambacher](https://github.com/pschambacher))
+- Upgrade RuboCop [\#100](https://github.com/zendesk/active_record_shards/pull/100) ([bquorning](https://github.com/bquorning))
 - Set/read @sharded class ivar with attr\_accessor [\#99](https://github.com/zendesk/active_record_shards/pull/99) ([bquorning](https://github.com/bquorning))
 
 ## [v3.9.1](https://github.com/zendesk/active_record_shards/tree/v3.9.1) (2017-03-29)
@@ -430,6 +437,7 @@
 
 - add rails\_env back to the shard selection key [\#61](https://github.com/zendesk/active_record_shards/pull/61) ([steved](https://github.com/steved))
 - A little bit of cleanup [\#58](https://github.com/zendesk/active_record_shards/pull/58) ([bquorning](https://github.com/bquorning))
+- Clean up a bit [\#53](https://github.com/zendesk/active_record_shards/pull/53) ([bquorning](https://github.com/bquorning))
 
 ## [v3.6.1](https://github.com/zendesk/active_record_shards/tree/v3.6.1) (2016-01-22)
 
@@ -455,7 +463,6 @@
 **Merged pull requests:**
 
 - Update bundle lock files [\#55](https://github.com/zendesk/active_record_shards/pull/55) ([bquorning](https://github.com/bquorning))
-- Clean up a bit [\#53](https://github.com/zendesk/active_record_shards/pull/53) ([bquorning](https://github.com/bquorning))
 
 ## [v3.5.0.pre.alpha](https://github.com/zendesk/active_record_shards/tree/v3.5.0.pre.alpha) (2015-08-06)
 
@@ -481,6 +488,7 @@
 **Merged pull requests:**
 
 - use a "root connection" for rails 3 db dropping [\#47](https://github.com/zendesk/active_record_shards/pull/47) ([steved](https://github.com/steved))
+- make sure to invoke rake tasks in the same scope [\#46](https://github.com/zendesk/active_record_shards/pull/46) ([steved](https://github.com/steved))
 
 ## [v3.4.1](https://github.com/zendesk/active_record_shards/tree/v3.4.1) (2015-03-16)
 
@@ -488,7 +496,6 @@
 
 **Merged pull requests:**
 
-- make sure to invoke rake tasks in the same scope [\#46](https://github.com/zendesk/active_record_shards/pull/46) ([steved](https://github.com/steved))
 - Allow disabling sharding on ActiveRecord::Base [\#44](https://github.com/zendesk/active_record_shards/pull/44) ([staugaard](https://github.com/staugaard))
 
 ## [v3.3.8](https://github.com/zendesk/active_record_shards/tree/v3.3.8) (2015-03-12)

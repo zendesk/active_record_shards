@@ -23,3 +23,10 @@ task :console do
   ARGV.clear
   IRB.start
 end
+
+require 'github_changelog_generator/task'
+GitHubChangelogGenerator::RakeTask.new :changelog do |config|
+  config.user = 'zendesk'
+  config.project = 'active_record_shards'
+  config.since_tag = '3.17.0'
+end
