@@ -28,5 +28,6 @@ require 'github_changelog_generator/task'
 GitHubChangelogGenerator::RakeTask.new :changelog do |config|
   config.user = 'zendesk'
   config.project = 'active_record_shards'
-  config.since_tag = '3.17.0'
+  config.since_tag = 'v3.15.3'
+  config.unreleased = false
 end

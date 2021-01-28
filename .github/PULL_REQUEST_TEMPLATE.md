@@ -1,8 +1,9 @@
-<!--- Briefly describe your changes in the field above. -->
-
 ## Description
-<!--- If necessary, go into depth of what this pull request is doing. -->
+
+<!--- Briefly describe your changes. -->
 
 ## Checklist:
 
-- [x] Updated the CHANGELOG.md. Added/Removed/Changed.
+- [ ] Read CONTRIBUTING.md.
+- [ ] Update HISTORY.md. Include Added/Removed/Changed sections as need it.
+- [ ] Refresh CHANGELOG.md by running the changelog rake task.
