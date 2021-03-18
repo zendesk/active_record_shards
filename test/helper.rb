@@ -121,7 +121,7 @@ module SpecHelpers
   end
 
   def migrator(direction = :up, path = 'migrations', target_version = nil)
-    migration_path = File.join(__dir__, "/", path)
+    migration_path = File.join(__dir__, "support", path)
     if ActiveRecord::VERSION::MAJOR >= 6
       migrations = ActiveRecord::MigrationContext.new(migration_path, ActiveRecord::SchemaMigration).migrations
       ActiveRecord::Migrator.new(direction, migrations, ActiveRecord::SchemaMigration, target_version)
@@ -172,7 +172,7 @@ module PhenixHelper
 
       # Populate unsharded databases
       Phenix.configure do |config|
-        config.schema_path = File.join(Dir.pwd, 'test', 'unsharded_schema.rb')
+        config.schema_path = File.join(__dir__, 'support', 'unsharded_schema.rb')
         config.skip_database = lambda do |name, _|
           sharded_databases = %w[test_shard_0 test_shard_0_replica test_shard_1 test_shard_1_replica]
           intentionally_empty_databases = %w[test3 test3_shard_0]
@@ -185,7 +185,7 @@ module PhenixHelper
 
       # Populate sharded databases
       Phenix.configure do |config|
-        config.schema_path = File.join(Dir.pwd, 'test', 'sharded_schema.rb')
+        config.schema_path = File.join(__dir__, 'support', 'sharded_schema.rb')
         config.skip_database = lambda do |name, _|
           unsharded_databases = %w[test test_replica test2 test2_replica]
           intentionally_empty_databases = %w[test3 test3_shard_0]

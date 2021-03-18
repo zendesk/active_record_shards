@@ -5,7 +5,7 @@ require_relative 'helper'
 describe ActiveRecordShards::ConfigurationParser do
   describe "exploding the database.yml" do
     before do
-      @exploded_conf = ActiveRecordShards::ConfigurationParser.explode(YAML.safe_load(IO.read(File.dirname(__FILE__) + '/database_parse_legacy_test.yml')))
+      @exploded_conf = ActiveRecordShards::ConfigurationParser.explode(YAML.safe_load(IO.read(__dir__ + '/support/database_parse_legacy_test.yml')))
     end
 
     describe "main replica" do

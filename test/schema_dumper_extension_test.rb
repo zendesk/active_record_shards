@@ -12,7 +12,7 @@ describe ActiveRecordShards::SchemaDumperExtension do
       ActiveRecord::Base.establish_connection(RAILS_ENV.to_sym)
 
       # create shard-specific columns
-      ActiveRecord::Migrator.migrations_paths = [File.join(File.dirname(__FILE__), "/migrations")]
+      ActiveRecord::Migrator.migrations_paths = [File.join(__dir__, "support/migrations")]
       migrator.migrate
     end
 
