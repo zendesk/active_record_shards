@@ -21,7 +21,7 @@ describe "Database rake tasks" do
     $stderr = STDERR
   end
 
-  let(:config) { Phenix.load_database_config('test/database_tasks.yml') }
+  let(:config) { Phenix.load_database_config('test/support/database_tasks.yml') }
   let(:primary_name) { config['test']['database'] }
   let(:replica_name) { config['test']['replica']['database'] }
   let(:shard_names) { config['test']['shards'].values.map { |v| v['database'] } }
