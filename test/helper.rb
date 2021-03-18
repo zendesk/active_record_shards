@@ -18,7 +18,7 @@ require 'phenix'
 RAILS_ENV = "test"
 
 ActiveRecord::Base.logger = Logger.new(__dir__ + "/test.log")
-ActiveSupport.test_order = :sorted if ActiveSupport.respond_to?(:test_order=)
+ActiveSupport.test_order = :sorted
 ActiveSupport::Deprecation.behavior = :raise
 ActiveRecordShards::Deprecation.behavior = :silence
 

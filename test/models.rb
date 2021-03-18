@@ -12,11 +12,7 @@ end
 class AccountThing < ActiveRecord::Base
   not_sharded
 
-  if respond_to?(:where)
-    scope(:enabled, -> { where(enabled: true) })
-  else
-    named_scope :enabled, conditions: { enabled: true }
-  end
+  scope(:enabled, -> { where(enabled: true) })
 end
 
 class AccountInherited < Account

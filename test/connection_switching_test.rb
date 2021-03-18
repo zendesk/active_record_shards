@@ -586,9 +586,7 @@ describe "connection switching" do
         end
 
         it "do exists? on the replica" do
-          if Account.respond_to?(:exists?)
-            assert Account.exists?(1001)
-          end
+          assert Account.exists?(1001)
         end
 
         it "does exists? on the replica with a named scope" do
