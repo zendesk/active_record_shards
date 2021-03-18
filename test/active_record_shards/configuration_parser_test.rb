@@ -4,8 +4,34 @@ require_relative '../helper'
 
 describe ActiveRecordShards::ConfigurationParser do
   describe "exploding the database.yml" do
+    let(:yaml) do
+      <<~YAML
+        test:
+          adapter: mysql
+          encoding: utf8
+          database: ars_test
+          port: 123
+          username: root
+          password:
+          host: main_host
+          replica:
+            host: main_replica_host
+          shards:
+            500:
+              database: ars_test_shard_500
+              host: shard_500_host
+              replica:
+                host: shard_500_replica_host
+            501:
+              database: ars_test_shard_501
+              host: shard_501_host
+              replica:
+                database: ars_test_shard_501_replica
+      YAML
+    end
+
     before do
-      @exploded_conf = ActiveRecordShards::ConfigurationParser.explode(YAML.safe_load(IO.read(__dir__ + '/../support/database_parse_test.yml')))
+      @exploded_conf = ActiveRecordShards::ConfigurationParser.explode(YAML.safe_load(yaml))
     end
 
     describe "main replica" do
