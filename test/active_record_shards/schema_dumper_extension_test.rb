@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative 'helper'
+require_relative '../helper'
 
 describe ActiveRecordShards::SchemaDumperExtension do
   describe "schema dump" do
@@ -12,7 +12,7 @@ describe ActiveRecordShards::SchemaDumperExtension do
       ActiveRecord::Base.establish_connection(RAILS_ENV.to_sym)
 
       # create shard-specific columns
-      ActiveRecord::Migrator.migrations_paths = [File.join(__dir__, "support/migrations")]
+      ActiveRecord::Migrator.migrations_paths = [File.join(__dir__, "../support/migrations")]
       migrator.migrate
     end
 
