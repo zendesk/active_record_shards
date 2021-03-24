@@ -1,4 +1,4 @@
-[![CircleCI build status](https://circleci.com/gh/zendesk/active_record_shards/tree/master.svg?style=svg)](https://circleci.com/gh/zendesk/active_record_shards/tree/master)
+[![Build Status](https://github.com/zendesk/active_record_shards/workflows/CI/badge.svg)](https://github.com/zendesk/active_record_shards/actions?query=workflow%3ACI)
 
 # ActiveRecord Shards
 
