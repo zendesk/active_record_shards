@@ -12,6 +12,7 @@ $LOAD_PATH.unshift(File.join(__dir__, '..', 'lib'))
 $LOAD_PATH.unshift(__dir__)
 require 'active_support'
 require 'active_record_shards'
+require 'support/tcp_proxy'
 require 'logger'
 require 'phenix'
 
@@ -71,28 +72,22 @@ module ConnectionSwitchingSpecHelpers
 end
 
 module SpecHelpers
-  # Verifies that a block of code is not using the primary by poisoning that
-  # primary's connection information.
+  def self.mysql_url
+    URI(ENV['MYSQL_URL'] || 'mysql://root@127.0.0.1:3306')
+  end
+
+  @@unsharded_primary_proxy ||= TCPProxy.start(
+    remote_host: mysql_url.host,
+    remote_port: mysql_url.port,
+    local_port: '13306'
+  )
+
+  # Verifies that a block of code is not using the unsharded primary by pausing
+  # the TCP proxy between Ruby and MySQL.
   def with_unsharded_primary_unavailable
-    db_config = ActiveRecord::Base.configurations.to_h.fetch(ActiveRecordShards.rails_env)
-    previous = db_config.slice('host', 'port')
-    # The hostname is so exception messages are clear, the port causes an immediation rejection instead of a timeout
-    db_config['host'] = 'unsharded-primary-unavailable-test.localhost'
-    db_config['port'] = 1
-
-    ActiveRecord::Base.send(:clear_specification_cache) if ActiveRecord::VERSION::MAJOR == 4
-    # Force the ConnectionHandler to replace its instance of the "test"
-    # ConnectionPool. Despite naming, these methods only deal with pools.
-    ActiveRecord::Base.connection_handler.remove_connection(Account)
-    ActiveRecord::Base.establish_connection(::RAILS_ENV.to_sym)
-
-    yield
-
-    db_config.merge!(previous)
-    ActiveRecord::Base.send(:clear_specification_cache) if ActiveRecord::VERSION::MAJOR == 4
-
-    ActiveRecord::Base.connection_handler.remove_connection(Account)
-    ActiveRecord::Base.establish_connection(::RAILS_ENV.to_sym)
+    @@unsharded_primary_proxy.pause do
+      yield
+    end
   end
 
   def clear_global_connection_handler_state

@@ -8,10 +8,15 @@ mysql: &MYSQL
   port: <%= mysql.port %>
   password: <%= mysql.password %>
 
+# We connect to the unsharded primary database on a different port, via a proxy,
+# so we can make the connection unavailable when testing on_replica_by_default
+# behavior.
 test:
   <<: *MYSQL
   database: ars_test
   shard_names: [0, 1]
+  host: 127.0.0.1
+  port: 13306
 
 test_replica:
   <<: *MYSQL
