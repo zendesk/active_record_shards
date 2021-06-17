@@ -42,6 +42,18 @@ describe ".on_replica_by_default" do
     Person.on_replica_by_default = false
   end
 
+  describe "on ActiveRecord::Base class" do
+    it "reader is always false" do
+      refute ActiveRecord::Base.on_replica_by_default?
+    end
+
+    it "setter does not work" do
+      assert_raises ArgumentError do
+        ActiveRecord::Base.on_replica_by_default = true
+      end
+    end
+  end
+
   it "executes `find` on the replica" do
     account = Account.find(1000)
     assert_equal "Replica account", account.name
@@ -97,10 +109,6 @@ describe ".on_replica_by_default" do
     assert AccountInherited.on_replica_by_default?
   end
 
-  it "is false on ActiveRecord::Base" do
-    refute ActiveRecord::Base.on_replica_by_default?
-  end
-
   it "propagates the `on_replica_by_default` writer to inherited classes" do
     begin
       AccountInherited.on_replica_by_default = false
@@ -108,12 +116,6 @@ describe ".on_replica_by_default" do
       refute Account.on_replica_by_default?
     ensure
       AccountInherited.on_replica_by_default = true
-    end
-  end
-
-  it "refuses to set on ActiveRecord::Base" do
-    assert_raises ArgumentError do
-      ActiveRecord::Base.on_replica_by_default = true
     end
   end
 
