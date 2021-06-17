@@ -131,25 +131,27 @@ describe ".on_replica_by_default" do
     assert_equal ["Replica account", "Replica account 2"], Account.pluck(:name)
   end
 
-  it "supports implicit joins" do
-    accounts = Account.includes(:account_things).references(:account_things)
-    account_names = accounts.order("account_things.id").map(&:name).sort
-    assert_equal ["Replica account", "Replica account 2"], account_names
-  end
+  describe "joins" do
+    it "supports implicit joins" do
+      accounts = Account.includes(:account_things).references(:account_things)
+      account_names = accounts.order("account_things.id").map(&:name).sort
+      assert_equal ["Replica account", "Replica account 2"], account_names
+    end
 
-  it "supports explicit joins" do
-    accounts = Account.joins("LEFT OUTER JOIN account_things ON account_things.account_id = accounts.id")
-    account_names = accounts.map(&:name).sort
-    assert_equal ["Replica account", "Replica account 2"], account_names
-  end
+    it "supports explicit joins" do
+      accounts = Account.joins("LEFT OUTER JOIN account_things ON account_things.account_id = accounts.id")
+      account_names = accounts.map(&:name).sort
+      assert_equal ["Replica account", "Replica account 2"], account_names
+    end
 
-  it "does not support implicit joins between an unsharded and a sharded table" do
-    accounts = Account.includes(:tickets).references(:tickets).order("tickets.id")
-    assert_raises(ActiveRecord::StatementInvalid) { accounts.first }
-  end
+    it "does not support implicit joins between an unsharded and a sharded table" do
+      accounts = Account.includes(:tickets).references(:tickets).order("tickets.id")
+      assert_raises(ActiveRecord::StatementInvalid) { accounts.first }
+    end
 
-  it "does not support explicit joins between an unsharded and a sharded table" do
-    accounts = Account.joins("LEFT OUTER JOIN tickets ON tickets.account_id = accounts.id")
-    assert_raises(ActiveRecord::StatementInvalid) { accounts.first }
+    it "does not support explicit joins between an unsharded and a sharded table" do
+      accounts = Account.joins("LEFT OUTER JOIN tickets ON tickets.account_id = accounts.id")
+      assert_raises(ActiveRecord::StatementInvalid) { accounts.first }
+    end
   end
 end
