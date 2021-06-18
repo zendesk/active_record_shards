@@ -37,25 +37,28 @@ class TCPProxy
     @thr = Thread.new do
       begin
         loop do
-          begin
-            requesting_socket = proxy_server.accept
-            responding_socket = TCPSocket.new(remote_host, remote_port)
+          requesting_socket = proxy_server.accept
 
-            requests = Thread.new { forward(requesting_socket, responding_socket) }
-            requests.abort_on_exception = true
+          Thread.new do
+            begin
+              responding_socket = TCPSocket.new(remote_host, remote_port)
 
-            responses = Thread.new { forward(responding_socket, requesting_socket) }
-            responses.abort_on_exception = true
+              requests = Thread.new { forward(requesting_socket, responding_socket) }
+              requests.abort_on_exception = true
 
-            # Either thread can be the first to finish - requests if the mysql2 client
-            # closes the connection; responses if the MySQL server closes - so we
-            # cannot do the more common `requests.join and responses.join`.
-            sleep 0.2 while requests.alive? && responses.alive?
-            requests.kill
-            responses.kill
-          ensure
-            requesting_socket&.close
-            responding_socket&.close
+              responses = Thread.new { forward(responding_socket, requesting_socket) }
+              responses.abort_on_exception = true
+
+              # Either thread can be the first to finish - requests if the mysql2 client
+              # closes the connection; responses if the MySQL server closes - so we
+              # cannot do the more common `requests.join and responses.join`.
+              sleep 0.2 while requests.alive? && responses.alive?
+              requests.kill
+              responses.kill
+            ensure
+              requesting_socket&.close
+              responding_socket&.close
+            end
           end
         end
       ensure
