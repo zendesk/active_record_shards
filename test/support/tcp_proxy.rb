@@ -43,7 +43,7 @@ class TCPProxy
             begin
               responding_socket = TCPSocket.new(remote_host, remote_port)
 
-              requests = Thread.new { forward(requesting_socket, responding_socket) }
+              requests = Thread.new { forward(requesting_socket, responding_socket, pause_behavior: :raise) }
               requests.abort_on_exception = true
 
               responses = Thread.new { forward(responding_socket, requesting_socket) }
@@ -78,18 +78,19 @@ class TCPProxy
 
   attr_reader :remote_host, :remote_port, :local_port
 
-  def forward(src, dst)
+  def forward(src, dst, pause_behavior: :ignore)
     zero_counter = 0
     loop do
+      data = src.recv(1024)
       if enabled?
-        data = src.recv(1024)
-
         if data.empty?
           zero_counter += 1
           return if zero_counter >= 5
         else
           dst.send(data, 0)
         end
+      elsif pause_behavior == :raise
+        raise "TCPProxy received a request while paused"
       else
         sleep 0.2
       end
