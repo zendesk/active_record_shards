@@ -10,7 +10,7 @@ describe "connection switching" do
     ActiveRecord::Base.connection_handler.connection_pool_list.clear
   end
 
-  with_phenix
+  with_fresh_databases
 
   before do
     ActiveRecord::Base.establish_connection(RAILS_ENV.to_sym)

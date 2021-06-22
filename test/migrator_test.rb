@@ -3,7 +3,7 @@
 require_relative 'helper'
 
 describe ActiveRecord::Migrator do
-  with_phenix
+  with_fresh_databases
 
   before { ActiveRecord::Base.establish_connection(RAILS_ENV.to_sym) }
 

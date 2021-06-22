@@ -21,7 +21,7 @@ describe "Database rake tasks" do
     $stderr = STDERR
   end
 
-  let(:config) { Phenix.load_database_config('test/support/database_tasks.yml') }
+  let(:config) { DbHelper.load_database_configuration('test/support/database_tasks.yml') }
   let(:primary_name) { config['test']['database'] }
   let(:replica_name) { config['test']['replica']['database'] }
   let(:shard_names) { config['test']['shards'].values.map { |v| v['database'] } }
@@ -36,8 +36,20 @@ describe "Database rake tasks" do
   end
 
   after do
-    Phenix.configure
-    Phenix.burn!
+    DbHelper.load_database_configuration
+
+    %w[
+      ars_tasks_test
+      ars_tasks_test_replica
+      ars_tasks_test_shard_a
+      ars_tasks_test_shard_b
+      ars_tasks_adapter_test
+      ars_tasks_adapter_test_replica
+      ars_tasks_adapter_test_shard_a
+      ars_tasks_adapter_test_shard_b
+    ].each do |database_name|
+      DbHelper.mysql("DROP DATABASE IF EXISTS #{database_name}")
+    end
   end
 
   describe "db:create" do

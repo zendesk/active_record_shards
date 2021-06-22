@@ -6,7 +6,7 @@ describe ActiveRecordShards::SchemaDumperExtension do
   describe "schema dump" do
     let(:schema_file) { Tempfile.new('active_record_shards_schema.rb') }
 
-    with_phenix
+    with_fresh_databases
 
     before do
       ActiveRecord::Base.establish_connection(RAILS_ENV.to_sym)
@@ -22,7 +22,10 @@ describe ActiveRecordShards::SchemaDumperExtension do
       ActiveRecord::SchemaDumper.dump(ActiveRecord::Base.connection, schema_file)
       schema_file.close
 
-      Phenix.rise! # Recreate the database without loading the schema
+      # Recreate the database without loading the schema
+      DbHelper.drop_databases
+      DbHelper.create_databases
+
       load(schema_file)
 
       ActiveRecord::Base.on_all_shards do

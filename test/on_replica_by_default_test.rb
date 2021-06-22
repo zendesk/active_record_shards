@@ -4,7 +4,7 @@ require_relative 'helper'
 require 'models'
 
 describe ".on_replica_by_default" do
-  with_phenix
+  with_fresh_databases
 
   before do
     ActiveRecord::Base.establish_connection(RAILS_ENV.to_sym)
