@@ -107,10 +107,6 @@ module ActiveRecordShards
           alias_method :transaction, :transaction_with_replica_off
         end
       end
-      if ActiveRecord::Associations.const_defined?(:HasAndBelongsToManyAssociation)
-        ActiveRecordShards::DefaultReplicaPatches.wrap_method_in_on_replica(false, ActiveRecord::Associations::HasAndBelongsToManyAssociation, :construct_sql)
-        ActiveRecordShards::DefaultReplicaPatches.wrap_method_in_on_replica(false, ActiveRecord::Associations::HasAndBelongsToManyAssociation, :construct_find_options!)
-      end
     end
 
     def on_replica_unless_tx
