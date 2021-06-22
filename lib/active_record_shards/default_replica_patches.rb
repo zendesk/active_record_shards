@@ -37,20 +37,6 @@ module ActiveRecordShards
       wrap_method_in_on_replica(*args)
     end
 
-    def columns_with_force_replica(*args, &block)
-      on_cx_switch_block(:replica, construct_ro_scope: false, force: true) do
-        columns_without_force_replica(*args, &block)
-      end
-    end
-    alias_method :columns_with_force_slave, :columns_with_force_replica
-
-    def table_exists_with_force_replica?(*args, &block)
-      on_cx_switch_block(:replica, construct_ro_scope: false, force: true) do
-        table_exists_without_force_replica?(*args, &block)
-      end
-    end
-    alias_method :table_exists_with_force_slave?, :table_exists_with_force_replica?
-
     def transaction_with_replica_off(*args, &block)
       if on_replica_by_default?
         begin
@@ -84,7 +70,6 @@ module ActiveRecordShards
     ].freeze
 
     CLASS_FORCE_REPLICA_METHODS = [
-      :columns,
       :replace_bind_variable,
       :replace_bind_variables,
       :sanitize_sql_array,
@@ -97,7 +82,13 @@ module ActiveRecordShards
 
     def self.extended(base)
       CLASS_REPLICA_METHODS.each { |m| ActiveRecordShards::DefaultReplicaPatches.wrap_method_in_on_replica(true, base, m) }
-      CLASS_FORCE_SLAVE_METHODS.each { |m| ActiveRecordShards::DefaultReplicaPatches.wrap_method_in_on_replica(true, base, m, force_on_replica: true) }
+      CLASS_FORCE_REPLICA_METHODS.each { |m| ActiveRecordShards::DefaultReplicaPatches.wrap_method_in_on_replica(true, base, m, force_on_replica: true) }
+
+      if ActiveRecord::VERSION::MAJOR >= 5
+        ActiveRecordShards::DefaultReplicaPatches.wrap_method_in_on_replica(true, base, :load_schema!, force_on_replica: true)
+      else
+        ActiveRecordShards::DefaultReplicaPatches.wrap_method_in_on_replica(true, base, :columns, force_on_replica: true)
+      end
 
       base.class_eval do
         include InstanceMethods

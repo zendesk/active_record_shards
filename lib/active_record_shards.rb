@@ -64,8 +64,6 @@ ActiveRecordShards::Deprecation.deprecate_methods(
 
 ActiveRecordShards::Deprecation.deprecate_methods(
   ActiveRecordShards::DefaultReplicaPatches,
-  columns_with_force_slave: :columns_with_force_replica,
-  table_exists_with_force_slave?: :table_exists_with_force_replica?,
   transaction_with_slave_off: :transaction_with_replica_off,
   on_slave_unless_tx: :on_replica_unless_tx
 )
