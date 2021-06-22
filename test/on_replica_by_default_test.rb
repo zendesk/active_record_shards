@@ -42,6 +42,28 @@ describe ".on_replica_by_default" do
     Person.on_replica_by_default = false
   end
 
+  describe "trying to access a primary DB connection" do
+    before do
+      clear_global_connection_handler_state
+    end
+
+    it "fails for the unsharded DB" do
+      skip "This test is very slow"
+
+      with_all_primaries_unavailable do
+        assert_raises { Account.on_primary.connection }
+      end
+    end
+
+    it "fails for the sharded DB" do
+      skip "This test is very slow"
+
+      with_all_primaries_unavailable do
+        assert_raises { Ticket.on_primary.connection }
+      end
+    end
+  end
+
   describe "on ActiveRecord::Base class" do
     it "reader is always false" do
       refute ActiveRecord::Base.on_replica_by_default?
@@ -121,6 +143,27 @@ describe ".on_replica_by_default" do
   it "executes `pluck` on the replica" do
     with_all_primaries_unavailable do
       assert_equal ["Replica account", "Replica account 2"], Account.pluck(:name)
+    end
+  end
+
+  it "loads schema from replica" do
+    Account.send(:reset_column_information)
+
+    # Verify that the schema hasn't been loaded yet
+    assert_nil Account.instance_variable_get :@columns
+    assert_nil Account.instance_variable_get :@columns_hash
+    assert_nil Account.instance_variable_get :@column_names
+
+    with_all_primaries_unavailable do
+      assert_equal ["id", "name", "created_at", "updated_at"], Account.column_names
+    end
+  end
+
+  it "loads primary key column from replica" do
+    with_all_primaries_unavailable do
+      Account.reset_primary_key
+
+      assert_equal "id", Account.primary_key
     end
   end
 
