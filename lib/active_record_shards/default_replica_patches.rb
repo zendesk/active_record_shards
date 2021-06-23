@@ -66,7 +66,8 @@ module ActiveRecordShards
       :find_by_sql,
       :find_every,
       :find_one,
-      :find_some
+      :find_some,
+      :get_primary_key
     ].freeze
 
     CLASS_FORCE_REPLICA_METHODS = [
