@@ -5,5 +5,5 @@ source 'https://rubygems.org'
 gemspec path: Bundler.root.to_s.sub('/gemfiles', '')
 
 group :test do
-  gem 'byebug', platforms: [:mri]
+  gem 'pry-byebug', platforms: [:mri]
 end

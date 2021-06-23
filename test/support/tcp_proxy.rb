@@ -43,7 +43,7 @@ class TCPProxy
             begin
               responding_socket = TCPSocket.new(remote_host, remote_port)
 
-              requests = Thread.new { forward(requesting_socket, responding_socket, pause_behavior: :raise) }
+              requests = Thread.new { forward(requesting_socket, responding_socket, pause_behavior: :return) }
               requests.abort_on_exception = true
 
               responses = Thread.new { forward(responding_socket, requesting_socket) }
@@ -89,8 +89,10 @@ class TCPProxy
         else
           dst.send(data, 0)
         end
-      elsif pause_behavior == :raise
-        raise "TCPProxy received a request while paused"
+      elsif pause_behavior == :return
+        clean_data = data.encode("UTF-8", invalid: :replace, undef: :replace, replace: "")
+        warn "TCPProxy received a request while paused: `#{clean_data}`"
+        return
       else
         sleep 0.2
       end

@@ -187,6 +187,8 @@ module ActiveRecordShards
       ActiveRecordShards.rails_env
     end
 
+    # Make these few schema related methods available before having switched to
+    # a shard.
     def with_default_shard(&block)
       if is_sharded? && current_shard_id.nil? && table_name != ActiveRecord::SchemaMigration.table_name
         on_first_shard(&block)

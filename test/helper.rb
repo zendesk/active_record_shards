@@ -16,6 +16,8 @@ require 'support/tcp_proxy'
 require 'logger'
 require 'phenix'
 
+require 'pry-byebug'
+
 RAILS_ENV = "test"
 
 ActiveRecord::Base.logger = Logger.new(__dir__ + "/test.log")

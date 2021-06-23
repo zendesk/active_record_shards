@@ -90,35 +90,6 @@ describe ".on_replica_by_default" do
     AccountThing.on_replica_by_default = false
   end
 
-  it "allows overriding with `on_primary`" do
-    model = Account.on_primary.find(1000)
-    assert_equal "Primary account", model.name
-  end
-
-  it "does not allow overriding `on_primary` with `on_replica`" do
-    model = Account.on_primary { Account.on_replica.find(1000) }
-    assert_equal "Primary account", model.name
-  end
-
-  it "allows overriding `on_replica` with `on_primary`" do
-    model = Account.on_replica { Account.on_primary.find(1000) }
-    assert_equal "Primary account", model.name
-  end
-
-  it "propagates the `on_replica_by_default?` reader to inherited classes" do
-    assert AccountInherited.on_replica_by_default?
-  end
-
-  it "propagates the `on_replica_by_default` writer to inherited classes" do
-    begin
-      AccountInherited.on_replica_by_default = false
-      refute AccountInherited.on_replica_by_default?
-      refute Account.on_replica_by_default?
-    ensure
-      AccountInherited.on_replica_by_default = true
-    end
-  end
-
   it "`includes` things via has_and_belongs_to_many associations correctly" do
     a = Account.where(id: 1001).includes(:people).first
     refute_empty(a.people)
@@ -154,6 +125,39 @@ describe ".on_replica_by_default" do
     it "does not support explicit joins between an unsharded and a sharded table" do
       accounts = Account.joins("LEFT OUTER JOIN tickets ON tickets.account_id = accounts.id")
       assert_raises(ActiveRecord::StatementInvalid) { accounts.first }
+    end
+  end
+
+  describe "overriding with `on_primary`" do
+    it "allows overriding with `on_primary`" do
+      model = Account.on_primary.find(1000)
+      assert_equal "Primary account", model.name
+    end
+
+    it "does not allow overriding `on_primary` with `on_replica`" do
+      model = Account.on_primary { Account.on_replica.find(1000) }
+      assert_equal "Primary account", model.name
+    end
+
+    it "allows overriding `on_replica` with `on_primary`" do
+      model = Account.on_replica { Account.on_primary.find(1000) }
+      assert_equal "Primary account", model.name
+    end
+  end
+
+  describe "inheritance" do
+    it "propagates the `on_replica_by_default?` reader to inherited classes" do
+      assert AccountInherited.on_replica_by_default?
+    end
+
+    it "propagates the `on_replica_by_default` writer to inherited classes" do
+      begin
+        AccountInherited.on_replica_by_default = false
+        refute AccountInherited.on_replica_by_default?
+        refute Account.on_replica_by_default?
+      ensure
+        AccountInherited.on_replica_by_default = true
+      end
     end
   end
 end
