@@ -157,5 +157,17 @@ module ActiveRecordShards
         model
       end
     end
+
+    module TypeCasterConnectionPatches
+      def connection
+        return super if Thread.current[:_active_record_shards_in_tx]
+
+        if @klass.on_replica_by_default?
+          @klass.on_replica.connection
+        else
+          super
+        end
+      end
+    end
   end
 end
