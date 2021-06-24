@@ -522,7 +522,7 @@ describe "connection switching" do
             assert User.on_replica_by_default?
             assert User.finder_needs_type_condition?
 
-            User.send(:reset_column_information)
+            User.reset_column_information
             User.columns_hash
           ensure
             Person.on_replica_by_default = false

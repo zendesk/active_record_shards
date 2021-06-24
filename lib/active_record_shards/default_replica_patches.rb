@@ -57,12 +57,18 @@ module ActiveRecordShards
       def quote_value(*args, &block)
         self.class.quote_value(*args, &block)
       end
+
+      def on_replica_unless_tx
+        self.class.on_replica_unless_tx { yield }
+      end
     end
 
     CLASS_REPLICA_METHODS = [
       :calculate,
       :count_by_sql,
       :exists?,
+      :find,
+      :find_by,
       :find_by_sql,
       :find_every,
       :find_one,
@@ -90,6 +96,8 @@ module ActiveRecordShards
       else
         ActiveRecordShards::DefaultReplicaPatches.wrap_method_in_on_replica(true, base, :columns, force_on_replica: true)
       end
+
+      ActiveRecordShards::DefaultReplicaPatches.wrap_method_in_on_replica(false, base, :reload)
 
       base.class_eval do
         include InstanceMethods
@@ -138,6 +146,19 @@ module ActiveRecordShards
       end
     end
 
+    module Rails52RelationPatches
+      def connection
+        return super if Thread.current[:_active_record_shards_in_migration]
+        return super if Thread.current[:_active_record_shards_in_tx]
+
+        if @klass.on_replica_by_default?
+          @klass.on_replica.connection
+        else
+          super
+        end
+      end
+    end
+
     # in rails 4.1+, they create a join class that's used to pull in records for HABTM.
     # this simplifies the hell out of our existence, because all we have to do is inerit on-replica-by-default
     # down from the parent now.
@@ -161,7 +182,77 @@ module ActiveRecordShards
       end
     end
 
-    module TypeCasterConnectionPatches
+    module AssociationsAssociationAssociationScopePatch
+      def association_scope
+        if klass
+          on_replica_unless_tx { super }
+        else
+          super
+        end
+      end
+
+      def on_replica_unless_tx
+        klass.on_replica_unless_tx { yield }
+      end
+    end
+
+    module AssociationsAssociationFindTargetPatch
+      def find_target
+        if klass
+          on_replica_unless_tx { super }
+        else
+          super
+        end
+      end
+
+      def on_replica_unless_tx
+        klass.on_replica_unless_tx { yield }
+      end
+    end
+
+    module AssociationsAssociationGetRecordsPatch
+      def get_records # rubocop:disable Naming/AccessorMethodName
+        if klass
+          on_replica_unless_tx { super }
+        else
+          super
+        end
+      end
+
+      def on_replica_unless_tx
+        klass.on_replica_unless_tx { yield }
+      end
+    end
+
+    module AssociationsPreloaderAssociationAssociatedRecordsByOwnerPatch
+      def associated_records_by_owner(preloader)
+        if klass
+          on_replica_unless_tx { super }
+        else
+          super
+        end
+      end
+
+      def on_replica_unless_tx
+        klass.on_replica_unless_tx { yield }
+      end
+    end
+
+    module AssociationsPreloaderAssociationLoadRecordsPatch
+      def load_records
+        if klass
+          on_replica_unless_tx { super }
+        else
+          super
+        end
+      end
+
+      def on_replica_unless_tx
+        klass.on_replica_unless_tx { yield }
+      end
+    end
+
+    module TypeCasterConnectionConnectionPatch
       def connection
         return super if Thread.current[:_active_record_shards_in_migration]
         return super if Thread.current[:_active_record_shards_in_tx]
@@ -174,7 +265,7 @@ module ActiveRecordShards
       end
     end
 
-    module SchemaPatches
+    module SchemaDefinePatch
       def define(info, &block)
         old_val = Thread.current[:_active_record_shards_in_migration]
         Thread.current[:_active_record_shards_in_migration] = true
