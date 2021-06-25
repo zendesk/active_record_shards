@@ -4,7 +4,7 @@ require_relative '../helper'
 require 'active_record_shards/sql_comments'
 
 describe ActiveRecordShards::SqlComments do
-  with_phenix
+  with_fresh_databases
 
   class CommentTester
     attr_reader :called
