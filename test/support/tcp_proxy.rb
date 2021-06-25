@@ -91,7 +91,7 @@ class TCPProxy
           dst.send(data, 0)
         end
       elsif disabled? && pause_behavior == :return
-        clean_data = data.encode("UTF-8", invalid: :replace, undef: :replace, replace: "")
+        clean_data = data.gsub(/[^\w. ]/, '').strip
 
         if schema_query?(clean_data)
           dst.send(data, 0)
@@ -108,6 +108,10 @@ class TCPProxy
   # FIXME: We should not allow fetching schema information from the primary DB.
   def schema_query?(data)
     data.include?("information_schema.tables") ||
+      data.include?("information_schema.statistics") ||
+      data.include?("information_schema.key_column_usage") ||
+      data.include?("SHOW TABLES") ||
+      data.include?("SHOW CREATE TABLE") ||
       data.include?("SHOW FULL FIELDS FROM")
   end
 
