@@ -36,6 +36,7 @@ when '5.0', '5.1', '5.2'
   :ok
 when '6.0'
   ActiveRecord::TypeCaster::Connection.prepend(ActiveRecordShards::DefaultReplicaPatches::TypeCasterConnectionPatches)
+  ActiveRecord::Schema.prepend(ActiveRecordShards::DefaultReplicaPatches::SchemaPatches)
 else
   raise "ActiveRecordShards is not compatible with #{ActiveRecord::VERSION::STRING}"
 end

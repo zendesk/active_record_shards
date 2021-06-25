@@ -102,6 +102,7 @@ module ActiveRecordShards
     end
 
     def on_replica_unless_tx(&block)
+      return yield if Thread.current[:_active_record_shards_in_migration]
       return yield if Thread.current[:_active_record_shards_in_tx]
 
       if on_replica_by_default?
@@ -113,6 +114,8 @@ module ActiveRecordShards
     alias_method :on_slave_unless_tx, :on_replica_unless_tx
 
     def force_on_replica(&block)
+      return yield if Thread.current[:_active_record_shards_in_migration]
+
       on_cx_switch_block(:replica, construct_ro_scope: false, force: true, &block)
     end
 
@@ -160,6 +163,7 @@ module ActiveRecordShards
 
     module TypeCasterConnectionPatches
       def connection
+        return super if Thread.current[:_active_record_shards_in_migration]
         return super if Thread.current[:_active_record_shards_in_tx]
 
         if @klass.on_replica_by_default?
@@ -167,6 +171,16 @@ module ActiveRecordShards
         else
           super
         end
+      end
+    end
+
+    module SchemaPatches
+      def define(info, &block)
+        old_val = Thread.current[:_active_record_shards_in_migration]
+        Thread.current[:_active_record_shards_in_migration] = true
+        super
+      ensure
+        Thread.current[:_active_record_shards_in_migration] = old_val
       end
     end
   end
