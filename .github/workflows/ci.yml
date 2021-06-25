@@ -22,9 +22,9 @@ jobs:
     strategy:
       matrix:
         ruby-version:
-          - "2.4"
           - "2.5"
           - "2.6"
+          - "2.7"
         gemfile:
           - rails4.2
           - rails5.0
@@ -34,14 +34,12 @@ jobs:
         task:
           - test
         exclude:
-          - ruby-version: "2.4"
+          - ruby-version: "2.7"
+            gemfile: rails4.2
+          - ruby-version: "2.7"
             gemfile: rails5.0
-          - ruby-version: "2.5"
-            gemfile: rails5.0
-          - ruby-version: "2.4"
-            gemfile: rails6.0
         include:
-          - ruby-version: "2.6"
+          - ruby-version: "2.7"
             gemfile: rails6.0
             task: rubocop
     env:
