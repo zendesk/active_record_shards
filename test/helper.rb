@@ -84,11 +84,43 @@ module SpecHelpers
     local_port: '13306'
   )
 
+  @@shard_1_primary_proxy ||= TCPProxy.start(
+    remote_host: mysql_url.host,
+    remote_port: mysql_url.port,
+    local_port: '13307'
+  )
+
+  @@shard_2_primary_proxy ||= TCPProxy.start(
+    remote_host: mysql_url.host,
+    remote_port: mysql_url.port,
+    local_port: '13308'
+  )
+
+  # Verifies that a block of code is not using any of the the primaries by
+  # pausing the TCP proxies between Ruby and MySQL.
+  def with_all_primaries_unavailable
+    with_unsharded_primary_unavailable do
+      with_sharded_primaries_unavailable do
+        yield
+      end
+    end
+  end
+
   # Verifies that a block of code is not using the unsharded primary by pausing
   # the TCP proxy between Ruby and MySQL.
   def with_unsharded_primary_unavailable
     @@unsharded_primary_proxy.pause do
       yield
+    end
+  end
+
+  # Verifies that a block of code is not using the sharded primaries by pausing
+  # the TCP proxies between Ruby and MySQL.
+  def with_sharded_primaries_unavailable
+    @@shard_1_primary_proxy.pause do
+      @@shard_2_primary_proxy.pause do
+        yield
+      end
     end
   end
 

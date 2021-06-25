@@ -22,17 +22,27 @@ test_replica:
   <<: *MYSQL
   database: ars_test_replica
 
+# We connect to this sharded primary database on a different port, via a proxy,
+# so we can make the connection unavailable when testing on_replica_by_default
+# behavior.
 test_shard_0:
   <<: *MYSQL
   database: ars_test_shard0
+  host: 127.0.0.1
+  port: 13307
 
 test_shard_0_replica:
   <<: *MYSQL
   database: ars_test_shard0_replica
 
+# We connect to this sharded primary database on a different port, via a proxy,
+# so we can make the connection unavailable when testing on_replica_by_default
+# behavior.
 test_shard_1:
   <<: *MYSQL
   database: ars_test_shard1
+  host: 127.0.0.1
+  port: 13308
 
 test_shard_1_replica:
   <<: *MYSQL

@@ -82,21 +82,37 @@ class TCPProxy
     zero_counter = 0
     loop do
       data = src.recv(1024)
-      if enabled?
+
+      if enabled? || pause_behavior == :ignore
         if data.empty?
           zero_counter += 1
           return if zero_counter >= 5
         else
           dst.send(data, 0)
         end
-      elsif pause_behavior == :return
+      elsif disabled? && pause_behavior == :return
         clean_data = data.encode("UTF-8", invalid: :replace, undef: :replace, replace: "")
-        warn "TCPProxy received a request while paused: `#{clean_data}`"
-        return
+
+        if schema_query?(clean_data)
+          dst.send(data, 0)
+        else
+          warn "TCPProxy received a request while paused: `#{clean_data}`"
+          return
+        end
       else
-        sleep 0.2
+        raise "Invalid state"
       end
     end
+  end
+
+  # FIXME: We should not allow fetching schema information from the primary DB.
+  def schema_query?(data)
+    data.include?("information_schema.tables") ||
+      data.include?("SHOW FULL FIELDS FROM")
+  end
+
+  def disabled?
+    !enabled?
   end
 
   def enabled?
