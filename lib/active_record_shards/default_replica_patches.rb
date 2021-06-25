@@ -119,7 +119,11 @@ module ActiveRecordShards
     alias_method :on_slave_unless_tx, :on_replica_unless_tx
 
     def force_on_replica(&block)
-      on_cx_switch_block(:replica, construct_ro_scope: false, force: true, &block)
+      if !Thread.current[:_active_record_shards_replica_off]
+        on_cx_switch_block(:replica, construct_ro_scope: false, force: true, &block)
+      else
+        yield
+      end
     end
 
     module ActiveRelationPatches
