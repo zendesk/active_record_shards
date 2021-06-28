@@ -28,14 +28,6 @@ module ActiveRecordShards
           expand_child!(env_config, replica_conf)
           conf["#{env_name}_replica"] = replica_conf
         end
-
-        # rubocop:disable Style/Next
-        if legacy_replica_conf = env_config.delete('slave')
-          ActiveRecordShards::Deprecation.warn('`slave` configuration keys should be replaced with `replica` keys!')
-          expand_child!(env_config, legacy_replica_conf)
-          conf["#{env_name}_replica"] = legacy_replica_conf
-        end
-        # rubocop:enable Style/Next
       end
 
       conf
@@ -43,7 +35,7 @@ module ActiveRecordShards
 
     def expand_child!(parent, child)
       parent.each do |key, value|
-        unless ['slave', 'replica', 'shards'].include?(key) || value.is_a?(Hash)
+        unless ['replica', 'shards'].include?(key) || value.is_a?(Hash)
           child[key] ||= value
         end
       end

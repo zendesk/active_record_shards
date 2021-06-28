@@ -29,14 +29,6 @@ module ActiveRecordShards
       RUBY
     end
 
-    def self.wrap_method_in_on_slave(*args)
-      ActiveRecordShards::Deprecation.deprecation_warning(
-        :'self.wrap_method_in_on_slave',
-        :'self.wrap_method_in_on_replica'
-      )
-      wrap_method_in_on_replica(*args)
-    end
-
     def transaction_with_replica_off(*args, &block)
       if on_replica_by_default?
         begin
@@ -50,7 +42,6 @@ module ActiveRecordShards
         transaction_without_replica_off(*args, &block)
       end
     end
-    alias_method :transaction_with_slave_off, :transaction_with_replica_off
 
     module InstanceMethods
       # fix ActiveRecord to do the right thing, and use our aliased quote_value
@@ -119,7 +110,6 @@ module ActiveRecordShards
         yield
       end
     end
-    alias_method :on_slave_unless_tx, :on_replica_unless_tx
 
     def force_on_replica(&block)
       return yield if Thread.current[:_active_record_shards_in_migration]

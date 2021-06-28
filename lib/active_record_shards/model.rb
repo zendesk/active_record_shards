@@ -34,7 +34,6 @@ module ActiveRecordShards
         end
       end
     end
-    alias_method :on_slave_by_default?, :on_replica_by_default?
 
     def on_replica_by_default=(value)
       if self == ActiveRecord::Base
@@ -43,19 +42,16 @@ module ActiveRecordShards
         base_class.instance_variable_set(:@on_replica_by_default, value)
       end
     end
-    alias_method :on_slave_by_default=, :on_replica_by_default=
 
     module InstanceMethods
       def initialize_shard_and_replica
         @from_replica = !!self.class.current_shard_selection.options[:replica]
         @from_shard = self.class.current_shard_selection.options[:shard]
       end
-      alias_method :initialize_shard_and_slave, :initialize_shard_and_replica
 
       def from_replica?
         @from_replica
       end
-      alias_method :from_slave?, :from_replica?
 
       def from_shard
         @from_shard
