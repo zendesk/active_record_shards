@@ -32,11 +32,25 @@ require 'active_support/test_case'
 # support multiple before/after blocks per example
 module SpecDslPatch
   def before(_type = nil, &block)
-    include(Module.new { super })
+    prepend(
+      Module.new do
+        define_method(:setup) do
+          super()
+          instance_exec(&block)
+        end
+      end
+    )
   end
 
   def after(_type = nil, &block)
-    include(Module.new { super })
+    prepend(
+      Module.new do
+        define_method(:teardown) do
+          instance_exec(&block)
+          super()
+        end
+      end
+    )
   end
 end
 Minitest::Spec.singleton_class.prepend(SpecDslPatch)
