@@ -54,11 +54,11 @@ module ActiveRecordShards
     def transaction_with_replica_off(*args, &block)
       if on_replica_by_default?
         begin
-          old_val = Thread.current[:_active_record_shards_replica_off]
-          Thread.current[:_active_record_shards_replica_off] = true
+          old_val = Thread.current[:_active_record_shards_in_tx]
+          Thread.current[:_active_record_shards_in_tx] = true
           transaction_without_replica_off(*args, &block)
         ensure
-          Thread.current[:_active_record_shards_replica_off] = old_val
+          Thread.current[:_active_record_shards_in_tx] = old_val
         end
       else
         transaction_without_replica_off(*args, &block)
@@ -109,9 +109,11 @@ module ActiveRecordShards
       end
     end
 
-    def on_replica_unless_tx
-      if on_replica_by_default? && !Thread.current[:_active_record_shards_replica_off]
-        on_replica { yield }
+    def on_replica_unless_tx(&block)
+      return yield if Thread.current[:_active_record_shards_in_tx]
+
+      if on_replica_by_default?
+        on_replica(&block)
       else
         yield
       end
