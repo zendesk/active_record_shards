@@ -32,8 +32,11 @@ ActiveRecord::SchemaDumper.prepend(ActiveRecordShards::SchemaDumperExtension)
 case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
 when '4.2'
   require 'active_record_shards/patches-4-2'
-when '5.0', '5.1', '5.2', '6.0'
+when '5.0', '5.1', '5.2'
   :ok
+when '6.0'
+  ActiveRecord::TypeCaster::Connection.prepend(ActiveRecordShards::DefaultReplicaPatches::TypeCasterConnectionPatches)
+  ActiveRecord::Schema.prepend(ActiveRecordShards::DefaultReplicaPatches::SchemaPatches)
 else
   raise "ActiveRecordShards is not compatible with #{ActiveRecord::VERSION::STRING}"
 end
@@ -64,8 +67,6 @@ ActiveRecordShards::Deprecation.deprecate_methods(
 
 ActiveRecordShards::Deprecation.deprecate_methods(
   ActiveRecordShards::DefaultReplicaPatches,
-  columns_with_force_slave: :columns_with_force_replica,
-  table_exists_with_force_slave?: :table_exists_with_force_replica?,
   transaction_with_slave_off: :transaction_with_replica_off,
   on_slave_unless_tx: :on_replica_unless_tx
 )

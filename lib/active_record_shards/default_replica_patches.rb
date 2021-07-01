@@ -37,28 +37,14 @@ module ActiveRecordShards
       wrap_method_in_on_replica(*args)
     end
 
-    def columns_with_force_replica(*args, &block)
-      on_cx_switch_block(:replica, construct_ro_scope: false, force: true) do
-        columns_without_force_replica(*args, &block)
-      end
-    end
-    alias_method :columns_with_force_slave, :columns_with_force_replica
-
-    def table_exists_with_force_replica?(*args, &block)
-      on_cx_switch_block(:replica, construct_ro_scope: false, force: true) do
-        table_exists_without_force_replica?(*args, &block)
-      end
-    end
-    alias_method :table_exists_with_force_slave?, :table_exists_with_force_replica?
-
     def transaction_with_replica_off(*args, &block)
       if on_replica_by_default?
         begin
-          old_val = Thread.current[:_active_record_shards_replica_off]
-          Thread.current[:_active_record_shards_replica_off] = true
+          old_val = Thread.current[:_active_record_shards_in_tx]
+          Thread.current[:_active_record_shards_in_tx] = true
           transaction_without_replica_off(*args, &block)
         ensure
-          Thread.current[:_active_record_shards_replica_off] = old_val
+          Thread.current[:_active_record_shards_in_tx] = old_val
         end
       else
         transaction_without_replica_off(*args, &block)
@@ -80,11 +66,11 @@ module ActiveRecordShards
       :find_by_sql,
       :find_every,
       :find_one,
-      :find_some
+      :find_some,
+      :get_primary_key
     ].freeze
 
     CLASS_FORCE_REPLICA_METHODS = [
-      :columns,
       :replace_bind_variable,
       :replace_bind_variables,
       :sanitize_sql_array,
@@ -97,7 +83,13 @@ module ActiveRecordShards
 
     def self.extended(base)
       CLASS_REPLICA_METHODS.each { |m| ActiveRecordShards::DefaultReplicaPatches.wrap_method_in_on_replica(true, base, m) }
-      CLASS_FORCE_SLAVE_METHODS.each { |m| ActiveRecordShards::DefaultReplicaPatches.wrap_method_in_on_replica(true, base, m, force_on_replica: true) }
+      CLASS_FORCE_REPLICA_METHODS.each { |m| ActiveRecordShards::DefaultReplicaPatches.wrap_method_in_on_replica(true, base, m, force_on_replica: true) }
+
+      if ActiveRecord::VERSION::MAJOR >= 5
+        ActiveRecordShards::DefaultReplicaPatches.wrap_method_in_on_replica(true, base, :load_schema!, force_on_replica: true)
+      else
+        ActiveRecordShards::DefaultReplicaPatches.wrap_method_in_on_replica(true, base, :columns, force_on_replica: true)
+      end
 
       base.class_eval do
         include InstanceMethods
@@ -109,9 +101,12 @@ module ActiveRecordShards
       end
     end
 
-    def on_replica_unless_tx
-      if on_replica_by_default? && !Thread.current[:_active_record_shards_replica_off]
-        on_replica { yield }
+    def on_replica_unless_tx(&block)
+      return yield if Thread.current[:_active_record_shards_in_migration]
+      return yield if Thread.current[:_active_record_shards_in_tx]
+
+      if on_replica_by_default?
+        on_replica(&block)
       else
         yield
       end
@@ -119,6 +114,8 @@ module ActiveRecordShards
     alias_method :on_slave_unless_tx, :on_replica_unless_tx
 
     def force_on_replica(&block)
+      return yield if Thread.current[:_active_record_shards_in_migration]
+
       on_cx_switch_block(:replica, construct_ro_scope: false, force: true, &block)
     end
 
@@ -161,6 +158,29 @@ module ActiveRecordShards
         # also transfer the sharded-ness of the left table to the join model
         model.not_sharded unless model.left_reflection.klass.is_sharded?
         model
+      end
+    end
+
+    module TypeCasterConnectionPatches
+      def connection
+        return super if Thread.current[:_active_record_shards_in_migration]
+        return super if Thread.current[:_active_record_shards_in_tx]
+
+        if @klass.on_replica_by_default?
+          @klass.on_replica.connection
+        else
+          super
+        end
+      end
+    end
+
+    module SchemaPatches
+      def define(info, &block)
+        old_val = Thread.current[:_active_record_shards_in_migration]
+        Thread.current[:_active_record_shards_in_migration] = true
+        super
+      ensure
+        Thread.current[:_active_record_shards_in_migration] = old_val
       end
     end
   end
