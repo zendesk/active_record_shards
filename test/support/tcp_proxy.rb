@@ -15,6 +15,15 @@
 require 'socket'
 
 class TCPProxy
+  # Set a higher interval on Ruby 2.5 to work around a bug:
+  # https://github.com/ruby/ruby/commit/645f7fbd4ec0199c6266df19ad82d99bdd8553a8
+  # Remove when removing Ruby 2.5 support.
+  THREAD_CHECK_INTERVAL = if RUBY_VERSION.start_with?('2.5.')
+                            0.2
+                          else
+                            0.001
+                          end
+
   def self.start(remote_host:, remote_port:, local_port:)
     new(
       remote_host: remote_host,
@@ -52,9 +61,10 @@ class TCPProxy
               # Either thread can be the first to finish - requests if the mysql2 client
               # closes the connection; responses if the MySQL server closes - so we
               # cannot do the more common `requests.join and responses.join`.
-              sleep 0.2 while requests.alive? && responses.alive?
+              sleep THREAD_CHECK_INTERVAL while requests.alive? && responses.alive?
               requests.kill
               responses.kill
+              sleep THREAD_CHECK_INTERVAL until requests.stop? && responses.stop?
             ensure
               requesting_socket&.close
               responding_socket&.close
@@ -68,6 +78,8 @@ class TCPProxy
   end
 
   def pause(&_block)
+    # Give requests already sent to the socket a chance to be picked up before pausing.
+    sleep 0.001
     @disabled = true
     yield
   ensure
