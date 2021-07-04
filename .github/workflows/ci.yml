@@ -20,6 +20,7 @@ jobs:
           --health-retries 10
 
     strategy:
+      fail-fast: false
       matrix:
         ruby-version:
           - "2.5"
