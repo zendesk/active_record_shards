@@ -48,16 +48,12 @@ describe ".on_replica_by_default" do
     end
 
     it "fails for the unsharded DB" do
-      skip "This test is very slow"
-
       with_all_primaries_unavailable do
         assert_raises { Account.on_primary.connection }
       end
     end
 
     it "fails for the sharded DB" do
-      skip "This test is very slow"
-
       with_all_primaries_unavailable do
         assert_raises { Ticket.on_primary.connection }
       end

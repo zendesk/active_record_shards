@@ -502,8 +502,6 @@ describe "connection switching" do
         end
 
         it "be marked as read only" do
-          skip("Readonly scope on finder method is complicated on Rails 4.2")
-
           assert(@model.readonly?)
         end
 
