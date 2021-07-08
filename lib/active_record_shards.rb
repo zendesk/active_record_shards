@@ -67,7 +67,7 @@ when '5.2'
 
   # https://github.com/rails/rails/blob/v5.2.6/activerecord/lib/active_record/associations/preloader/association.rb#L96
   ActiveRecord::Associations::Preloader::Association.prepend(ActiveRecordShards::DefaultReplicaPatches::AssociationsPreloaderAssociationLoadRecordsPatch)
-when '6.0'
+when '6.0', '6.1'
   # https://github.com/rails/rails/blob/v6.0.4/activerecord/lib/active_record/type_caster/connection.rb#L28
   ActiveRecord::TypeCaster::Connection.prepend(ActiveRecordShards::DefaultReplicaPatches::TypeCasterConnectionConnectionPatch)
 
