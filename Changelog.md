@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## v3.19.0
+
 ### Changed / Fixed
 
 Lots of improvements to the `on_replica_by_default` logic, now covered by an improved test suite. Schema loading should now _always_ happen on the replica databases, and non-mutating queries will should now happen on the replica except when `on_replica_by_default` is not configured.
