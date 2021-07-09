@@ -28,4 +28,7 @@ class Person < ActiveRecord::Base
 end
 
 class User < Person
+  # Makes `User.new` a bit more complicated. Don't change without changing the
+  # corresponding tests.
+  default_scope { where(type: 'User') }
 end

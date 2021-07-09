@@ -48,16 +48,12 @@ describe ".on_replica_by_default" do
     end
 
     it "fails for the unsharded DB" do
-      skip "This test is very slow"
-
       with_all_primaries_unavailable do
         assert_raises { Account.on_primary.connection }
       end
     end
 
     it "fails for the sharded DB" do
-      skip "This test is very slow"
-
       with_all_primaries_unavailable do
         assert_raises { Ticket.on_primary.connection }
       end
@@ -79,6 +75,13 @@ describe ".on_replica_by_default" do
   it "executes `find` on the replica" do
     with_all_primaries_unavailable do
       account = Account.find(1000)
+      assert_equal "Replica account", account.name
+    end
+  end
+
+  it "executes `find_by` on the replica" do
+    with_all_primaries_unavailable do
+      account = Account.find_by(id: 1000)
       assert_equal "Replica account", account.name
     end
   end
@@ -146,8 +149,114 @@ describe ".on_replica_by_default" do
     end
   end
 
+  it "executes `first` on association on the replica" do
+    with_all_primaries_unavailable do
+      account = Account.find(1001)
+      person = account.people.first
+      assert_equal "Replica person", person.name
+    end
+  end
+
+  it "executes `map` on preloaded relation on the primary" do
+    Ticket.on_shard(1) do
+      Ticket.connection.execute(
+        "INSERT INTO tickets (id, title, account_id, created_at, updated_at) VALUES (50000, 'Primary ticket', 1001, NOW(), NOW())"
+      )
+      Ticket.on_replica.connection.execute(
+        "INSERT INTO tickets (id, title, account_id, created_at, updated_at) VALUES (50001, 'Replica ticket', 1001, NOW(), NOW())"
+      )
+
+      with_unsharded_primary_unavailable do
+        ticket_rel = Ticket.preload(:account).where(id: 50000)
+        ticket_titles = ticket_rel.map(&:title)
+        assert_equal ["Primary ticket"], ticket_titles
+      end
+    end
+  end
+
+  it "executes `all` on association on the replica" do
+    with_all_primaries_unavailable do
+      account = Account.find(1001)
+      all_people = account.people.all
+      assert_equal ["Replica person"], all_people.map(&:name)
+    end
+  end
+
+  it "executes `count` on association on the replica" do
+    Person.on_replica.connection.execute(
+      "INSERT INTO people(id, name) VALUES (30, 'Replica person 2')"
+    )
+    Account.on_replica.connection.execute(
+      "INSERT INTO account_people(account_id, person_id) VALUES (1001, 30)"
+    )
+
+    with_all_primaries_unavailable do
+      account = Account.find(1001)
+      count = account.people.count
+      assert_equal 2, count
+    end
+  end
+
+  it "can call preload from sharded model to unsharded model" do
+    Ticket.on_shard(1) do
+      Ticket.connection.execute(
+        "INSERT INTO tickets (id, title, account_id, created_at, updated_at) VALUES (50000, 'Primary ticket', 1000, NOW(), NOW())"
+      )
+      Ticket.on_replica.connection.execute(
+        "INSERT INTO tickets (id, title, account_id, created_at, updated_at) VALUES (50001, 'Replica ticket', 1001, NOW(), NOW())"
+      )
+    end
+
+    begin
+      Ticket.on_replica_by_default = true
+
+      Ticket.on_shard(1) do
+        with_all_primaries_unavailable do
+          tickets = Ticket.preload(:account)
+          ticket = tickets.first
+
+          assert_equal "Replica ticket", ticket.title
+          assert_equal "Replica account 2", ticket.account.name
+        end
+      end
+    ensure
+      Ticket.on_replica_by_default = false
+    end
+  end
+
+  it "can handle association from sharded model to unsharded model" do
+    Ticket.on_shard(1) do
+      Ticket.connection.execute(
+        "INSERT INTO tickets (id, title, account_id, created_at, updated_at) VALUES (50000, 'Primary ticket', 1000, NOW(), NOW())"
+      )
+      Ticket.on_replica.connection.execute(
+        "INSERT INTO tickets (id, title, account_id, created_at, updated_at) VALUES (50001, 'Replica ticket', 1001, NOW(), NOW())"
+      )
+    end
+
+    begin
+      Ticket.on_replica_by_default = true
+
+      Ticket.on_shard(1) do
+        with_all_primaries_unavailable do
+          ticket = Ticket.find(50001)
+          account_name = ticket.account.name
+          assert_equal "Replica account 2", account_name
+        end
+      end
+    ensure
+      Ticket.on_replica_by_default = false
+    end
+  end
+
+  it "can instantiate a new record whose model defines an ordered default_scope" do
+    with_all_primaries_unavailable do
+      User.new
+    end
+  end
+
   it "loads schema from replica" do
-    Account.send(:reset_column_information)
+    Account.reset_column_information
 
     # Verify that the schema hasn't been loaded yet
     assert_nil Account.instance_variable_get :@columns

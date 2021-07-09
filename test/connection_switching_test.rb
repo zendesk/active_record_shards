@@ -502,8 +502,6 @@ describe "connection switching" do
         end
 
         it "be marked as read only" do
-          skip("Readonly scope on finder method is complicated on Rails 4.2")
-
           assert(@model.readonly?)
         end
 
@@ -519,12 +517,16 @@ describe "connection switching" do
       describe "a inherited model without cached columns hash" do
         # before columns -> with_scope -> type-condition -> columns == loop
         it "not loop when on replica by default" do
-          Person.on_replica_by_default = true
-          assert User.on_replica_by_default?
-          assert User.finder_needs_type_condition?
+          begin
+            Person.on_replica_by_default = true
+            assert User.on_replica_by_default?
+            assert User.finder_needs_type_condition?
 
-          User.instance_variable_set(:@columns_hash, nil)
-          User.columns_hash
+            User.reset_column_information
+            User.columns_hash
+          ensure
+            Person.on_replica_by_default = false
+          end
         end
       end
 
