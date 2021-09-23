@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## v3.19.1
+
+### Fixed
+
+Converts the `ActiveRecord::Base.configurations` object introduced in Rails 6 into a hash as expected.
+
 ## v3.19.0
 
 ### Changed / Fixed
