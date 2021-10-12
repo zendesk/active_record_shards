@@ -1,0 +1,11 @@
+---
+version: 2
+updates:
+
+  # Update Gemfile & lockfiles once per day
+  - package-ecosystem: "bundler"
+    vendor: true
+    directory: "/"
+    schedule:
+      interval: "daily"
+      
