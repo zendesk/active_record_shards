@@ -25,6 +25,12 @@ ActiveRecord::Base.logger = Logger.new(__dir__ + "/test.log")
 ActiveSupport.test_order = :sorted
 ActiveSupport::Deprecation.behavior = :raise
 
+if ActiveRecord::VERSION::MAJOR == 6 && ActiveRecord::VERSION::MINOR == 1
+  # Disable legacy_connection_handling by default.
+  legacy_connection_handling = ENV.fetch("LEGACY_CONNECTION_HANDLING", "false") == "true"
+  ActiveRecord::Base.legacy_connection_handling = legacy_connection_handling
+end
+
 BaseMigration = ActiveRecord::Migration[4.2]
 
 require 'active_support/test_case'

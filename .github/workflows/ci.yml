@@ -33,6 +33,8 @@ jobs:
           - rails5.2
           - rails6.0
           - rails6.1
+        legacy_connection_handling:
+          - "false"
         exclude:
           - ruby-version: "2.7"
             gemfile: rails5.0
@@ -41,15 +43,18 @@ jobs:
           - ruby-version: "2.7"
             gemfile: rails5.2
           - ruby-version: "3.0"
-            gemfile: rails4.2
-          - ruby-version: "3.0"
             gemfile: rails5.0
           - ruby-version: "3.0"
             gemfile: rails5.1
           - ruby-version: "3.0"
             gemfile: rails5.2
+        include:
+          - ruby-version: "2.7"
+            gemfile: rails6.1
+            legacy_connection_handling: "true"
     env:
       BUNDLE_GEMFILE: gemfiles/${{ matrix.gemfile }}.gemfile
+      LEGACY_CONNECTION_HANDLING: ${{ matrix.legacy_connection_handling }}
     steps:
       - uses: zendesk/checkout@v2
       - name: Set up Ruby
