@@ -3,7 +3,7 @@ name: CI
 on: push
 
 jobs:
-  specs:
+  test:
     runs-on: ubuntu-latest
 
     services:
@@ -32,8 +32,6 @@ jobs:
           - rails5.1
           - rails5.2
           - rails6.0
-        task:
-          - test
         exclude:
           - ruby-version: "2.7"
             gemfile: rails4.2
@@ -43,10 +41,6 @@ jobs:
             gemfile: rails5.1
           - ruby-version: "2.7"
             gemfile: rails5.2
-        include:
-          - ruby-version: "2.7"
-            gemfile: rails6.0
-            task: rubocop
     env:
       BUNDLE_GEMFILE: gemfiles/${{ matrix.gemfile }}.gemfile
     steps:
@@ -56,5 +50,15 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby-version }}
           bundler-cache: true
-      - name: ${{ matrix.task }}
-        run: bundle exec rake ${{ matrix.task }}
+      - run: bundle exec rake test
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: zendesk/checkout@v2
+      - name: Set up Ruby
+        uses: zendesk/setup-ruby@v1
+        with:
+          ruby-version: "2.7"
+          bundler-cache: true
+      - run: bundle exec rake rubocop
