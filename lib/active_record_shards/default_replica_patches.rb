@@ -22,7 +22,7 @@ module ActiveRecordShards
               #{method}_without_default_replica#{punctuation}(*args, &block)
             end
           end
-
+          ruby2_keywords(:#{method}_with_default_replica#{punctuation}) if respond_to?(:ruby2_keywords, true)
           alias_method :#{method}_without_default_replica#{punctuation}, :#{method}#{punctuation}
           alias_method :#{method}#{punctuation}, :#{method}_with_default_replica#{punctuation}
         #{class_method ? 'end' : ''}
@@ -42,6 +42,7 @@ module ActiveRecordShards
         transaction_without_replica_off(*args, &block)
       end
     end
+    ruby2_keywords(:transaction_with_replica_off) if respond_to?(:ruby2_keywords, true)
 
     module InstanceMethods
       def on_replica_unless_tx

@@ -26,6 +26,7 @@ jobs:
           - "2.5"
           - "2.6"
           - "2.7"
+          - "3.0"
         gemfile:
           - rails5.0
           - rails5.1
@@ -37,6 +38,14 @@ jobs:
           - ruby-version: "2.7"
             gemfile: rails5.1
           - ruby-version: "2.7"
+            gemfile: rails5.2
+          - ruby-version: "3.0"
+            gemfile: rails4.2
+          - ruby-version: "3.0"
+            gemfile: rails5.0
+          - ruby-version: "3.0"
+            gemfile: rails5.1
+          - ruby-version: "3.0"
             gemfile: rails5.2
     env:
       BUNDLE_GEMFILE: gemfiles/${{ matrix.gemfile }}.gemfile
@@ -56,6 +65,6 @@ jobs:
       - name: Set up Ruby
         uses: zendesk/setup-ruby@v1
         with:
-          ruby-version: "2.7"
+          ruby-version: "3.0"
           bundler-cache: true
       - run: bundle exec rake rubocop

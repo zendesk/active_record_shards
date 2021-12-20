@@ -30,6 +30,7 @@ module ActiveRecordShards
       end
       raise exception
     end
+    ruby2_keywords(:find) if respond_to?(:ruby2_keywords, true)
 
     def count
       enum.inject(0) { |accum, _shard| @scope.clone.count + accum }

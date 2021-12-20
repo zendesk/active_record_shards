@@ -22,6 +22,7 @@ module ActiveRecord
         ActiveRecord::InternalMetadata.create_table
       end
     end
+    ruby2_keywords(:initialize_with_sharding) if respond_to?(:ruby2_keywords, true)
     alias_method :initialize_without_sharding, :initialize
     alias_method :initialize, :initialize_with_sharding
 
