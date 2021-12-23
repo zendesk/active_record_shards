@@ -6,6 +6,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+[Deprecation] Removes all deprecated methods containing `master`/`slave`. Use the updated `primary`/`replica` methods instead. The main public methods changed:
+
+1. `on_slave` => `on_replica`
+1. `on_master` => `on_primary`
+
+other methods changed:
+
+1. `on_master_if` => `on_primary_if`
+1. `on_slave_if` => `on_replica_if`
+1. `on_master_unless` => `on_primary_unless`
+1. `on_slave_unless` => `on_replica_unless`
+1. `on_master_or_slave` => `on_primary_or_replica`
+1. `exists_with_default_slave` => `exists_with_default_replica`
+1. `from_slave` => `from_replica`
+1. `initialize_shard_and_slave` => `initialize_shard_and_replica`
+1. `ShardSelection#options` no longer uses `:slave`, if this method was overridden ensure it returns `:replica` instead of `:slave`: `{ shard: .., replica: ... }`
+
+Also removes the class `ActiveRecordShards::Deprecation`.
+
 ## v3.19.1
 
 ### Fixed

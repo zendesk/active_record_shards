@@ -1,6 +1,2 @@
 ignore:
   - Changelog.md
-  - README.md
-  - active_record_shards.gemspec
-  - lib/
-  - test/
