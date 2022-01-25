@@ -17,7 +17,7 @@ module ActiveRecordShards
           if @shard == NO_SHARD
             nil
           else
-            @shard || self.class.default_shard
+            @shard || self.class.default_shard || raise('You can not connect a sharded model without calling on_shard.')
           end
         end
       end
