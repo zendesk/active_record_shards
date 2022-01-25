@@ -4,7 +4,6 @@ class << ActiveRecord::Base
   remove_method :establish_connection if ActiveRecord::VERSION::MAJOR >= 5
   def establish_connection(spec = ENV["DATABASE_URL"])
     spec ||= ActiveRecord::ConnectionHandling::DEFAULT_ENV.call
-    spec = spec.to_sym if spec.is_a?(String)
     resolver = ActiveRecordShards::ConnectionSpecification::Resolver.new configurations
     spec = resolver.spec(spec)
 
