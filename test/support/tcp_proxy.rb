@@ -105,24 +105,12 @@ class TCPProxy
       elsif disabled? && pause_behavior == :return
         clean_data = data.gsub(/[^\w. ]/, '').strip
 
-        if ActiveRecord::VERSION::MAJOR == 4 && schema_query?(clean_data)
-          warn "Rails 4.x performed #{clean_data} on a primary database."
-          dst.send(data, 0)
-        else
-          warn "TCPProxy received a request while paused: `#{clean_data}`"
-          return
-        end
+        warn "TCPProxy received a request while paused: `#{clean_data}`"
+        return
       else
         raise "Invalid state"
       end
     end
-  end
-
-  def schema_query?(data)
-    data.include?("information_schema.key_column_usage") ||
-      data.include?("SHOW TABLES") ||
-      data.include?("SHOW CREATE TABLE") ||
-      data.include?("SHOW FULL FIELDS FROM")
   end
 
   def disabled?

@@ -30,20 +30,6 @@ ActiveRecord::Associations::Builder::HasAndBelongsToMany.include(ActiveRecordSha
 ActiveRecord::SchemaDumper.prepend(ActiveRecordShards::SchemaDumperExtension)
 
 case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
-when '4.2'
-  require 'active_record_shards/patches-4-2'
-
-  # https://github.com/rails/rails/blob/v4.2.11.3/activerecord/lib/active_record/associations/association.rb#L97
-  ActiveRecord::Associations::Association.prepend(ActiveRecordShards::DefaultReplicaPatches::AssociationsAssociationAssociationScopePatch)
-
-  # https://github.com/rails/rails/blob/v4.2.11.3/activerecord/lib/active_record/associations/singular_association.rb#L44-L53
-  ActiveRecord::Associations::SingularAssociation.prepend(ActiveRecordShards::DefaultReplicaPatches::AssociationsAssociationGetRecordsPatch)
-
-  # https://github.com/rails/rails/blob/v4.2.11.3/activerecord/lib/active_record/associations/collection_association.rb#L447-L456
-  ActiveRecord::Associations::CollectionAssociation.prepend(ActiveRecordShards::DefaultReplicaPatches::AssociationsAssociationGetRecordsPatch)
-
-  # https://github.com/rails/rails/blob/v4.2.11.3/activerecord/lib/active_record/associations/preloader/association.rb#L89
-  ActiveRecord::Associations::Preloader::Association.prepend(ActiveRecordShards::DefaultReplicaPatches::AssociationsPreloaderAssociationAssociatedRecordsByOwnerPatch)
 when '5.0'
   # https://github.com/rails/rails/blob/v5.0.7/activerecord/lib/active_record/associations/association.rb#L97
   ActiveRecord::Associations::Association.prepend(ActiveRecordShards::DefaultReplicaPatches::AssociationsAssociationAssociationScopePatch)

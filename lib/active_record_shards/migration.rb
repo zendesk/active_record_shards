@@ -19,9 +19,7 @@ module ActiveRecord
       # manually on the sharded DBs.
       ActiveRecord::Base.on_all_shards do
         ActiveRecord::SchemaMigration.create_table
-        if ActiveRecord::VERSION::MAJOR >= 5
-          ActiveRecord::InternalMetadata.create_table
-        end
+        ActiveRecord::InternalMetadata.create_table
       end
     end
     alias_method :initialize_without_sharding, :initialize

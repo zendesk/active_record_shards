@@ -347,21 +347,16 @@ describe "connection switching" do
 
     describe "shard switching" do
       it "just stay on the primary db" do
-        if ActiveRecord::VERSION::MAJOR >= 5
-          main_spec_name = spec_name
-          shard_spec_name = ActiveRecord::Base.on_shard(0) { spec_name }
-        end
+        main_spec_name = spec_name
+        shard_spec_name = ActiveRecord::Base.on_shard(0) { spec_name }
+
         ActiveRecord::Base.on_replica do
           assert_using_database('ars_test3', Account)
-          if ActiveRecord::VERSION::MAJOR >= 5
-            assert_equal main_spec_name, spec_name
-          end
+          assert_equal main_spec_name, spec_name
 
           ActiveRecord::Base.on_shard(0) do
             assert_using_database('ars_test3_shard0', Ticket)
-            if ActiveRecord::VERSION::MAJOR >= 5
-              assert_equal shard_spec_name, spec_name
-            end
+            assert_equal shard_spec_name, spec_name
           end
         end
       end
@@ -577,19 +572,5 @@ describe "connection switching" do
         end
       end
     end
-  end
-
-  if ActiveRecord::VERSION::MAJOR < 5
-
-    it "raises an exception if a connection is not found" do
-      ActiveRecord::Base.on_shard(0) do
-        ActiveRecord::Base.connection_handler.remove_connection(Ticket)
-        assert_raises(ActiveRecord::ConnectionNotEstablished) do
-          ActiveRecord::Base.connection_handler.retrieve_connection_pool(Ticket)
-          assert_using_database('ars_test_shard0', Ticket)
-        end
-      end
-    end
-
   end
 end
