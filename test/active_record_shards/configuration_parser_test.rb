@@ -165,4 +165,71 @@ describe "ActiveRecordShards::ConfigurationParser.explode" do
       assert_equal "ars_test_shard_501_replica", config["database"]
     end
   end
+
+  describe "already-expanded configuration (with `*_slave` keys" do
+    let(:exploder) do
+      Class.new do
+        class << self
+          attr_accessor :configurations
+        end
+        extend(ActiveRecordShards::ConfigurationParser)
+      end
+    end
+
+    it "copies the *_slave configs to *_replica configs" do
+      yaml = <<~YAML
+        test:
+          adapter: mysql
+          database: ars_test
+          username: root
+          password:
+          host: main_host
+        test_slave:
+          adapter: mysql
+          database: ars_test
+          username: root
+          password:
+          host: main_slave_host
+        test_shard_500_slave:
+          adapter: mysql
+          database: ars_test
+          username: root
+          password:
+          host: shard_500_slave_host
+      YAML
+      exploder.configurations = YAML.safe_load(yaml)
+      conf = exploder.configurations
+
+      assert_equal %w[test test_replica test_shard_500_replica test_shard_500_slave test_slave], conf.keys.sort
+      assert_equal conf["test_slave"], conf["test_replica"]
+      assert_equal conf["test_shard_500_slave"], conf["test_shard_500_replica"]
+    end
+
+    # Your database config is a mess.
+    it "doesn't copy *_slave configs if already expanded from a nested slave/replica config" do
+      yaml = <<~YAML
+        test:
+          adapter: mysql
+          database: ars_test
+          username: root
+          password:
+          host: main_host
+          slave:
+            host: replica_host_one
+        test_slave:
+          adapter: mysql
+          database: ars_test
+          username: root
+          password:
+          host: replica_host_two
+      YAML
+      exploder.configurations = YAML.safe_load(yaml)
+      conf = exploder.configurations
+
+      assert_equal %w[test test_replica test_slave], conf.keys.sort
+      refute_equal conf["test_slave"], conf["test_replica"]
+      assert_equal "replica_host_one", conf["test_replica"]["host"]
+      assert_equal "replica_host_two", conf["test_slave"]["host"]
+    end
+  end
 end

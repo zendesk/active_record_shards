@@ -41,6 +41,19 @@ module ActiveRecordShards
       conf
     end
 
+    def replace_slave_keys(conf)
+      conf.to_a.each do |env_name, env_config|
+        next unless env_name.end_with?("_slave")
+
+        replica_key = env_name.sub(/_slave$/, "_replica")
+        next if conf.key?(replica_key)
+
+        conf[replica_key] = env_config.deep_dup
+      end
+
+      conf
+    end
+
     def expand_child!(parent, child)
       parent.each do |key, value|
         unless ['slave', 'replica', 'shards'].include?(key) || value.is_a?(Hash)
@@ -50,7 +63,9 @@ module ActiveRecordShards
     end
 
     def configurations_with_shard_explosion=(conf)
-      self.configurations_without_shard_explosion = explode(conf)
+      exploded_configuration = explode(conf)
+      configuration_with_slave_keys_replaced = replace_slave_keys(exploded_configuration)
+      self.configurations_without_shard_explosion = configuration_with_slave_keys_replaced
     end
 
     def self.extended(base)
