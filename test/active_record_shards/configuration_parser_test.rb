@@ -29,12 +29,12 @@ describe "ActiveRecordShards::ConfigurationParser.explode" do
     YAML
   end
 
-  before do
-    @exploded_conf = ActiveRecordShards::ConfigurationParser.explode(YAML.safe_load(yaml))
+  let(:exploded_conf) do
+    ActiveRecordShards::ConfigurationParser.explode(YAML.safe_load(yaml))
   end
 
   it "expands configuration for the main primary" do
-    config = @exploded_conf["test"]
+    config = exploded_conf["test"]
 
     shared_assertions(config)
     assert_equal "main_host", config["host"]
@@ -42,7 +42,7 @@ describe "ActiveRecordShards::ConfigurationParser.explode" do
   end
 
   it "expands configuration for the main replica" do
-    config = @exploded_conf["test_replica"]
+    config = exploded_conf["test_replica"]
 
     shared_assertions(config)
     assert_equal "main_replica_host", config["host"]
@@ -50,7 +50,7 @@ describe "ActiveRecordShards::ConfigurationParser.explode" do
   end
 
   it "expands configuration for shard 500's primary" do
-    config = @exploded_conf["test_shard_500"]
+    config = exploded_conf["test_shard_500"]
 
     shared_assertions(config)
     assert_equal "shard_500_host", config["host"]
@@ -58,7 +58,7 @@ describe "ActiveRecordShards::ConfigurationParser.explode" do
   end
 
   it "expands configuration for shard 500's replica" do
-    config = @exploded_conf["test_shard_500_replica"]
+    config = exploded_conf["test_shard_500_replica"]
 
     shared_assertions(config)
     assert_equal "shard_500_replica_host", config["host"]
@@ -66,7 +66,7 @@ describe "ActiveRecordShards::ConfigurationParser.explode" do
   end
 
   it "expands configuration for shard 501's primary" do
-    config = @exploded_conf["test_shard_501"]
+    config = exploded_conf["test_shard_501"]
 
     shared_assertions(config)
     assert_equal "shard_501_host", config["host"]
@@ -74,7 +74,7 @@ describe "ActiveRecordShards::ConfigurationParser.explode" do
   end
 
   it "expands configuration for shard 501's replica" do
-    config = @exploded_conf["test_shard_501_replica"]
+    config = exploded_conf["test_shard_501_replica"]
 
     shared_assertions(config)
     assert_equal "shard_501_host", config["host"]
@@ -118,7 +118,7 @@ describe "ActiveRecordShards::ConfigurationParser.explode" do
     end
 
     it "expands configuration for the main primary" do
-      config = @exploded_conf["test"]
+      config = exploded_conf["test"]
 
       shared_assertions(config)
       assert_equal "main_host", config["host"]
@@ -126,7 +126,7 @@ describe "ActiveRecordShards::ConfigurationParser.explode" do
     end
 
     it "expands configuration for the main replica" do
-      config = @exploded_conf["test_replica"]
+      config = exploded_conf["test_replica"]
 
       shared_assertions(config)
       assert_equal "main_replica_host", config["host"]
@@ -134,7 +134,7 @@ describe "ActiveRecordShards::ConfigurationParser.explode" do
     end
 
     it "expands configuration for shard 500's primary" do
-      config = @exploded_conf["test_shard_500"]
+      config = exploded_conf["test_shard_500"]
 
       shared_assertions(config)
       assert_equal "shard_500_host", config["host"]
@@ -142,7 +142,7 @@ describe "ActiveRecordShards::ConfigurationParser.explode" do
     end
 
     it "expands configuration for shard 500's replica" do
-      config = @exploded_conf["test_shard_500_replica"]
+      config = exploded_conf["test_shard_500_replica"]
 
       shared_assertions(config)
       assert_equal "shard_500_replica_host", config["host"]
@@ -150,7 +150,7 @@ describe "ActiveRecordShards::ConfigurationParser.explode" do
     end
 
     it "expands configuration for shard 501's primary" do
-      config = @exploded_conf["test_shard_501"]
+      config = exploded_conf["test_shard_501"]
 
       shared_assertions(config)
       assert_equal "shard_501_host", config["host"]
@@ -158,7 +158,7 @@ describe "ActiveRecordShards::ConfigurationParser.explode" do
     end
 
     it "expands configuration for shard 501's replica" do
-      config = @exploded_conf["test_shard_501_replica"]
+      config = exploded_conf["test_shard_501_replica"]
 
       shared_assertions(config)
       assert_equal "shard_501_host", config["host"]
