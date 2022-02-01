@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+Fix a bug when the given database configuration was already "exploded" with deprecated keys, e.g. `test_slave` or others ending with `_slave`.
+
 ## v3.19.1
 
 ### Fixed
