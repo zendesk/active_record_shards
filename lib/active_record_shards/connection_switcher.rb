@@ -153,14 +153,17 @@ module ActiveRecordShards
     end
 
     def shard_names
-      unless config = configurations[shard_env]
-        raise "Did not find #{shard_env} in configurations, did you forget to add it to your database config? (configurations: #{configurations.to_h.keys.inspect})"
-      end
-      unless config.fetch(SHARD_NAMES_CONFIG_KEY, []).all? { |shard_name| shard_name.is_a?(Integer) }
-        raise "All shard names must be integers: #{config[SHARD_NAMES_CONFIG_KEY].inspect}."
-      end
+      @_ars_shard_names ||= {}
+      @_ars_shard_names[shard_env] ||= begin
+        unless config = configurations[shard_env]
+          raise "Did not find #{shard_env} in configurations, did you forget to add it to your database config? (configurations: #{configurations.to_h.keys.inspect})"
+        end
+        unless config.fetch(SHARD_NAMES_CONFIG_KEY, []).all? { |shard_name| shard_name.is_a?(Integer) }
+          raise "All shard names must be integers: #{config[SHARD_NAMES_CONFIG_KEY].inspect}."
+        end
 
-      config[SHARD_NAMES_CONFIG_KEY] || []
+        config[SHARD_NAMES_CONFIG_KEY] || []
+      end
     end
 
     private
@@ -172,7 +175,7 @@ module ActiveRecordShards
         end
 
         if options.key?(:shard)
-          unless configurations[shard_env]
+          if shard_names.empty?
             raise "Did not find #{shard_env} in configurations, did you forget to add it to your database config? (configurations: #{configurations.to_h.keys.inspect})"
           end
 
