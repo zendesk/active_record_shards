@@ -7,3 +7,5 @@ gemspec path: Bundler.root.to_s.sub('/gemfiles', '')
 group :test do
   gem 'pry-byebug', platforms: [:mri]
 end
+
+gem 'benchmark-ips'
