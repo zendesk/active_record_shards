@@ -25,7 +25,7 @@ ActiveRecord::Base.logger = Logger.new(__dir__ + "/test.log")
 ActiveSupport.test_order = :sorted
 ActiveSupport::Deprecation.behavior = :raise
 
-BaseMigration = (ActiveRecord::VERSION::MAJOR >= 5 ? ActiveRecord::Migration[4.2] : ActiveRecord::Migration) # rubocop:disable Naming/ConstantName
+BaseMigration = ActiveRecord::Migration[4.2]
 
 require 'active_support/test_case'
 
@@ -146,19 +146,10 @@ module SpecHelpers
 
     # Use a fresh connection handler
     ActiveRecord::Base.connection_handler = ActiveRecord::ConnectionAdapters::ConnectionHandler.new
-
-    if ActiveRecord::VERSION::MAJOR == 4
-      # Clear out our own global state
-      ActiveRecord::Base.send(:clear_specification_cache)
-    end
   end
 
   def table_exists?(name)
-    if ActiveRecord::VERSION::MAJOR >= 5
-      ActiveRecord::Base.connection.data_source_exists?(name)
-    else
-      ActiveRecord::Base.connection.table_exists?(name)
-    end
+    ActiveRecord::Base.connection.data_source_exists?(name)
   end
 
   def table_has_column?(table, column)

@@ -27,14 +27,11 @@ jobs:
           - "2.6"
           - "2.7"
         gemfile:
-          - rails4.2
           - rails5.0
           - rails5.1
           - rails5.2
           - rails6.0
         exclude:
-          - ruby-version: "2.7"
-            gemfile: rails4.2
           - ruby-version: "2.7"
             gemfile: rails5.0
           - ruby-version: "2.7"

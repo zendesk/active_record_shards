@@ -28,9 +28,7 @@ describe ActiveRecord::Migrator do
       ActiveRecord::Base.on_shard(nil) do
         assert table_exists?(:unsharded_table)
         assert ActiveRecord::SchemaMigration.table_exists?
-        if ActiveRecord::VERSION::MAJOR >= 5
-          assert ActiveRecord::InternalMetadata.table_exists?
-        end
+        assert ActiveRecord::InternalMetadata.table_exists?
         assert ActiveRecord::Base.connection.select_value("select version from schema_migrations where version = '20190121112233'")
         assert ActiveRecord::Base.connection.select_value("select version from schema_migrations where version = '20190121112234'")
       end
@@ -38,9 +36,7 @@ describe ActiveRecord::Migrator do
       ActiveRecord::Base.on_all_shards do
         assert table_exists?(:sharded_table)
         assert ActiveRecord::SchemaMigration.table_exists?
-        if ActiveRecord::VERSION::MAJOR >= 5
-          assert ActiveRecord::InternalMetadata.table_exists?
-        end
+        assert ActiveRecord::InternalMetadata.table_exists?
         assert ActiveRecord::Base.connection.select_value("select version from schema_migrations where version = '20190121112233'")
         assert ActiveRecord::Base.connection.select_value("select version from schema_migrations where version = '20190121112234'")
       end

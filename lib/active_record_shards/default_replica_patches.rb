@@ -82,12 +82,7 @@ module ActiveRecordShards
       CLASS_REPLICA_METHODS.each { |m| ActiveRecordShards::DefaultReplicaPatches.wrap_method_in_on_replica(true, base, m) }
       CLASS_FORCE_REPLICA_METHODS.each { |m| ActiveRecordShards::DefaultReplicaPatches.wrap_method_in_on_replica(true, base, m, force_on_replica: true) }
 
-      if ActiveRecord::VERSION::MAJOR >= 5
-        ActiveRecordShards::DefaultReplicaPatches.wrap_method_in_on_replica(true, base, :load_schema!, force_on_replica: true)
-      else
-        ActiveRecordShards::DefaultReplicaPatches.wrap_method_in_on_replica(true, base, :columns, force_on_replica: true)
-      end
-
+      ActiveRecordShards::DefaultReplicaPatches.wrap_method_in_on_replica(true, base, :load_schema!, force_on_replica: true)
       ActiveRecordShards::DefaultReplicaPatches.wrap_method_in_on_replica(false, base, :reload)
 
       base.class_eval do
@@ -121,11 +116,6 @@ module ActiveRecordShards
       def self.included(base)
         [:calculate, :exists?, :pluck, :load].each do |m|
           ActiveRecordShards::DefaultReplicaPatches.wrap_method_in_on_replica(false, base, m)
-        end
-
-        if ActiveRecord::VERSION::MAJOR == 4
-          # `where` and `having` clauses call `create_binds`, which will use the primary connection
-          ActiveRecordShards::DefaultReplicaPatches.wrap_method_in_on_replica(false, base, :create_binds, force_on_replica: true)
         end
 
         ActiveRecordShards::DefaultReplicaPatches.wrap_method_in_on_replica(false, base, :to_sql, force_on_replica: true)
