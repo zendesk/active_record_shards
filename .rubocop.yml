@@ -8,7 +8,7 @@ AllCops:
     - .git/**/*
     - gemfiles/vendor/**/*
     - vendor/**/*
-  TargetRubyVersion: 2.3
+  TargetRubyVersion: 2.5
 
 # Configured cops
 

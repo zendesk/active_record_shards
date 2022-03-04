@@ -331,13 +331,11 @@ describe ".on_replica_by_default" do
     end
 
     it "propagates the `on_replica_by_default` writer to inherited classes" do
-      begin
-        AccountInherited.on_replica_by_default = false
-        refute AccountInherited.on_replica_by_default?
-        refute Account.on_replica_by_default?
-      ensure
-        AccountInherited.on_replica_by_default = true
-      end
+      AccountInherited.on_replica_by_default = false
+      refute AccountInherited.on_replica_by_default?
+      refute Account.on_replica_by_default?
+    ensure
+      AccountInherited.on_replica_by_default = true
     end
   end
 end

@@ -78,14 +78,12 @@ namespace :db do
   namespace :test do
     desc 'Purges the test databases by dropping and creating'
     task purge: :load_config do |t|
-      begin
-        saved_env = Rails.env
-        Rails.env = 'test'
-        Rake.application.lookup('db:drop', t.scope).execute
-        Rake.application.lookup('db:create', t.scope).execute
-      ensure
-        Rails.env = saved_env
-      end
+      saved_env = Rails.env
+      Rails.env = 'test'
+      Rake.application.lookup('db:drop', t.scope).execute
+      Rake.application.lookup('db:create', t.scope).execute
+    ensure
+      Rails.env = saved_env
     end
   end
 end
