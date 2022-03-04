@@ -138,17 +138,26 @@ module ActiveRecordShards
     end
 
     def shard_names
-      unless config = configurations[shard_env]
-        raise "Did not find #{shard_env} in configurations, did you forget to add it to your database config? (configurations: #{configurations.to_h.keys.inspect})"
-      end
-      unless config.fetch(SHARD_NAMES_CONFIG_KEY, []).all? { |shard_name| shard_name.is_a?(Integer) }
-        raise "All shard names must be integers: #{config[SHARD_NAMES_CONFIG_KEY].inspect}."
+      unless config_for_env.fetch(SHARD_NAMES_CONFIG_KEY, []).all? { |shard_name| shard_name.is_a?(Integer) }
+        raise "All shard names must be integers: #{config_for_env[SHARD_NAMES_CONFIG_KEY].inspect}."
       end
 
-      config[SHARD_NAMES_CONFIG_KEY] || []
+      config_for_env[SHARD_NAMES_CONFIG_KEY] || []
     end
 
     private
+
+    def config_for_env
+      @_ars_config_for_env ||= {}
+      @_ars_config_for_env[shard_env] ||= begin
+        unless config = configurations[shard_env]
+          raise "Did not find #{shard_env} in configurations, did you forget to add it to your database config? (configurations: #{configurations.to_h.keys.inspect})"
+        end
+
+        config
+      end
+    end
+    alias_method :check_config_for_env, :config_for_env
 
     def switch_connection(options)
       if options.any?
@@ -157,9 +166,7 @@ module ActiveRecordShards
         end
 
         if options.key?(:shard)
-          unless configurations[shard_env]
-            raise "Did not find #{shard_env} in configurations, did you forget to add it to your database config? (configurations: #{configurations.to_h.keys.inspect})"
-          end
+          check_config_for_env
 
           current_shard_selection.shard = options[:shard]
         end
@@ -214,8 +221,10 @@ when '4.2'
   require 'active_record_shards/connection_switcher-4-2'
 when '5.0'
   require 'active_record_shards/connection_switcher-5-0'
-when '5.1', '5.2', '6.0'
+when '5.1', '5.2'
   require 'active_record_shards/connection_switcher-5-1'
+when '6.0'
+  require 'active_record_shards/connection_switcher-6-0'
 else
   raise "ActiveRecordShards is not compatible with #{ActiveRecord::VERSION::STRING}"
 end
