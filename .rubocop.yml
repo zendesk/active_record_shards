@@ -25,6 +25,7 @@ Naming/FileName:
     - 'lib/active_record_shards/connection_switcher-4-2.rb'
     - 'lib/active_record_shards/connection_switcher-5-0.rb'
     - 'lib/active_record_shards/connection_switcher-5-1.rb'
+    - 'lib/active_record_shards/connection_switcher-6-0.rb'
 
 Style/Alias:
   EnforcedStyle: prefer_alias_method
@@ -41,6 +42,9 @@ Lint/AssignmentInCondition:
   Enabled: false
 
 Metrics:
+  Enabled: false
+
+Style/AsciiComments:
   Enabled: false
 
 Style/ClassVars:
