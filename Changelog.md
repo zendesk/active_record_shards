@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## v3.19.3
+
+### Fixed
+
+Fixed terrible performance when used with Rails 6.0 and having many shards defined in the database configuration.
+
 ## v3.19.2
 
 ### Fixed
