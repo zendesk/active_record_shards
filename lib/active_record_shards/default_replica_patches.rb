@@ -44,11 +44,6 @@ module ActiveRecordShards
     end
 
     module InstanceMethods
-      # fix ActiveRecord to do the right thing, and use our aliased quote_value
-      def quote_value(*args, &block)
-        self.class.quote_value(*args, &block)
-      end
-
       def on_replica_unless_tx
         self.class.on_replica_unless_tx { yield }
       end
