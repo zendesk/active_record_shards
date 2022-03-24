@@ -105,11 +105,9 @@ describe "Database rake tasks" do
     it "fails when migrations are pending" do
       ActiveRecord::Migrator.any_instance.stubs(:pending_migrations).returns([stub(version: 1, name: 'Fake')])
       out = capture_stderr do
-        begin
-          rake('db:abort_if_pending_migrations')
-        rescue SystemExit
-          ""
-        end
+        rake('db:abort_if_pending_migrations')
+      rescue SystemExit
+        ""
       end
       assert_match(/You have \d+ pending migrations:/, out)
     end

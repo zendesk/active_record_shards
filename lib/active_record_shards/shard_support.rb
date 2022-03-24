@@ -23,12 +23,10 @@ module ActiveRecordShards
 
       exception = nil
       enum.each do
-        begin
-          record = @scope.find(*find_args)
-          return record if record
-        rescue ActiveRecord::RecordNotFound => e
-          exception = e
-        end
+        record = @scope.find(*find_args)
+        return record if record
+      rescue ActiveRecord::RecordNotFound => e
+        exception = e
       end
       raise exception
     end

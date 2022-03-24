@@ -44,36 +44,32 @@ class TCPProxy
     proxy_server = TCPServer.new('0.0.0.0', local_port)
 
     @thr = Thread.new do
-      begin
-        loop do
-          requesting_socket = proxy_server.accept
+      loop do
+        requesting_socket = proxy_server.accept
 
-          Thread.new do
-            begin
-              responding_socket = TCPSocket.new(remote_host, remote_port)
+        Thread.new do
+          responding_socket = TCPSocket.new(remote_host, remote_port)
 
-              requests = Thread.new { forward(requesting_socket, responding_socket, pause_behavior: :return) }
-              requests.abort_on_exception = true
+          requests = Thread.new { forward(requesting_socket, responding_socket, pause_behavior: :return) }
+          requests.abort_on_exception = true
 
-              responses = Thread.new { forward(responding_socket, requesting_socket) }
-              responses.abort_on_exception = true
+          responses = Thread.new { forward(responding_socket, requesting_socket) }
+          responses.abort_on_exception = true
 
-              # Either thread can be the first to finish - requests if the mysql2 client
-              # closes the connection; responses if the MySQL server closes - so we
-              # cannot do the more common `requests.join and responses.join`.
-              sleep THREAD_CHECK_INTERVAL while requests.alive? && responses.alive?
-              requests.kill
-              responses.kill
-              sleep THREAD_CHECK_INTERVAL until requests.stop? && responses.stop?
-            ensure
-              requesting_socket&.close
-              responding_socket&.close
-            end
-          end
+          # Either thread can be the first to finish - requests if the mysql2 client
+          # closes the connection; responses if the MySQL server closes - so we
+          # cannot do the more common `requests.join and responses.join`.
+          sleep THREAD_CHECK_INTERVAL while requests.alive? && responses.alive?
+          requests.kill
+          responses.kill
+          sleep THREAD_CHECK_INTERVAL until requests.stop? && responses.stop?
+        ensure
+          requesting_socket&.close
+          responding_socket&.close
         end
-      ensure
-        proxy_server.close
       end
+    ensure
+      proxy_server.close
     end
   end
 
