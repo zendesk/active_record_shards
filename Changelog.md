@@ -33,6 +33,12 @@ other methods changed:
 
 Also removes the class `ActiveRecordShards::Deprecation`.
 
+### Added
+
+Add a global setting to disable marking instances from replicas as read-only. To enable:
+
+`ActiveRecordShards.disable_replica_readonly_records = true`
+
 ## v3.19.1
 
 ### Fixed

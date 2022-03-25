@@ -106,7 +106,7 @@ module ActiveRecordShards
 
       # we avoid_readonly_scope to prevent some stack overflow problems, like when
       # .columns calls .with_scope which calls .columns and onward, endlessly.
-      if self == ActiveRecord::Base || !switch_to_replica || construct_ro_scope == false
+      if self == ActiveRecord::Base || !switch_to_replica || construct_ro_scope == false || ActiveRecordShards.disable_replica_readonly_records == true
         yield
       else
         readonly.scoping(&block)
