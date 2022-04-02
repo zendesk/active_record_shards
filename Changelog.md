@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+Rename `ActiveRecordShards.rails_env` to `ActiveRecordShards.app_env`, and include `APP_ENV` and `ENV['APP_ENV']` in the list of places it looks for environment information.
+
 Removed support for Ruby 2.3 and 2.4.
 
 Removed support for Rails 4.2
