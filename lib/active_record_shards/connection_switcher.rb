@@ -171,7 +171,7 @@ module ActiveRecordShards
     end
 
     def shard_env
-      ActiveRecordShards.rails_env
+      ActiveRecordShards.app_env
     end
 
     # Make these few schema related methods available before having switched to

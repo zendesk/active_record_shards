@@ -340,7 +340,7 @@ describe "connection switching" do
   end
 
   describe "in an environment without replica" do
-    switch_rails_env('test3')
+    switch_app_env('test3')
     def spec_name
       ActiveRecord::Base.connection_pool.spec.name
     end
@@ -364,7 +364,7 @@ describe "connection switching" do
   end
 
   describe "in an unsharded environment" do
-    switch_rails_env('test2')
+    switch_app_env('test2')
 
     describe "shard switching" do
       it "just stay on the main db" do

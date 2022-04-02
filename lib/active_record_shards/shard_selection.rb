@@ -21,7 +21,7 @@ module ActiveRecordShards
     PRIMARY = "primary"
     def resolve_connection_name(sharded:, configurations:)
       resolved_shard = sharded ? shard : nil
-      env = ActiveRecordShards.rails_env
+      env = ActiveRecordShards.app_env
 
       @connection_names ||= {}
       @connection_names[env] ||= {}
