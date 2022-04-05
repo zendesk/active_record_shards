@@ -1,4 +1,3 @@
-
 ### Committing a change
 
 #### Development
