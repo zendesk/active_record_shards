@@ -133,26 +133,26 @@ module ActiveRecordShards
     end
 
     def shard_names
-      unless config_for_env.fetch(SHARD_NAMES_CONFIG_KEY, []).all? { |shard_name| shard_name.is_a?(Integer) }
-        raise "All shard names must be integers: #{config_for_env[SHARD_NAMES_CONFIG_KEY].inspect}."
+      unless sharding_config_for_env.fetch(SHARD_NAMES_CONFIG_KEY, []).all? { |shard_name| shard_name.is_a?(Integer) }
+        raise "All shard names must be integers: #{sharding_config_for_env[SHARD_NAMES_CONFIG_KEY].inspect}."
       end
 
-      config_for_env[SHARD_NAMES_CONFIG_KEY] || []
+      sharding_config_for_env[SHARD_NAMES_CONFIG_KEY] || []
     end
 
     private
 
-    def config_for_env
-      @_ars_config_for_env ||= {}
-      @_ars_config_for_env[shard_env] ||= begin
-        unless config = configurations[shard_env]
+    def sharding_config_for_env
+      @_ars_sharding_config_for_env ||= {}
+      @_ars_sharding_config_for_env[shard_env] ||= begin
+        unless config = configurations.configs_for(env_name: shard_env)
           raise "Did not find #{shard_env} in configurations, did you forget to add it to your database config? (configurations: #{configurations.to_h.keys.inspect})"
         end
 
         config
       end
     end
-    alias_method :check_config_for_env, :config_for_env
+    alias_method :check_sharding_config_for_env, :sharding_config_for_env
 
     def switch_connection(options)
       if options.any?
@@ -161,7 +161,7 @@ module ActiveRecordShards
         end
 
         if options.key?(:shard)
-          check_config_for_env
+          check_sharding_config_for_env
 
           current_shard_selection.shard = options[:shard]
         end
