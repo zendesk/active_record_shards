@@ -2,7 +2,6 @@
 
 require 'active_record'
 require 'active_record/base'
-require 'active_record_shards/configuration_parser'
 require 'active_record_shards/model'
 require 'active_record_shards/shard_selection'
 require 'active_record_shards/connection_switcher'
@@ -20,7 +19,6 @@ module ActiveRecordShards
   end
 end
 
-ActiveRecord::Base.extend(ActiveRecordShards::ConfigurationParser)
 ActiveRecord::Base.extend(ActiveRecordShards::Model)
 ActiveRecord::Base.extend(ActiveRecordShards::ConnectionSwitcher)
 ActiveRecord::Base.extend(ActiveRecordShards::DefaultReplicaPatches)

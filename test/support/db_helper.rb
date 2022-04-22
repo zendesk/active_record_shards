@@ -1,3 +1,5 @@
+require 'erb'
+
 module DbHelper
   class << self
     def client

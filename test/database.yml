@@ -9,60 +9,67 @@ mysql: &MYSQL
   password: <%= mysql.password %>
   ssl_mode: :disabled
 
-# We connect to the unsharded primary database on a different port, via a proxy,
-# so we can make the connection unavailable when testing on_replica_by_default
-# behavior.
 test:
-  <<: *MYSQL
-  database: ars_test
-  shard_names: [0, 1]
-  host: 127.0.0.1
-  port: 13306
+  # We connect to the unsharded primary database on a different port, via a proxy,
+  # so we can make the connection unavailable when testing on_replica_by_default
+  # behavior.
+  default:
+    <<: *MYSQL
+    database: ars_test
+    host: 127.0.0.1
+    port: 13306
 
-test_replica:
-  <<: *MYSQL
-  database: ars_test_replica
+  default_replica:
+    <<: *MYSQL
+    database: ars_test_replica
+    replica: true
 
-# We connect to this sharded primary database on a different port, via a proxy,
-# so we can make the connection unavailable when testing on_replica_by_default
-# behavior.
-test_shard_0:
-  <<: *MYSQL
-  database: ars_test_shard0
-  host: 127.0.0.1
-  port: 13307
+  # We connect to this sharded primary database on a different port, via a proxy,
+  # so we can make the connection unavailable when testing on_replica_by_default
+  # behavior.
+  shard_0:
+    <<: *MYSQL
+    database: ars_test_shard0
+    host: 127.0.0.1
+    port: 13307
 
-test_shard_0_replica:
-  <<: *MYSQL
-  database: ars_test_shard0_replica
+  shard_0_replica:
+    <<: *MYSQL
+    database: ars_test_shard0_replica
+    replica: true
 
-# We connect to this sharded primary database on a different port, via a proxy,
-# so we can make the connection unavailable when testing on_replica_by_default
-# behavior.
-test_shard_1:
-  <<: *MYSQL
-  database: ars_test_shard1
-  host: 127.0.0.1
-  port: 13308
+  # We connect to this sharded primary database on a different port, via a proxy,
+  # so we can make the connection unavailable when testing on_replica_by_default
+  # behavior.
+  shard_1:
+    <<: *MYSQL
+    database: ars_test_shard1
+    host: 127.0.0.1
+    port: 13308
 
-test_shard_1_replica:
-  <<: *MYSQL
-  database: ars_test_shard1_replica
+  shard_1_replica:
+    <<: *MYSQL
+    database: ars_test_shard1_replica
+    replica: true
 
+# This config has a replica, but no shards
 test2:
-  <<: *MYSQL
-  database: ars_test2
+  default:
+    <<: *MYSQL
+    database: ars_test2
 
-test2_replica:
-  <<: *MYSQL
-  database: ars_test2_replica
+  default_replica:
+    <<: *MYSQL
+    database: ars_test2_replica
+    replica: true
 
+# This config has a shard, but no replicas
 test3:
-  <<: *MYSQL
-  database: ars_test3
-  shard_names: [0]
+  default:
+    <<: *MYSQL
+    database: ars_test3
 
-test3_shard_0:
-  <<: *MYSQL
-  database: ars_test3_shard0
+  default_shard_0:
+    <<: *MYSQL
+    database: ars_test3_shard0
 
