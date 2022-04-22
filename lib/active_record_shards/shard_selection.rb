@@ -26,11 +26,11 @@ module ActiveRecordShards
         the_shard = shard(klass)
 
         @shard_names ||= {}
-        @shard_names[ActiveRecordShards.rails_env] ||= {}
-        @shard_names[ActiveRecordShards.rails_env][the_shard] ||= {}
-        @shard_names[ActiveRecordShards.rails_env][the_shard][try_replica] ||= {}
-        @shard_names[ActiveRecordShards.rails_env][the_shard][try_replica][@on_replica] ||= begin
-          s = ActiveRecordShards.rails_env.dup
+        @shard_names[ActiveRecordShards.app_env] ||= {}
+        @shard_names[ActiveRecordShards.app_env][the_shard] ||= {}
+        @shard_names[ActiveRecordShards.app_env][the_shard][try_replica] ||= {}
+        @shard_names[ActiveRecordShards.app_env][the_shard][try_replica][@on_replica] ||= begin
+          s = ActiveRecordShards.app_env.dup
           s << "_shard_#{the_shard}" if the_shard
           s << "_replica"            if @on_replica && try_replica
           s
@@ -50,7 +50,7 @@ module ActiveRecordShards
       PRIMARY = "primary"
       def resolve_connection_name(sharded:, configurations:)
         resolved_shard = sharded ? shard : nil
-        env = ActiveRecordShards.rails_env
+        env = ActiveRecordShards.app_env
 
         @connection_names ||= {}
         @connection_names[env] ||= {}

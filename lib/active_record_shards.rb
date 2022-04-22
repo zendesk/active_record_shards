@@ -12,10 +12,12 @@ require 'active_record_shards/default_replica_patches'
 require 'active_record_shards/schema_dumper_extension'
 
 module ActiveRecordShards
-  def self.rails_env
+  def self.app_env
     env = Rails.env if defined?(Rails.env)
     env ||= RAILS_ENV if Object.const_defined?(:RAILS_ENV)
     env ||= ENV['RAILS_ENV']
+    env ||= APP_ENV if Object.const_defined?(:APP_ENV)
+    env ||= ENV['APP_ENV']
     env || 'development'
   end
 end
