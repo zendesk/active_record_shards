@@ -6,7 +6,7 @@ describe 'ActiveRecordShards' do
   describe '.app_env' do
     before do
       if defined?(Rails) || ENV['RAILS_ENV'] || defined?(APP_ENV) || ENV['APP_ENV']
-        raise 'Tests in active_record_shards_test.rb will overwrite environment constants, please update them to avoid conflicts'
+        raise "Tests in #{__FILE__} will overwrite environment constants, please update them to avoid conflicts"
       end
 
       Object.send(:remove_const, 'RAILS_ENV')
