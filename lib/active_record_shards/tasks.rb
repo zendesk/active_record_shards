@@ -10,7 +10,7 @@ namespace :db do
   desc 'Drops the database for the current RAILS_ENV including shards'
   task drop: :load_config do
     ActiveRecord::Base.configurations.to_h.each do |key, conf|
-      next if !key.start_with?(ActiveRecordShards.rails_env) || key.end_with?("_replica")
+      next if !key.start_with?(ActiveRecordShards.app_env) || key.end_with?("_replica")
 
       begin
         ActiveRecordShards::Tasks.root_connection(conf).drop_database(conf['database'])
@@ -31,7 +31,7 @@ namespace :db do
   desc "Create the database defined in config/database.yml for the current RAILS_ENV including shards"
   task create: :load_config do
     ActiveRecord::Base.configurations.to_h.each do |key, conf|
-      next if !key.start_with?(ActiveRecordShards.rails_env) || key.end_with?("_replica")
+      next if !key.start_with?(ActiveRecordShards.app_env) || key.end_with?("_replica")
 
       begin
         # MysqlAdapter takes charset instead of encoding in Rails 4.2 or greater
@@ -48,7 +48,7 @@ namespace :db do
         end
       end
     end
-    ActiveRecord::Base.establish_connection(ActiveRecordShards.rails_env.to_sym)
+    ActiveRecord::Base.establish_connection(ActiveRecordShards.app_env.to_sym)
   end
 
   desc "Raises an error if there are pending migrations"

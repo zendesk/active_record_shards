@@ -173,7 +173,7 @@ end
 Minitest::Spec.include(SpecHelpers)
 
 module RailsEnvSwitch
-  def switch_rails_env(env)
+  def switch_app_env(env)
     before do
       silence_warnings { Object.const_set("RAILS_ENV", env) }
       ActiveRecord::Base.establish_connection(::RAILS_ENV.to_sym)

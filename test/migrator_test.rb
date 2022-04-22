@@ -10,7 +10,7 @@ describe ActiveRecord::Migrator do
   describe "when DB is empty" do
     extend RailsEnvSwitch
 
-    switch_rails_env('test3')
+    switch_app_env('test3')
 
     it "makes meta tables" do
       ActiveRecord::Base.on_shard(nil) do
