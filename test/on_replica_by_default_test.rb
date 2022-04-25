@@ -1,13 +1,15 @@
 # frozen_string_literal: true
 
 require_relative 'helper'
-require 'models'
 
 describe ".on_replica_by_default" do
   with_fresh_databases
 
   before do
     ActiveRecord::Base.establish_connection(RAILS_ENV.to_sym)
+    unless defined?(UnshardedApplicationRecord)
+      require 'models'
+    end
 
     Account.on_replica_by_default = true
     Person.on_replica_by_default = true
