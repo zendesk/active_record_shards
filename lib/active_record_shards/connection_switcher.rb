@@ -133,11 +133,7 @@ module ActiveRecordShards
     end
 
     def shard_names
-      unless sharding_config_for_env.fetch(SHARD_NAMES_CONFIG_KEY, []).all? { |shard_name| shard_name.is_a?(Integer) }
-        raise "All shard names must be integers: #{sharding_config_for_env[SHARD_NAMES_CONFIG_KEY].inspect}."
-      end
-
-      sharding_config_for_env[SHARD_NAMES_CONFIG_KEY] || []
+      sharding_config_for_env.filter { |config| config.name.start_with?('shard') }
     end
 
     private
