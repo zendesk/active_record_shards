@@ -5,8 +5,8 @@ module ActiveRecordShards
 
       @_ars_connection_specification_names ||= {}
       unless @_ars_connection_specification_names.include?(name)
-        unless configurations[name] || name == "primary"
-          raise ActiveRecord::AdapterNotSpecified, "No database defined by #{name} in your database config. (configurations: #{configurations.to_h.keys.inspect})"
+        unless configurations.configs_for(env_name: ENV['RAILS_ENV'], name: name, include_replicas: true) || name == "default"
+          raise ActiveRecord::AdapterNotSpecified, "No database defined by #{name} in your database config. (configurations: #{configurations.inspect})"
         end
 
         @_ars_connection_specification_names[name] = true
