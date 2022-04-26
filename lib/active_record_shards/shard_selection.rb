@@ -26,15 +26,19 @@ module ActiveRecordShards
       @connection_names ||= {}
       @connection_names[env] ||= {}
       @connection_names[env][resolved_shard] ||= {}
+
       @connection_names[env][resolved_shard][@on_replica] ||= begin
         name = env.dup
-        name << "_shard_#{resolved_shard}" if resolved_shard
-        if @on_replica && configurations["#{name}_replica"]
-          "#{name}_replica"
+        shard_name = resolved_shard.dup
+        # name << "_shard_#{resolved_shard}" if resolved_shard
+        if @on_replica && configurations.configs_for(env_name: name, name: "#{shard_name}_replica", include_replicas: true)
+          "#{shard_name}_replica"
+        elsif @on_replica && configurations.configs_for(env_name: name, name: "default_replica", include_replicas: true)
+          'default_replica'
         else
           # ActiveRecord always names its default connection pool 'primary'
           # while everything else is named by the configuration name
-          resolved_shard ? name : PRIMARY
+          resolved_shard ? name : 'default'
         end
       end
     end
