@@ -133,7 +133,7 @@ module ActiveRecordShards
     end
 
     def shard_names
-      sharding_config_for_env.filter { |config| config.name.start_with?('shard') }
+      sharding_config_for_env.filter { |config| config.name.start_with?('shard') }.map { |config| config.name }
     end
 
     private
