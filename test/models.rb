@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class UnshardedApplicationRecord < ActiveRecord::Base
+class ApplicationRecord < ActiveRecord::Base
   self.abstract_class = true
 
   connects_to database: { writing: :default, reading: :default_replica }
@@ -15,7 +15,7 @@ class ShardedApplicationRecord < ActiveRecord::Base
   }
 end
 
-class Account < UnshardedApplicationRecord
+class Account < ApplicationRecord
   # attributes: id, name, updated_at, created_at
 
   has_many :tickets
@@ -23,7 +23,7 @@ class Account < UnshardedApplicationRecord
   has_and_belongs_to_many :people, join_table: 'account_people'
 end
 
-class AccountThing < UnshardedApplicationRecord
+class AccountThing < ApplicationRecord
   scope(:enabled, -> { where(enabled: true) })
 end
 
@@ -35,7 +35,7 @@ class Ticket < ShardedApplicationRecord
   belongs_to :account
 end
 
-class Person < UnshardedApplicationRecord
+class Person < ApplicationRecord
 end
 
 class User < Person
