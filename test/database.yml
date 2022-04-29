@@ -1,26 +1,29 @@
 <% mysql = URI(ENV['MYSQL_URL'] || 'mysql://root@127.0.0.1:3306') %>
 
-mysql: &MYSQL
-  encoding: utf8
-  adapter: mysql2
-  username: <%= mysql.user %>
-  host: <%= mysql.host %>
-  port: <%= mysql.port %>
-  password: <%= mysql.password %>
-  ssl_mode: :disabled
+<%
+default_config = <<-YAML
+    encoding: utf8
+    adapter: mysql2
+    username: #{mysql.user}
+    host: #{mysql.host}
+    port: #{mysql.port}
+    password: #{mysql.password}
+    ssl_mode: :disabled
+YAML
+%>
 
 test:
   # We connect to the unsharded primary database on a different port, via a proxy,
   # so we can make the connection unavailable when testing on_replica_by_default
   # behavior.
   default:
-    <<: *MYSQL
+<%= default_config -%>
     database: ars_test
     host: 127.0.0.1
     port: 13306
 
   default_replica:
-    <<: *MYSQL
+<%= default_config -%>
     database: ars_test_replica
     replica: true
 
@@ -28,13 +31,13 @@ test:
   # so we can make the connection unavailable when testing on_replica_by_default
   # behavior.
   shard_0:
-    <<: *MYSQL
+<%= default_config -%>
     database: ars_test_shard0
     host: 127.0.0.1
     port: 13307
 
   shard_0_replica:
-    <<: *MYSQL
+<%= default_config -%>
     database: ars_test_shard0_replica
     replica: true
 
@@ -42,34 +45,34 @@ test:
   # so we can make the connection unavailable when testing on_replica_by_default
   # behavior.
   shard_1:
-    <<: *MYSQL
+<%= default_config -%>
     database: ars_test_shard1
     host: 127.0.0.1
     port: 13308
 
   shard_1_replica:
-    <<: *MYSQL
+<%= default_config -%>
     database: ars_test_shard1_replica
     replica: true
 
 # This config has a replica, but no shards
 test2:
   default:
-    <<: *MYSQL
+<%= default_config -%>
     database: ars_test2
 
   default_replica:
-    <<: *MYSQL
+<%= default_config -%>
     database: ars_test2_replica
     replica: true
 
 # This config has a shard, but no replicas
 test3:
   default:
-    <<: *MYSQL
+<%= default_config -%>
     database: ars_test3
 
   default_shard_0:
-    <<: *MYSQL
+<%= default_config -%>
     database: ars_test3_shard0
 
