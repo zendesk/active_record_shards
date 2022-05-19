@@ -218,15 +218,15 @@ describe "connection switching" do
 
     describe "for unsharded models" do
       before do
+        DbHelper.execute_sql("test", "default_replica", "ALTER TABLE accounts ADD COLUMN foo INT")
         Account.on_replica do
-          Account.connection.execute("alter table accounts add column foo int")
           Account.reset_column_information
         end
       end
 
       after do
+        DbHelper.execute_sql("test", "default_replica", "ALTER TABLE accounts DROP COLUMN foo")
         Account.on_replica do
-          ActiveRecord::Base.connection.execute("alter table accounts drop column foo")
           Account.reset_column_information
           refute_includes(Account.column_names, 'foo')
         end
@@ -245,18 +245,18 @@ describe "connection switching" do
 
     describe "for sharded models" do
       before do
+        DbHelper.execute_sql("test", "shard_0_replica", "ALTER TABLE tickets ADD COLUMN foo INT")
         ActiveRecord::Base.on_first_shard do
           ActiveRecord::Base.on_replica do
-            ActiveRecord::Base.connection.execute("alter table tickets add column foo int")
             Ticket.reset_column_information
           end
         end
       end
 
       after do
+        DbHelper.execute_sql("test", "shard_0_replica", "ALTER TABLE tickets DROP COLUMN foo")
         ActiveRecord::Base.on_first_shard do
           ActiveRecord::Base.on_replica do
-            ActiveRecord::Base.connection.execute("alter table tickets drop column foo")
             Ticket.reset_column_information
           end
         end
@@ -275,15 +275,11 @@ describe "connection switching" do
 
     describe "for SchemaMigration" do
       before do
-        ActiveRecord::Base.on_shard(nil) do
-          ActiveRecord::Base.connection.execute("alter table schema_migrations add column foo int")
-        end
+        DbHelper.execute_sql("test", "default", "ALTER TABLE schema_migrations ADD COLUMN foo INT")
       end
 
       after do
-        ActiveRecord::Base.on_shard(nil) do
-          ActiveRecord::Base.connection.execute("alter table schema_migrations drop column foo")
-        end
+        DbHelper.execute_sql("test", "default", "ALTER TABLE schema_migrations DROP COLUMN foo")
       end
 
       it "doesn't switch to shard" do
@@ -314,7 +310,7 @@ describe "connection switching" do
           not_sharded
         end
 
-        UnshardedModel.on_replica { UnshardedModel.connection.execute("create table unsharded_models (id int)") }
+        DbHelper.execute_sql("test", "default_replica", "CREATE TABLE unsharded_models (id INT)")
         assert UnshardedModel.table_exists?
 
         ActiveRecord::Base.on_all_shards do
@@ -328,11 +324,7 @@ describe "connection switching" do
         class ShardedModel < ActiveRecord::Base
         end
 
-        ActiveRecord::Base.on_first_shard do
-          ShardedModel.on_replica do
-            ShardedModel.connection.execute("create table sharded_models (id int)")
-          end
-        end
+        DbHelper.execute_sql("test", "shard_0_replica", "CREATE TABLE sharded_models (id INT)")
 
         assert ShardedModel.table_exists?
       end
@@ -480,11 +472,11 @@ describe "connection switching" do
         before do
           Account.on_replica_by_default = true
 
-          Account.on_primary.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'primary_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
+          DbHelper.execute_sql("test", "default", "INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'primary_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
           assert(Account.on_primary.find(1000))
           assert_equal('primary_name', Account.on_primary.find(1000).name)
 
-          Account.on_replica.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'replica_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
+          DbHelper.execute_sql("test", "default_replica", "INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'replica_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
 
           @model = Account.on_replica.find(1000)
           assert(@model)
@@ -525,7 +517,7 @@ describe "connection switching" do
 
       describe "a model loaded with the primary" do
         before do
-          Account.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'primary_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
+          DbHelper.execute_sql("test", "default", "INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'primary_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
           @model = Account.first
           assert(@model)
           assert_equal('primary_name', @model.name)

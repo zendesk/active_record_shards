@@ -2,6 +2,18 @@ require 'erb'
 
 module DbHelper
   class << self
+    def execute_sql(env_name, name, sql)
+      config = DbHelper.database_configurations.fetch(env_name).fetch(name)
+      client = Mysql2::Client.new(
+        host: config['host'],
+        port: config['port'],
+        username: config['username'],
+        password: config['password'],
+        database: config['database']
+      )
+      client.query(sql)
+    end
+
     def client
       @client ||= begin
         config = URI(ENV["MYSQL_URL"] || "mysql://root@127.0.0.1:3306")
@@ -48,9 +60,13 @@ module DbHelper
 
     # Load the database configuration into ActiveRecord
     def load_database_configuration(path_or_io = 'test/database.yml')
+      ActiveRecord::Base.configurations = database_configurations(path_or_io)
+    end
+
+    def database_configurations(path_or_io = 'test/database.yml')
       erb_config = path_or_io.is_a?(String) ? IO.read(path_or_io) : path_or_io.read
       yaml_config = ERB.new(erb_config, trim_mode: '-').result
-      ActiveRecord::Base.configurations = YAML.load(yaml_config) # rubocop:disable Security/YAMLLoad
+      YAML.load(yaml_config) # rubocop:disable Security/YAMLLoad
     end
   end
 

@@ -3,6 +3,7 @@
 require_relative 'helper'
 
 describe ".on_replica_by_default" do
+
   with_fresh_databases
 
   before do
@@ -14,27 +15,34 @@ describe ".on_replica_by_default" do
     Account.on_replica_by_default = true
     Person.on_replica_by_default = true
 
-    Account.connection.execute(
+    DbHelper.execute_sql(
+      "test", "default",
       "INSERT INTO accounts (id, name, created_at, updated_at) VALUES (1000, 'Primary account', NOW(), NOW())"
     )
-    Account.on_replica.connection.execute(
+    DbHelper.execute_sql(
+      "test", "default_replica",
       "INSERT INTO accounts (id, name, created_at, updated_at) VALUES (1000, 'Replica account', NOW(), NOW())"
     )
-    Account.on_replica.connection.execute(
+    DbHelper.execute_sql(
+      "test", "default_replica",
       "INSERT INTO accounts (id, name, created_at, updated_at) VALUES (1001, 'Replica account 2', NOW(), NOW())"
     )
 
-    Person.connection.execute(
+    DbHelper.execute_sql(
+      "test", "default",
       "REPLACE INTO people(id, name) VALUES (10, 'Primary person')"
     )
-    Person.on_replica.connection.execute(
+    DbHelper.execute_sql(
+      "test", "default_replica",
       "REPLACE INTO people(id, name) VALUES (20, 'Replica person')"
     )
 
-    Account.connection.execute(
+    DbHelper.execute_sql(
+      "test", "default",
       "INSERT INTO account_people(account_id, person_id) VALUES (1000, 10)"
     )
-    Account.on_replica.connection.execute(
+    DbHelper.execute_sql(
+      "test", "default_replica",
       "INSERT INTO account_people(account_id, person_id) VALUES (1001, 20)"
     )
   end
@@ -110,7 +118,10 @@ describe ".on_replica_by_default" do
 
   it "executes `exists?` on the replica with a named scope" do
     AccountThing.on_replica_by_default = true
-    AccountThing.on_replica.connection.execute("INSERT INTO account_things (id, account_id) VALUES (123125, 1000)")
+    DbHelper.execute_sql(
+      "test", "default_replica",
+      "INSERT INTO account_things (id, account_id) VALUES (123125, 1000)"
+    )
 
     with_all_primaries_unavailable do
       assert AccountThing.enabled.exists?(123125)
@@ -121,8 +132,14 @@ describe ".on_replica_by_default" do
 
   it "counts associations on the replica" do
     AccountThing.on_replica_by_default = true
-    AccountThing.on_replica.connection.execute("INSERT INTO account_things (id, account_id) VALUES (123123, 1000)")
-    AccountThing.on_replica.connection.execute("INSERT INTO account_things (id, account_id) VALUES (123124, 1000)")
+    DbHelper.execute_sql(
+      "test", "default_replica",
+      "INSERT INTO account_things (id, account_id) VALUES (123123, 1000)"
+    )
+    DbHelper.execute_sql(
+      "test", "default_replica",
+      "INSERT INTO account_things (id, account_id) VALUES (123124, 1000)"
+    )
 
     with_all_primaries_unavailable do
       assert_equal 2, Account.find(1000).account_things.count
@@ -160,14 +177,16 @@ describe ".on_replica_by_default" do
   end
 
   it "executes `map` on preloaded relation on the primary" do
-    Ticket.on_shard(1) do
-      Ticket.connection.execute(
-        "INSERT INTO tickets (id, title, account_id, created_at, updated_at) VALUES (50000, 'Primary ticket', 1001, NOW(), NOW())"
-      )
-      Ticket.on_replica.connection.execute(
-        "INSERT INTO tickets (id, title, account_id, created_at, updated_at) VALUES (50001, 'Replica ticket', 1001, NOW(), NOW())"
-      )
+    DbHelper.execute_sql(
+      "test", "shard_1",
+      "INSERT INTO tickets (id, title, account_id, created_at, updated_at) VALUES (50000, 'Primary ticket', 1001, NOW(), NOW())"
+    )
+    DbHelper.execute_sql(
+      "test", "shard_1_replica",
+      "INSERT INTO tickets (id, title, account_id, created_at, updated_at) VALUES (50001, 'Replica ticket', 1001, NOW(), NOW())"
+    )
 
+    Ticket.on_shard(1) do
       with_unsharded_primary_unavailable do
         ticket_rel = Ticket.preload(:account).where(id: 50000)
         ticket_titles = ticket_rel.map(&:title)
@@ -185,10 +204,12 @@ describe ".on_replica_by_default" do
   end
 
   it "executes `count` on association on the replica" do
-    Person.on_replica.connection.execute(
+    DbHelper.execute_sql(
+      "test", "default_replica",
       "INSERT INTO people(id, name) VALUES (30, 'Replica person 2')"
     )
-    Account.on_replica.connection.execute(
+    DbHelper.execute_sql(
+      "test", "default_replica",
       "INSERT INTO account_people(account_id, person_id) VALUES (1001, 30)"
     )
 
@@ -200,14 +221,14 @@ describe ".on_replica_by_default" do
   end
 
   it "can call preload from sharded model to unsharded model" do
-    Ticket.on_shard(1) do
-      Ticket.connection.execute(
-        "INSERT INTO tickets (id, title, account_id, created_at, updated_at) VALUES (50000, 'Primary ticket', 1000, NOW(), NOW())"
-      )
-      Ticket.on_replica.connection.execute(
-        "INSERT INTO tickets (id, title, account_id, created_at, updated_at) VALUES (50001, 'Replica ticket', 1001, NOW(), NOW())"
-      )
-    end
+    DbHelper.execute_sql(
+      "test", "shard_1",
+      "INSERT INTO tickets (id, title, account_id, created_at, updated_at) VALUES (50000, 'Primary ticket', 1000, NOW(), NOW())"
+    )
+    DbHelper.execute_sql(
+      "test", "shard_1_replica",
+      "INSERT INTO tickets (id, title, account_id, created_at, updated_at) VALUES (50001, 'Replica ticket', 1001, NOW(), NOW())"
+    )
 
     begin
       Ticket.on_replica_by_default = true
@@ -227,14 +248,14 @@ describe ".on_replica_by_default" do
   end
 
   it "can handle association from sharded model to unsharded model" do
-    Ticket.on_shard(1) do
-      Ticket.connection.execute(
-        "INSERT INTO tickets (id, title, account_id, created_at, updated_at) VALUES (50000, 'Primary ticket', 1000, NOW(), NOW())"
-      )
-      Ticket.on_replica.connection.execute(
-        "INSERT INTO tickets (id, title, account_id, created_at, updated_at) VALUES (50001, 'Replica ticket', 1001, NOW(), NOW())"
-      )
-    end
+    DbHelper.execute_sql(
+      "test", "shard_1",
+      "INSERT INTO tickets (id, title, account_id, created_at, updated_at) VALUES (50000, 'Primary ticket', 1000, NOW(), NOW())"
+    )
+    DbHelper.execute_sql(
+      "test", "shard_1_replica",
+      "INSERT INTO tickets (id, title, account_id, created_at, updated_at) VALUES (50001, 'Replica ticket', 1001, NOW(), NOW())"
+    )
 
     begin
       Ticket.on_replica_by_default = true
