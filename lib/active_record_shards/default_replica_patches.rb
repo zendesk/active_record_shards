@@ -71,9 +71,6 @@ module ActiveRecordShards
       :table_exists?
     ].freeze
 
-    CLASS_SLAVE_METHODS = CLASS_REPLICA_METHODS
-    CLASS_FORCE_SLAVE_METHODS = CLASS_FORCE_REPLICA_METHODS
-
     def self.extended(base)
       CLASS_REPLICA_METHODS.each { |m| ActiveRecordShards::DefaultReplicaPatches.wrap_method_in_on_replica(true, base, m) }
       CLASS_FORCE_REPLICA_METHODS.each { |m| ActiveRecordShards::DefaultReplicaPatches.wrap_method_in_on_replica(true, base, m, force_on_replica: true) }
