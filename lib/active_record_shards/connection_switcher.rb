@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'active_record_shards/shard_support'
-
 module ActiveRecordShards
   module ConnectionSwitcher
     SHARD_NAMES_CONFIG_KEY = 'shard_names'
@@ -34,10 +32,6 @@ module ActiveRecordShards
     def on_first_shard(&block)
       shard_name = shard_names.first
       on_shard(shard_name, &block)
-    end
-
-    def shards
-      ShardSupport.new(self == ActiveRecord::Base ? nil : where(nil))
     end
 
     def on_all_shards
