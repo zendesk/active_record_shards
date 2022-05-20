@@ -3,15 +3,15 @@
 class ApplicationRecord < ActiveRecord::Base
   self.abstract_class = true
 
-  connects_to database: { writing: :default, reading: :default_replica }
+  connects_to database: { writing: :default_primary, reading: :default_replica }
 end
 
 class ShardedApplicationRecord < ActiveRecord::Base
   self.abstract_class = true
 
   connects_to shards: {
-    shard_0: { writing: :shard_0, reading: :shard_0_replica },
-    shard_1: { writing: :shard_1, reading: :shard_1_replica }
+    shard_0: { writing: :shard_0_primary, reading: :shard_0_replica },
+    shard_1: { writing: :shard_1_primary, reading: :shard_1_replica }
   }
 
   self.default_shard = :shard_0

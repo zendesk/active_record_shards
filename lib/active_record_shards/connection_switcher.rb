@@ -28,7 +28,7 @@ module ActiveRecordShards
     end
 
     def on_first_shard(&block)
-      shard_name = shard_names.first
+      shard_name = shard_names.first.to_sym
       on_shard(shard_name, &block)
     end
 
@@ -150,10 +150,8 @@ module ActiveRecordShards
     # a shard.
     def with_default_shard(&block)
       if is_sharded? && current_shard_id.nil? && table_name != ActiveRecord::SchemaMigration.table_name
-        p 'going on first shard'
         on_first_shard(&block)
       else
-        p 'not going on first shard'
         yield
       end
     end

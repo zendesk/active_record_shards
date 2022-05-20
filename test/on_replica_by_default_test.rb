@@ -16,7 +16,7 @@ describe ".on_replica_by_default" do
     Person.on_replica_by_default = true
 
     DbHelper.execute_sql(
-      "test", "default",
+      "test", "default_primary",
       "INSERT INTO accounts (id, name, created_at, updated_at) VALUES (1000, 'Primary account', NOW(), NOW())"
     )
     DbHelper.execute_sql(
@@ -29,7 +29,7 @@ describe ".on_replica_by_default" do
     )
 
     DbHelper.execute_sql(
-      "test", "default",
+      "test", "default_primary",
       "REPLACE INTO people(id, name) VALUES (10, 'Primary person')"
     )
     DbHelper.execute_sql(
@@ -38,7 +38,7 @@ describe ".on_replica_by_default" do
     )
 
     DbHelper.execute_sql(
-      "test", "default",
+      "test", "default_primary",
       "INSERT INTO account_people(account_id, person_id) VALUES (1000, 10)"
     )
     DbHelper.execute_sql(
@@ -178,7 +178,7 @@ describe ".on_replica_by_default" do
 
   it "executes `map` on preloaded relation on the primary" do
     DbHelper.execute_sql(
-      "test", "shard_1",
+      "test", "shard_1_primary",
       "INSERT INTO tickets (id, title, account_id, created_at, updated_at) VALUES (50000, 'Primary ticket', 1001, NOW(), NOW())"
     )
     DbHelper.execute_sql(
@@ -222,7 +222,7 @@ describe ".on_replica_by_default" do
 
   it "can call preload from sharded model to unsharded model" do
     DbHelper.execute_sql(
-      "test", "shard_1",
+      "test", "shard_1_primary",
       "INSERT INTO tickets (id, title, account_id, created_at, updated_at) VALUES (50000, 'Primary ticket', 1000, NOW(), NOW())"
     )
     DbHelper.execute_sql(
@@ -249,7 +249,7 @@ describe ".on_replica_by_default" do
 
   it "can handle association from sharded model to unsharded model" do
     DbHelper.execute_sql(
-      "test", "shard_1",
+      "test", "shard_1_primary",
       "INSERT INTO tickets (id, title, account_id, created_at, updated_at) VALUES (50000, 'Primary ticket', 1000, NOW(), NOW())"
     )
     DbHelper.execute_sql(
@@ -260,7 +260,7 @@ describe ".on_replica_by_default" do
     begin
       Ticket.on_replica_by_default = true
 
-      Ticket.on_shard(1) do
+      Ticket.on_shard(:shard_1) do
         with_all_primaries_unavailable do
           ticket = Ticket.find(50001)
           account_name = ticket.account.name

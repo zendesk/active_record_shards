@@ -16,7 +16,7 @@ test:
   # We connect to the unsharded primary database on a different port, via a proxy,
   # so we can make the connection unavailable when testing on_replica_by_default
   # behavior.
-  default:
+  default_primary:
 <%= default_config -%>
     database: ars_test
     host: 127.0.0.1
@@ -30,7 +30,7 @@ test:
   # We connect to this sharded primary database on a different port, via a proxy,
   # so we can make the connection unavailable when testing on_replica_by_default
   # behavior.
-  shard_0:
+  shard_0_primary:
 <%= default_config -%>
     database: ars_test_shard0
     host: 127.0.0.1
@@ -44,7 +44,7 @@ test:
   # We connect to this sharded primary database on a different port, via a proxy,
   # so we can make the connection unavailable when testing on_replica_by_default
   # behavior.
-  shard_1:
+  shard_1_primary:
 <%= default_config -%>
     database: ars_test_shard1
     host: 127.0.0.1
@@ -57,7 +57,7 @@ test:
 
 # This config has a replica, but no shards
 test2:
-  default:
+  default_primary:
 <%= default_config -%>
     database: ars_test2
 

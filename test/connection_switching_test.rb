@@ -275,11 +275,11 @@ describe "connection switching" do
 
     describe "for SchemaMigration" do
       before do
-        DbHelper.execute_sql("test", "default", "ALTER TABLE schema_migrations ADD COLUMN foo INT")
+        DbHelper.execute_sql("test", "default_primary", "ALTER TABLE schema_migrations ADD COLUMN foo INT")
       end
 
       after do
-        DbHelper.execute_sql("test", "default", "ALTER TABLE schema_migrations DROP COLUMN foo")
+        DbHelper.execute_sql("test", "default_primary", "ALTER TABLE schema_migrations DROP COLUMN foo")
       end
 
       it "doesn't switch to shard" do
@@ -474,7 +474,7 @@ describe "connection switching" do
         before do
           Account.on_replica_by_default = true
 
-          DbHelper.execute_sql("test", "default", "INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'primary_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
+          DbHelper.execute_sql("test", "default_primary", "INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'primary_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
           assert(Account.on_primary.find(1000))
           assert_equal('primary_name', Account.on_primary.find(1000).name)
 
@@ -519,7 +519,7 @@ describe "connection switching" do
 
       describe "a model loaded with the primary" do
         before do
-          DbHelper.execute_sql("test", "default", "INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'primary_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
+          DbHelper.execute_sql("test", "default_primary", "INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'primary_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
           @model = Account.first
           assert(@model)
           assert_equal('primary_name', @model.name)
