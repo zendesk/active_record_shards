@@ -130,50 +130,6 @@ describe "connection switching" do
         assert_equal [["ars_test", nil]], result
       end
     end
-
-    describe ".shards.enum" do
-      it "works like this:" do
-        ActiveRecord::Base.on_all_shards { Ticket.create! }
-        count = ActiveRecord::Base.shards.enum.map { Ticket.count }.inject(&:+)
-        assert_equal(ActiveRecord::Base.shard_names.size, count)
-      end
-    end
-
-    describe ".shards.find" do
-      it "works like this:" do
-        t = ActiveRecord::Base.on_shard(1) { Ticket.create! }
-        assert(Ticket.shards.find(t.id))
-
-        assert_raises(ActiveRecord::RecordNotFound) do
-          Ticket.shards.find(123123123)
-        end
-      end
-    end
-
-    describe ".shards.count" do
-      before do
-        ActiveRecord::Base.on_shard(0) { 2.times { Ticket.create!(title: "0") } }
-        ActiveRecord::Base.on_shard(1) { Ticket.create!(title: "1") }
-      end
-
-      it "works like this:" do
-        count = Ticket.shards.count
-        assert_equal(3, count)
-      end
-
-      it "works with scopes" do
-        assert_equal(1, Ticket.where(title: "1").shards.count)
-      end
-    end
-
-    describe ".shards.to_a" do
-      it "works like this" do
-        ActiveRecord::Base.on_all_shards { |s| Ticket.create!(title: s.to_s) }
-
-        res = Ticket.where(title: "1").shards.to_a
-        assert_equal 1, res.size
-      end
-    end
   end
 
   describe "default shard selection" do
