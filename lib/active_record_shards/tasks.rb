@@ -54,16 +54,8 @@ namespace :db do
   desc "Raises an error if there are pending migrations"
   task abort_if_pending_migrations: :environment do
     if defined? ActiveRecord
-      pending_migrations =
-        if ActiveRecord::VERSION::MAJOR >= 6
-          migrations = ActiveRecord::MigrationContext.new(ActiveRecord::Migrator.migrations_paths, ActiveRecord::SchemaMigration).migrations
-          ActiveRecord::Migrator.new(:up, migrations, ActiveRecord::SchemaMigration).pending_migrations
-        elsif ActiveRecord::VERSION::STRING >= "5.2.0"
-          migrations = ActiveRecord::MigrationContext.new(ActiveRecord::Migrator.migrations_paths).migrations
-          ActiveRecord::Migrator.new(:up, migrations).pending_migrations
-        else
-          ActiveRecord::Base.on_shard(nil) { ActiveRecord::Migrator.open(ActiveRecord::Migrator.migrations_paths).pending_migrations }
-        end
+      migrations = ActiveRecord::MigrationContext.new(ActiveRecord::Migrator.migrations_paths, ActiveRecord::SchemaMigration).migrations
+      pending_migrations = ActiveRecord::Migrator.new(:up, migrations, ActiveRecord::SchemaMigration).pending_migrations
 
       if pending_migrations.any?
         warn "You have #{pending_migrations.size} pending migrations:"

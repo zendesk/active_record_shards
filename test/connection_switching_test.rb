@@ -395,23 +395,15 @@ describe "connection switching" do
   describe "replica driving" do
     describe "without replica configuration" do
       before do
-        if ActiveRecord::VERSION::MAJOR >= 6
-          @saved_config = ActiveRecord::Base.configurations.find_db_config('test_replica')
-          ActiveRecord::Base.configurations.configurations.delete(@saved_config)
-        else
-          @saved_config = ActiveRecord::Base.configurations.delete('test_replica')
-        end
+        @saved_config = ActiveRecord::Base.configurations.find_db_config('test_replica')
+        ActiveRecord::Base.configurations.configurations.delete(@saved_config)
         Thread.current[:shard_selection] = nil # drop caches
         clear_connection_pool
         ActiveRecord::Base.establish_connection(:test)
       end
 
       after do
-        if ActiveRecord::VERSION::MAJOR >= 6
-          ActiveRecord::Base.configurations.configurations << @saved_config
-        else
-          ActiveRecord::Base.configurations['test_replica'] = @saved_config
-        end
+        ActiveRecord::Base.configurations.configurations << @saved_config
         Thread.current[:shard_selection] = nil # drop caches
       end
 

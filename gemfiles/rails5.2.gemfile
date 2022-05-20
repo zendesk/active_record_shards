@@ -1,3 +1,0 @@
-eval_gemfile 'common.rb'
-
-gem 'activerecord', '~> 5.2.0'

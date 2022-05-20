@@ -158,16 +158,8 @@ module SpecHelpers
 
   def migrator(direction = :up, path = 'migrations', target_version = nil)
     migration_path = File.join(__dir__, "support", path)
-    if ActiveRecord::VERSION::MAJOR >= 6
-      migrations = ActiveRecord::MigrationContext.new(migration_path, ActiveRecord::SchemaMigration).migrations
-      ActiveRecord::Migrator.new(direction, migrations, ActiveRecord::SchemaMigration, target_version)
-    elsif ActiveRecord::VERSION::STRING >= "5.2.0"
-      migrations = ActiveRecord::MigrationContext.new(migration_path).migrations
-      ActiveRecord::Migrator.new(direction, migrations, target_version)
-    else
-      migrations = ActiveRecord::Migrator.migrations(migration_path)
-      ActiveRecord::Migrator.new(direction, migrations, target_version)
-    end
+    migrations = ActiveRecord::MigrationContext.new(migration_path, ActiveRecord::SchemaMigration).migrations
+    ActiveRecord::Migrator.new(direction, migrations, ActiveRecord::SchemaMigration, target_version)
   end
 end
 Minitest::Spec.include(SpecHelpers)

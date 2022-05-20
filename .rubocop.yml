@@ -8,7 +8,7 @@ AllCops:
     - .git/**/*
     - gemfiles/vendor/**/*
     - vendor/**/*
-  TargetRubyVersion: 2.5
+  TargetRubyVersion: 2.6
 
 # Configured cops
 
@@ -18,12 +18,6 @@ Layout/FirstHashElementIndentation:
 Layout/HashAlignment:
   EnforcedHashRocketStyle:
     - table
-
-Naming/FileName:
-  Exclude:
-    - 'lib/active_record_shards/connection_switcher-5-0.rb'
-    - 'lib/active_record_shards/connection_switcher-5-1.rb'
-    - 'lib/active_record_shards/connection_switcher-6-0.rb'
 
 Style/Alias:
   EnforcedStyle: prefer_alias_method

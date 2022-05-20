@@ -15,14 +15,7 @@
 require 'socket'
 
 class TCPProxy
-  # Set a higher interval on Ruby 2.5 to work around a bug:
-  # https://github.com/ruby/ruby/commit/645f7fbd4ec0199c6266df19ad82d99bdd8553a8
-  # Remove when removing Ruby 2.5 support.
-  THREAD_CHECK_INTERVAL = if RUBY_VERSION.start_with?('2.5.')
-                            0.2
-                          else
-                            0.001
-                          end
+  THREAD_CHECK_INTERVAL = 0.001
 
   def self.start(remote_host:, remote_port:, local_port:)
     new(
