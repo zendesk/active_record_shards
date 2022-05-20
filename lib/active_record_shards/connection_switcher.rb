@@ -14,21 +14,17 @@ module ActiveRecordShards
       base.singleton_class.send(:alias_method, :table_exists?, :table_exists_with_default_shard?)
     end
 
-    def default_shard=(new_default_shard)
-      ActiveRecordShards::ShardSelection.default_shard = new_default_shard
-      switch_connection(shard: new_default_shard)
-    end
+    # def default_shard=(new_default_shard)
+      # ActiveRecordShards::ShardSelection.default_shard = new_default_shard
+      # switch_connection(shard: new_default_shard)
+    # end
 
     def on_primary_db(&block)
       on_shard(nil, &block)
     end
 
-    def on_shard(shard)
-      old_options = current_shard_selection.options
-      switch_connection(shard: shard) if supports_sharding?
-      yield
-    ensure
-      switch_connection(old_options)
+    def on_shard(shard, &block)
+      ActiveRecord::Base.connected_to(role: :reading, shard: shard, &block)
     end
 
     def on_first_shard(&block)
@@ -40,18 +36,10 @@ module ActiveRecordShards
       ShardSupport.new(self == ActiveRecord::Base ? nil : where(nil))
     end
 
-    def on_all_shards
-      old_options = current_shard_selection.options
-      if supports_sharding?
-        shard_names.map do |shard|
-          switch_connection(shard: shard)
-          yield(shard)
-        end
-      else
-        [yield]
+    def on_all_shards(&block)
+      shard_names.map do |shard|
+        on_shard(shard, &block)
       end
-    ensure
-      switch_connection(old_options)
     end
 
     def on_replica_if(condition, &block)
@@ -96,24 +84,12 @@ module ActiveRecordShards
     end
 
     def on_cx_switch_block(which, force: false, construct_ro_scope: nil, &block)
-      @disallow_replica ||= 0
-      @disallow_replica += 1 if which == :primary
-
-      switch_to_replica = force || @disallow_replica.zero?
-      old_options = current_shard_selection.options
-
-      switch_connection(replica: switch_to_replica)
-
-      # we avoid_readonly_scope to prevent some stack overflow problems, like when
-      # .columns calls .with_scope which calls .columns and onward, endlessly.
-      if self == ActiveRecord::Base || !switch_to_replica || construct_ro_scope == false
-        yield
+      case which
+      when :replica
+        ActiveRecord::Base.connected_to(role: :reading, &block)
       else
-        readonly.scoping(&block)
+        ActiveRecord::Base.connected_to(role: :writing, &block)
       end
-    ensure
-      @disallow_replica -= 1 if which == :primary
-      switch_connection(old_options) if old_options
     end
 
     def supports_sharding?
@@ -133,7 +109,7 @@ module ActiveRecordShards
     end
 
     def shard_names
-      sharding_config_for_env.filter { |config| config.name.start_with?('shard') }.map { |config| config.name }
+      sharding_config_for_env.filter { |config| config.name.start_with?('shard') }.map(&:name)
     end
 
     private
@@ -150,21 +126,21 @@ module ActiveRecordShards
     end
     alias_method :check_sharding_config_for_env, :sharding_config_for_env
 
-    def switch_connection(options)
-      if options.any?
-        if options.key?(:replica)
-          current_shard_selection.on_replica = options[:replica]
-        end
+    # def switch_connection(options)
+    #   if options.any?
+    #     if options.key?(:replica)
+    #       current_shard_selection.on_replica = options[:replica]
+    #     end
 
-        if options.key?(:shard)
-          check_sharding_config_for_env
+    #     if options.key?(:shard)
+    #       check_sharding_config_for_env
 
-          current_shard_selection.shard = options[:shard]
-        end
+    #       current_shard_selection.shard = options[:shard]
+    #     end
 
-        ensure_shard_connection
-      end
-    end
+    #     ensure_shard_connection
+    #   end
+    # end
 
     def shard_env
       ActiveRecordShards.rails_env
@@ -174,8 +150,10 @@ module ActiveRecordShards
     # a shard.
     def with_default_shard(&block)
       if is_sharded? && current_shard_id.nil? && table_name != ActiveRecord::SchemaMigration.table_name
+        p 'going on first shard'
         on_first_shard(&block)
       else
+        p 'not going on first shard'
         yield
       end
     end

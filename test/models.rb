@@ -13,6 +13,8 @@ class ShardedApplicationRecord < ActiveRecord::Base
     shard_0: { writing: :shard_0, reading: :shard_0_replica },
     shard_1: { writing: :shard_1, reading: :shard_1_replica }
   }
+
+  self.default_shard = :shard_0
 end
 
 class Account < ApplicationRecord

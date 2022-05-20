@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changes related to Rails 6.1
+
+
+
+
 ### Changed
 
 Removed support for Ruby 2.3 and 2.4.

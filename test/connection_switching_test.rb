@@ -331,6 +331,7 @@ describe "connection switching" do
     end
   end
 
+=begin
   describe "in an environment without replica" do
     switch_rails_env('test3')
     def spec_name
@@ -383,6 +384,7 @@ describe "connection switching" do
       end
     end
   end
+=end
 
   describe "replica driving" do
     describe "without replica configuration" do
