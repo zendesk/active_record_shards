@@ -12,7 +12,7 @@ Rename `ActiveRecordShards.rails_env` to `ActiveRecordShards.app_env`, and inclu
 
 Removed support for Ruby 2.3 and 2.4.
 
-Removed support for Rails 4.2
+Removed support for Rails 4.2, 5.0, 5.1, 5.2 and 6.0. Soon only Rails 6.1 will be supported.
 
 [Deprecation] Removes all deprecated methods containing `master`/`slave`. Use the updated `primary`/`replica` methods instead. The main public methods changed:
 

@@ -8,20 +8,8 @@ Gem::Specification.new "active_record_shards", "3.19.1" do |s|
 
   s.required_ruby_version = ">= 2.5"
 
-  s.add_runtime_dependency("activerecord", ">= 5.0", "< 6.1")
-  s.add_runtime_dependency("activesupport", ">= 5.0", "< 6.1")
-
-  s.add_development_dependency("bump")
-  s.add_development_dependency("minitest", ">= 5.10.0")
-  s.add_development_dependency("minitest-fail-fast")
-  s.add_development_dependency("minitest-line")
-  s.add_development_dependency("minitest-rg")
-  s.add_development_dependency("mocha", ">= 1.4.0")
-  s.add_development_dependency("mysql2")
-  s.add_development_dependency("rake", '~> 12.0')
-  s.add_development_dependency("rubocop", "~> 0.77.0")
-  s.add_development_dependency("rubocop-minitest", "~> 0.5.0")
-  s.add_development_dependency("rubocop-performance", "~> 1.5.1")
+  s.add_runtime_dependency("activerecord", "~> 6.1.0")
+  s.add_runtime_dependency("activesupport", "~> 6.1.0")
 
   s.files = Dir["lib/**/*"] + ["README.md"]
 end

@@ -140,6 +140,21 @@ module ActiveRecordShards
       config_for_env[SHARD_NAMES_CONFIG_KEY] || []
     end
 
+    def connection_specification_name
+      name = current_shard_selection.resolve_connection_name(sharded: is_sharded?, configurations: configurations)
+
+      @_ars_connection_specification_names ||= {}
+      unless @_ars_connection_specification_names.include?(name)
+        unless configurations[name] || name == "primary"
+          raise ActiveRecord::AdapterNotSpecified, "No database defined by #{name} in your database config. (configurations: #{configurations.to_h.keys.inspect})"
+        end
+
+        @_ars_connection_specification_names[name] = true
+      end
+
+      name
+    end
+
     private
 
     def config_for_env
@@ -168,6 +183,16 @@ module ActiveRecordShards
 
         ensure_shard_connection
       end
+    end
+
+    def ensure_shard_connection
+      # See if we've connected before. If not, call `#establish_connection`
+      # so that ActiveRecord can resolve connection_specification_name to an
+      # ARS connection.
+      spec_name = connection_specification_name
+
+      pool = connection_handler.retrieve_connection_pool(spec_name)
+      connection_handler.establish_connection(spec_name.to_sym) if pool.nil?
     end
 
     def shard_env
@@ -204,15 +229,4 @@ module ActiveRecordShards
       ruby2_keywords(:method_missing) if respond_to?(:ruby2_keywords, true)
     end
   end
-end
-
-case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
-when '5.0'
-  require 'active_record_shards/connection_switcher-5-0'
-when '5.1', '5.2'
-  require 'active_record_shards/connection_switcher-5-1'
-when '6.0'
-  require 'active_record_shards/connection_switcher-6-0'
-else
-  raise "ActiveRecordShards is not compatible with #{ActiveRecord::VERSION::STRING}"
 end

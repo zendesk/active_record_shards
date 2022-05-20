@@ -3,13 +3,7 @@
 module ActiveRecord
   class Migrator
     def self.shards_migration_context
-      if ActiveRecord::VERSION::MAJOR >= 6
-        ActiveRecord::MigrationContext.new(ActiveRecord::Migrator.migrations_paths, ActiveRecord::SchemaMigration)
-      elsif ActiveRecord::VERSION::STRING >= '5.2.0'
-        ActiveRecord::MigrationContext.new(ActiveRecord::Migrator.migrations_paths)
-      else
-        self
-      end
+      ActiveRecord::MigrationContext.new(ActiveRecord::Migrator.migrations_paths, ActiveRecord::SchemaMigration)
     end
 
     def initialize_with_sharding(*args)
