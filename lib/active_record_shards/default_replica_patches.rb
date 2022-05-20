@@ -119,7 +119,7 @@ module ActiveRecordShards
       end
     end
 
-    module Rails52RelationPatches
+    module RelationConnectionPatch
       def connection
         return super if Thread.current[:_active_record_shards_in_migration]
         return super if Thread.current[:_active_record_shards_in_tx]
@@ -135,7 +135,7 @@ module ActiveRecordShards
     # in rails 4.1+, they create a join class that's used to pull in records for HABTM.
     # this simplifies the hell out of our existence, because all we have to do is inerit on-replica-by-default
     # down from the parent now.
-    module Rails41HasAndBelongsToManyBuilderExtension
+    module HasAndBelongsToManyBuilderExtension
       def self.included(base)
         base.class_eval do
           alias_method :through_model_without_inherit_default_replica_from_lhs, :through_model
@@ -155,20 +155,6 @@ module ActiveRecordShards
       end
     end
 
-    module AssociationsAssociationAssociationScopePatch
-      def association_scope
-        if klass
-          on_replica_unless_tx { super }
-        else
-          super
-        end
-      end
-
-      def on_replica_unless_tx
-        klass.on_replica_unless_tx { yield }
-      end
-    end
-
     module AssociationsAssociationFindTargetPatch
       def find_target
         if klass
@@ -183,36 +169,8 @@ module ActiveRecordShards
       end
     end
 
-    module AssociationsAssociationGetRecordsPatch
-      def get_records # rubocop:disable Naming/AccessorMethodName
-        if klass
-          on_replica_unless_tx { super }
-        else
-          super
-        end
-      end
-
-      def on_replica_unless_tx
-        klass.on_replica_unless_tx { yield }
-      end
-    end
-
     module AssociationsPreloaderAssociationAssociatedRecordsByOwnerPatch
       def associated_records_by_owner(preloader)
-        if klass
-          on_replica_unless_tx { super }
-        else
-          super
-        end
-      end
-
-      def on_replica_unless_tx
-        klass.on_replica_unless_tx { yield }
-      end
-    end
-
-    module AssociationsPreloaderAssociationLoadRecordsPatch
-      def load_records
         if klass
           on_replica_unless_tx { super }
         else
