@@ -172,33 +172,6 @@ describe "connection switching" do
       ActiveRecord::Base.default_shard = nil
     end
 
-    describe "for unsharded models" do
-      before do
-        Account.on_replica do
-          Account.connection.execute("alter table accounts add column foo int")
-          Account.reset_column_information
-        end
-      end
-
-      after do
-        Account.on_replica do
-          ActiveRecord::Base.connection.execute("alter table accounts drop column foo")
-          Account.reset_column_information
-          refute_includes(Account.column_names, 'foo')
-        end
-      end
-
-      it "use the non-sharded replica connection" do
-        assert_using_database('ars_test', Account)
-        assert_includes(Account.column_names, 'foo')
-      end
-
-      it "ignores primary/transactions" do
-        assert_using_database('ars_test', Account)
-        Account.on_primary { assert_includes(Account.column_names, 'foo') }
-      end
-    end
-
     describe "for sharded models" do
       before do
         ActiveRecord::Base.on_first_shard do
@@ -216,10 +189,6 @@ describe "connection switching" do
             Ticket.reset_column_information
           end
         end
-      end
-
-      it "gets columns from the replica shard" do
-        assert_includes(Ticket.column_names, 'foo')
       end
 
       it "have correct from_shard" do
@@ -244,53 +213,6 @@ describe "connection switching" do
 
       it "doesn't switch to shard" do
         table_has_column?('schema_migrations', 'foo')
-      end
-    end
-  end
-
-  describe ".where.to_sql" do
-    it "doesn't use the primary (for escaping)" do
-      with_unsharded_primary_unavailable do
-        Account.all.to_sql
-        Account.where('id = 1').to_sql
-        Account.where('id = ?', 1).to_sql
-        Account.where(id: 1).to_sql
-      end
-    end
-  end
-
-  describe "ActiveRecord::Base.table_exists?" do
-    before do
-      ActiveRecord::Base.default_shard = nil
-    end
-
-    describe "for unsharded models" do
-      it "use the unsharded replica connection" do
-        class UnshardedModel < ActiveRecord::Base
-          not_sharded
-        end
-
-        UnshardedModel.on_replica { UnshardedModel.connection.execute("create table unsharded_models (id int)") }
-        assert UnshardedModel.table_exists?
-
-        ActiveRecord::Base.on_all_shards do
-          refute table_exists?("unsharded_models")
-        end
-      end
-    end
-
-    describe "for sharded models" do
-      it "uses the first shard replica" do
-        class ShardedModel < ActiveRecord::Base
-        end
-
-        ActiveRecord::Base.on_first_shard do
-          ShardedModel.on_replica do
-            ShardedModel.connection.execute("create table sharded_models (id int)")
-          end
-        end
-
-        assert ShardedModel.table_exists?
       end
     end
   end
@@ -421,53 +343,6 @@ describe "connection switching" do
 
         Account.on_replica_unless(false) do
           assert_using_replica_db
-        end
-      end
-
-      describe "a model loaded with the replica" do
-        before do
-          Account.on_replica_by_default = true
-
-          Account.on_primary.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'primary_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
-          assert(Account.on_primary.find(1000))
-          assert_equal('primary_name', Account.on_primary.find(1000).name)
-
-          Account.on_replica.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'replica_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
-
-          @model = Account.on_replica.find(1000)
-          assert(@model)
-          assert_equal('replica_name', @model.name)
-        end
-
-        it "read from replica on reload" do
-          @model.reload
-          assert_equal('replica_name', @model.name)
-        end
-
-        it "be marked as read only" do
-          assert(@model.readonly?)
-        end
-
-        it "be marked as comming from the replica" do
-          assert(@model.from_replica?)
-        end
-
-        after do
-          Account.on_replica_by_default = false
-        end
-      end
-
-      describe "a inherited model without cached columns hash" do
-        # before columns -> with_scope -> type-condition -> columns == loop
-        it "not loop when on replica by default" do
-          Person.on_replica_by_default = true
-          assert User.on_replica_by_default?
-          assert User.finder_needs_type_condition?
-
-          User.reset_column_information
-          User.columns_hash
-        ensure
-          Person.on_replica_by_default = false
         end
       end
 

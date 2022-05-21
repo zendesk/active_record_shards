@@ -14,7 +14,6 @@ require 'active_support'
 require 'active_record_shards'
 require 'mysql2'
 require 'support/db_helper'
-require 'support/tcp_proxy'
 require 'logger'
 
 require 'pry-byebug'
@@ -88,58 +87,6 @@ module ConnectionSwitchingSpecHelpers
 end
 
 module SpecHelpers
-  def self.mysql_url
-    URI(ENV['MYSQL_URL'] || 'mysql://root@127.0.0.1:3306')
-  end
-
-  @@unsharded_primary_proxy ||= TCPProxy.start(
-    remote_host: mysql_url.host,
-    remote_port: mysql_url.port,
-    local_port: '13306'
-  )
-
-  @@shard_1_primary_proxy ||= TCPProxy.start(
-    remote_host: mysql_url.host,
-    remote_port: mysql_url.port,
-    local_port: '13307'
-  )
-
-  @@shard_2_primary_proxy ||= TCPProxy.start(
-    remote_host: mysql_url.host,
-    remote_port: mysql_url.port,
-    local_port: '13308'
-  )
-
-  # Verifies that a block of code is not using any of the the primaries by
-  # pausing the TCP proxies between Ruby and MySQL.
-  def with_all_primaries_unavailable
-    with_unsharded_primary_unavailable do
-      with_sharded_primaries_unavailable do
-        yield
-      end
-    end
-  end
-
-  # Verifies that a block of code is not using the unsharded primary by pausing
-  # the TCP proxy between Ruby and MySQL.
-  def with_unsharded_primary_unavailable
-    ActiveRecord::Base.connection_handler.clear_all_connections!
-    @@unsharded_primary_proxy.pause do
-      yield
-    end
-  end
-
-  # Verifies that a block of code is not using the sharded primaries by pausing
-  # the TCP proxies between Ruby and MySQL.
-  def with_sharded_primaries_unavailable
-    ActiveRecord::Base.connection_handler.clear_all_connections!
-    @@shard_1_primary_proxy.pause do
-      @@shard_2_primary_proxy.pause do
-        yield
-      end
-    end
-  end
-
   def clear_global_connection_handler_state
     # Close active connections
     ActiveRecord::Base.connection_handler.clear_all_connections!
