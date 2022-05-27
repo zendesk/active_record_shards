@@ -47,7 +47,7 @@ module DbHelper
     # Load the database configuration into ActiveRecord
     def load_database_configuration(path_or_io = 'test/database.yml')
       erb_config = path_or_io.is_a?(String) ? IO.read(path_or_io) : path_or_io.read
-      yaml_config = ERB.new(erb_config).result
+      yaml_config = ERB.new(erb_config, nil, '-').result
       ActiveRecord::Base.configurations = YAML.load(yaml_config) # rubocop:disable Security/YAMLLoad
     end
   end
