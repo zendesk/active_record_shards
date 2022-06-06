@@ -14,6 +14,8 @@ Removed support for Ruby 2.3 and 2.4.
 
 Removed support for Rails 4.2
 
+Remove `ActiveRecord::Base.shards` class method.
+
 [Deprecation] Removes all deprecated methods containing `master`/`slave`. Use the updated `primary`/`replica` methods instead. The main public methods changed:
 
 1. `on_slave` => `on_replica`
