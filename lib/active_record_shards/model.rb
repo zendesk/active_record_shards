@@ -11,41 +11,11 @@ module ActiveRecordShards
     end
 
     def is_sharded? # rubocop:disable Naming/PredicateName
-      if self == ActiveRecord::Base
-        sharded != false && supports_sharding?
-      elsif self == base_class
-        if sharded.nil?
-          ActiveRecord::Base.is_sharded?
-        else
-          sharded != false
-        end
-      else
-        base_class.is_sharded?
-      end
-    end
-
-    module InstanceMethods
-      def initialize_shard_and_replica
-        @from_replica = !!self.class.current_shard_selection.options[:replica]
-        @from_shard = self.class.current_shard_selection.options[:shard]
-      end
-
-      def from_replica?
-        @from_replica
-      end
-
-      def from_shard
-        @from_shard
-      end
-    end
-
-    def self.extended(base)
-      base.send(:include, InstanceMethods)
-      base.after_initialize :initialize_shard_and_replica
+      sharded != false
     end
 
     private
 
-    attr_accessor :sharded
+    attr_accessor :sharded, :ars_current_shard, :ars_current_role
   end
 end

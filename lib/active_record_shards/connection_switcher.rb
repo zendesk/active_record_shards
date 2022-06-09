@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'configuration'
+
 module ActiveRecordShards
   module ConnectionSwitcher
     SHARD_NAMES_CONFIG_KEY = 'shard_names'
@@ -18,15 +20,16 @@ module ActiveRecordShards
     end
 
     def on_primary_db(&block)
-      on_shard(nil, &block)
+      on_shard(:default, &block)
     end
 
     def on_shard(shard)
-      old_options = current_shard_selection.options
-      switch_connection(shard: shard) if supports_sharding?
+      old_shard = ActiveRecord::Base.ars_current_shard
+      shard = :default if shard.nil?
+      ActiveRecord::Base.ars_current_shard = shard
       yield
     ensure
-      switch_connection(old_options)
+      ActiveRecord::Base.ars_current_shard = old_shard
     end
 
     def on_first_shard(&block)
@@ -35,17 +38,15 @@ module ActiveRecordShards
     end
 
     def on_all_shards
-      old_options = current_shard_selection.options
       if supports_sharding?
         shard_names.map do |shard|
-          switch_connection(shard: shard)
-          yield(shard)
+          on_shard(shard) do
+            yield(shard)
+          end
         end
       else
         [yield]
       end
-    ensure
-      switch_connection(old_options)
     end
 
     def on_replica_if(condition, &block)
@@ -82,32 +83,26 @@ module ActiveRecordShards
     # For one-liners you can simply do
     #   Account.on_replica.first
     def on_replica(&block)
-      on_primary_or_replica(:replica, &block)
+      if block_given?
+        ActiveRecord::Base.connected_to(role: :reading, &block)
+      else
+        PrimaryReplicaProxy.new(self, :replica)
+      end
     end
 
     def on_primary(&block)
       on_primary_or_replica(:primary, &block)
     end
 
-    def on_cx_switch_block(which, force: false, construct_ro_scope: nil, &block)
-      @disallow_replica ||= 0
-      @disallow_replica += 1 if which == :primary
-
-      switch_to_replica = force || @disallow_replica.zero?
-      old_options = current_shard_selection.options
-
-      switch_connection(replica: switch_to_replica)
-
-      # we avoid_readonly_scope to prevent some stack overflow problems, like when
-      # .columns calls .with_scope which calls .columns and onward, endlessly.
-      if self == ActiveRecord::Base || !switch_to_replica || construct_ro_scope == false
-        yield
+    def on_cx_switch_block(which, &block)
+      case which
+      when :primary
+        ActiveRecord::Base.connected_to(role: :writing, &block)
+      when :replica
+        ActiveRecord::Base.connected_to(role: :reading, &block)
       else
-        readonly.scoping(&block)
+        raise
       end
-    ensure
-      @disallow_replica -= 1 if which == :primary
-      switch_connection(old_options) if old_options
     end
 
     def supports_sharding?
@@ -127,26 +122,11 @@ module ActiveRecordShards
     end
 
     def shard_names
-      unless config_for_env.fetch(SHARD_NAMES_CONFIG_KEY, []).all? { |shard_name| shard_name.is_a?(Integer) }
-        raise "All shard names must be integers: #{config_for_env[SHARD_NAMES_CONFIG_KEY].inspect}."
-      end
-
-      config_for_env[SHARD_NAMES_CONFIG_KEY] || []
+      @shard_names ||= ActiveRecordShards::Configuration.shard_id_map.keys
     end
 
-    def connection_specification_name
-      name = current_shard_selection.resolve_connection_name(sharded: is_sharded?, configurations: configurations)
-
-      @_ars_connection_specification_names ||= {}
-      unless @_ars_connection_specification_names.include?(name)
-        unless configurations[name] || name == "primary"
-          raise ActiveRecord::AdapterNotSpecified, "No database defined by #{name} in your database config. (configurations: #{configurations.to_h.keys.inspect})"
-        end
-
-        @_ars_connection_specification_names[name] = true
-      end
-
-      name
+    def table_exists_with_default_shard?
+      with_default_shard { table_exists_without_default_shard? }
     end
 
     private
@@ -154,12 +134,12 @@ module ActiveRecordShards
     def config_for_env
       @_ars_config_for_env ||= {}
       @_ars_config_for_env[shard_env] ||= begin
-        unless config = configurations[shard_env]
-          raise "Did not find #{shard_env} in configurations, did you forget to add it to your database config? (configurations: #{configurations.to_h.keys.inspect})"
-        end
+                                            unless config = configurations[shard_env]
+                                              raise "Did not find #{shard_env} in configurations, did you forget to add it to your database config? (configurations: #{configurations.to_h.keys.inspect})"
+                                            end
 
-        config
-      end
+                                            config
+                                          end
     end
     alias_method :check_config_for_env, :config_for_env
 
@@ -205,10 +185,6 @@ module ActiveRecordShards
 
     def load_schema_with_default_shard!
       with_default_shard { load_schema_without_default_shard! }
-    end
-
-    def table_exists_with_default_shard?
-      with_default_shard { table_exists_without_default_shard? }
     end
 
     class PrimaryReplicaProxy

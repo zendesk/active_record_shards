@@ -5,14 +5,21 @@ require_relative 'helper'
 describe 'ActiveRecordShards' do
   describe '.app_env' do
     before do
-      if defined?(Rails) || ENV['RAILS_ENV'] || defined?(APP_ENV) || ENV['APP_ENV']
+      if defined?(Rails) || defined?(APP_ENV) || ENV['APP_ENV']
         raise "Tests in #{__FILE__} will overwrite environment constants, please update them to avoid conflicts"
       end
 
+      @env_rails_env_before = ENV['RAILS_ENV']
+      ENV.delete('RAILS_ENV')
+
+      @rails_env_before = RAILS_ENV
       Object.send(:remove_const, 'RAILS_ENV')
     end
 
-    after { Object.const_set('RAILS_ENV', 'test') }
+    after do
+      ENV['RAILS_ENV'] = @env_rails_env_before if @env_rails_env_before
+      Object.const_set('RAILS_ENV', @rails_env_before) if @rails_env_before
+    end
 
     describe 'Rails.env' do
       before do

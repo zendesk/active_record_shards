@@ -5,42 +5,18 @@ require_relative 'helper'
 describe ActiveRecord::Migrator do
   with_fresh_databases
 
-  before { ActiveRecord::Base.establish_connection(RAILS_ENV.to_sym) }
+  before do
+    ActiveRecord::Base.establish_connection(RAILS_ENV.to_sym)
+    require 'models'
+    ActiveRecordShards::Configuration.shard_id_map = {
+      0 => :shard_0,
+      1 => :shard_1
+    }
+  end
 
-  describe "when DB is empty" do
-    extend RailsEnvSwitch
-
-    switch_app_env('test3')
-
-    it "makes meta tables" do
-      ActiveRecord::Base.on_shard(nil) do
-        refute table_exists?(:unsharded_table)
-        refute ActiveRecord::SchemaMigration.table_exists?
-      end
-
-      ActiveRecord::Base.on_all_shards do
-        refute table_exists?(:sharded_table)
-        refute ActiveRecord::SchemaMigration.table_exists?
-      end
-
-      migrator(:up, 'separate_migrations').migrate
-
-      ActiveRecord::Base.on_shard(nil) do
-        assert table_exists?(:unsharded_table)
-        assert ActiveRecord::SchemaMigration.table_exists?
-        assert ActiveRecord::InternalMetadata.table_exists?
-        assert ActiveRecord::Base.connection.select_value("select version from schema_migrations where version = '20190121112233'")
-        assert ActiveRecord::Base.connection.select_value("select version from schema_migrations where version = '20190121112234'")
-      end
-
-      ActiveRecord::Base.on_all_shards do
-        assert table_exists?(:sharded_table)
-        assert ActiveRecord::SchemaMigration.table_exists?
-        assert ActiveRecord::InternalMetadata.table_exists?
-        assert ActiveRecord::Base.connection.select_value("select version from schema_migrations where version = '20190121112233'")
-        assert ActiveRecord::Base.connection.select_value("select version from schema_migrations where version = '20190121112234'")
-      end
-    end
+  after do
+    ActiveRecordShards::Configuration.shard_id_map = nil
+    ActiveRecord::Base.instance_variable_set(:@shard_names, nil)
   end
 
   it "migrates" do

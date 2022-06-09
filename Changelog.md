@@ -6,13 +6,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Rails compatibility
+
+Add compatibility with Rails 6.1, and remove compatibility with Rails < 6.1.
+
+To upgrade, you need to:
+
+- ...
+- ...
+- ...
+
 ### Changed
 
 Rename `ActiveRecordShards.rails_env` to `ActiveRecordShards.app_env`, and include `APP_ENV` and `ENV['APP_ENV']` in the list of places it looks for environment information.
 
 Removed support for Ruby 2.3 and 2.4.
-
-Removed support for Rails 4.2
 
 [Deprecation] Removes all deprecated methods containing `master`/`slave`. Use the updated `primary`/`replica` methods instead. The main public methods changed:
 

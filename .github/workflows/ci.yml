@@ -27,7 +27,7 @@ jobs:
           - "2.7"
           - "3.0"
         gemfile:
-          - rails6.0
+          - rails6.1
     env:
       BUNDLE_GEMFILE: gemfiles/${{ matrix.gemfile }}.gemfile
     steps:

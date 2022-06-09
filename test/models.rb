@@ -1,5 +1,14 @@
 # frozen_string_literal: true
 
+class ActiveRecord::Base # rubocop:disable Style/ClassAndModuleChildren
+  # TODO: Overwrite connects to to validate input
+  connects_to shards: {
+    default: { writing: :primary, reading: :primary_replica },
+    shard_0: { writing: :shard_0, reading: :shard_0_replica },
+    shard_1: { writing: :shard_1, reading: :shard_1_replica }
+  }
+end
+
 class Account < ActiveRecord::Base
   # attributes: id, name, updated_at, created_at
   not_sharded

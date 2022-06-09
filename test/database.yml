@@ -1,53 +1,49 @@
 <% mysql = URI(ENV['MYSQL_URL'] || 'mysql://root@127.0.0.1:3306') %>
 
-mysql: &MYSQL
-  encoding: utf8
-  adapter: mysql2
-  username: <%= mysql.user %>
-  host: <%= mysql.host %>
-  port: <%= mysql.port %>
-  password: <%= mysql.password %>
-  ssl_mode: :disabled
+<%
+default_config = <<-YAML
+    encoding: utf8
+    adapter: mysql2
+    username: #{mysql.user}
+    password: #{mysql.password}
+    host: 127.0.0.1
+    ssl_mode: :disabled
+YAML
+%>
 
 test:
-  <<: *MYSQL
-  database: ars_test
-  shard_names: [0, 1]
+  # We connect to the unsharded primary database on a different port, via a proxy,
+  # so we can make the connection unavailable when testing on_replica_by_default
+  # behavior.
+  primary:
+<%= default_config -%>
+    database: ars_test
 
-test_replica:
-  <<: *MYSQL
-  database: ars_test_replica
+  primary_replica:
+<%= default_config -%>
+    database: ars_test_replica
+    replica: true
 
-test_shard_0:
-  <<: *MYSQL
-  database: ars_test_shard0
+  # We connect to this sharded primary database on a different port, via a proxy,
+  # so we can make the connection unavailable when testing on_replica_by_default
+  # behavior.
+  shard_0:
+<%= default_config -%>
+    database: ars_test_shard0
 
-test_shard_0_replica:
-  <<: *MYSQL
-  database: ars_test_shard0_replica
+  shard_0_replica:
+<%= default_config -%>
+    database: ars_test_shard0_replica
+    replica: true
 
-test_shard_1:
-  <<: *MYSQL
-  database: ars_test_shard1
+  # We connect to this sharded primary database on a different port, via a proxy,
+  # so we can make the connection unavailable when testing on_replica_by_default
+  # behavior.
+  shard_1:
+<%= default_config -%>
+    database: ars_test_shard1
 
-test_shard_1_replica:
-  <<: *MYSQL
-  database: ars_test_shard1_replica
-
-test2:
-  <<: *MYSQL
-  database: ars_test2
-
-test2_replica:
-  <<: *MYSQL
-  database: ars_test2_replica
-
-test3:
-  <<: *MYSQL
-  database: ars_test3
-  shard_names: [0]
-
-test3_shard_0:
-  <<: *MYSQL
-  database: ars_test3_shard0
-
+  shard_1_replica:
+<%= default_config -%>
+    database: ars_test_shard1_replica
+    replica: true

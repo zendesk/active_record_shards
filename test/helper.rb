@@ -19,10 +19,11 @@ require 'logger'
 require 'pry-byebug'
 
 RAILS_ENV = "test"
+ENV["RAILS_ENV"] = RAILS_ENV
 
 ActiveRecord::Base.logger = Logger.new(__dir__ + "/test.log")
 ActiveSupport.test_order = :sorted
-ActiveSupport::Deprecation.behavior = :raise
+ActiveSupport::Deprecation.behavior = :silence
 
 BaseMigration = ActiveRecord::Migration[4.2]
 
@@ -57,17 +58,21 @@ Minitest::Spec.singleton_class.prepend(SpecDslPatch)
 module RakeSpecHelpers
   def show_databases(config)
     client = Mysql2::Client.new(
-      host: config['test']['host'],
-      port: config['test']['port'],
-      username: config['test']['username'],
-      password: config['test']['password']
+      host: config['host'],
+      port: config['port'],
+      username: config['username'],
+      password: config['password']
     )
     databases = client.query("SHOW DATABASES")
     databases.map { |d| d['Database'] }
   end
 
-  def rake(name)
-    Rake::Task[name].reenable
+  def rake(name, reenable_all: true)
+    if reenable_all
+      Rake.application.tasks.each(&:reenable)
+    else
+      Rake::Task[name].reenable
+    end
     Rake::Task[name].invoke
   end
 end
@@ -92,7 +97,7 @@ module SpecHelpers
     ActiveRecord::Base.connection_handler.clear_all_connections!
 
     # Use a fresh connection handler
-    ActiveRecord::Base.connection_handler = ActiveRecord::ConnectionAdapters::ConnectionHandler.new
+    # ActiveRecord::Base.connection_handler = ActiveRecord::ConnectionAdapters::ConnectionHandler.new
   end
 
   def table_exists?(name)
@@ -110,20 +115,5 @@ module SpecHelpers
   end
 end
 Minitest::Spec.include(SpecHelpers)
-
-module RailsEnvSwitch
-  def switch_app_env(env)
-    before do
-      silence_warnings { Object.const_set("RAILS_ENV", env) }
-      ActiveRecord::Base.establish_connection(::RAILS_ENV.to_sym)
-    end
-    after do
-      silence_warnings { Object.const_set("RAILS_ENV", 'test') }
-      ActiveRecord::Base.establish_connection(::RAILS_ENV.to_sym)
-      tmp_sharded_model = Class.new(ActiveRecord::Base)
-      assert_equal('ars_test', tmp_sharded_model.connection.current_database)
-    end
-  end
-end
 
 Minitest::Spec.extend(DbHelper)

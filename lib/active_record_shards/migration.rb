@@ -89,9 +89,9 @@ module ActiveRecordShards
                  or a specific shard (for data-fixups).  please call shard(arg) in your migration."
       end
 
-      shard = ActiveRecord::Base.current_shard_selection.shard
+      shard = ActiveRecord::Base.ars_current_shard || :default
 
-      if shard.nil?
+      if shard == :default
         return if migration_shard != :none
       else
         return if migration_shard == :none

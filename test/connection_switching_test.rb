@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 require_relative 'helper'
+require 'active_record_shards/configuration'
 
 describe "connection switching" do
   include ConnectionSwitchingSpecHelpers
-  extend RailsEnvSwitch
 
   def clear_connection_pool
     ActiveRecord::Base.connection_handler.connection_pool_list.clear
@@ -15,6 +15,15 @@ describe "connection switching" do
   before do
     ActiveRecord::Base.establish_connection(RAILS_ENV.to_sym)
     require 'models'
+    ActiveRecordShards::Configuration.shard_id_map = {
+      0 => :shard_0,
+      1 => :shard_1
+    }
+  end
+
+  after do
+    ActiveRecordShards::Configuration.shard_id_map = nil
+    ActiveRecord::Base.instance_variable_set(:@shard_names, nil)
   end
 
   describe "on_primary_db" do
@@ -82,13 +91,6 @@ describe "connection switching" do
 
       assert_using_database('ars_test')
       ActiveRecord::Base.on_replica { assert_using_database('ars_test_replica') }
-    end
-
-    it "does not fail on unrelated ensure error when current_shard_selection fails" do
-      ActiveRecord::Base.expects(:current_shard_selection).raises(ArgumentError)
-      assert_raises ArgumentError do
-        ActiveRecord::Base.on_replica { 1 }
-      end
     end
 
     describe "on_first_shard" do
@@ -174,26 +176,20 @@ describe "connection switching" do
 
     describe "for sharded models" do
       before do
+        DbHelper.execute_sql("test", "shard_0_replica", "alter table tickets add column foo int")
         ActiveRecord::Base.on_first_shard do
           ActiveRecord::Base.on_replica do
-            ActiveRecord::Base.connection.execute("alter table tickets add column foo int")
             Ticket.reset_column_information
           end
         end
       end
 
       after do
+        DbHelper.execute_sql("test", "shard_0_replica", "alter table tickets drop column foo")
         ActiveRecord::Base.on_first_shard do
           ActiveRecord::Base.on_replica do
-            ActiveRecord::Base.connection.execute("alter table tickets drop column foo")
             Ticket.reset_column_information
           end
-        end
-      end
-
-      it "have correct from_shard" do
-        ActiveRecord::Base.on_all_shards do |shard|
-          assert_equal shard, Ticket.new.from_shard
         end
       end
     end
@@ -217,91 +213,7 @@ describe "connection switching" do
     end
   end
 
-  describe "in an environment without replica" do
-    switch_app_env('test3')
-    def spec_name
-      ActiveRecord::Base.connection_pool.spec.name
-    end
-
-    describe "shard switching" do
-      it "just stay on the primary db" do
-        main_spec_name = spec_name
-        shard_spec_name = ActiveRecord::Base.on_shard(0) { spec_name }
-
-        ActiveRecord::Base.on_replica do
-          assert_using_database('ars_test3', Account)
-          assert_equal main_spec_name, spec_name
-
-          ActiveRecord::Base.on_shard(0) do
-            assert_using_database('ars_test3_shard0', Ticket)
-            assert_equal shard_spec_name, spec_name
-          end
-        end
-      end
-    end
-  end
-
-  describe "in an unsharded environment" do
-    switch_app_env('test2')
-
-    describe "shard switching" do
-      it "just stay on the main db" do
-        assert_using_database('ars_test2', Ticket)
-        assert_using_database('ars_test2', Account)
-
-        ActiveRecord::Base.on_shard(0) do
-          assert_using_database('ars_test2', Ticket)
-          assert_using_database('ars_test2', Account)
-        end
-      end
-    end
-
-    describe "on_all_shards" do
-      before do
-        @database_names = []
-        ActiveRecord::Base.on_all_shards do
-          @database_names << ActiveRecord::Base.connection.select_value("SELECT DATABASE()")
-        end
-      end
-
-      it "execute the block on all shard primaries" do
-        assert_equal([ActiveRecord::Base.connection.select_value("SELECT DATABASE()")], @database_names)
-      end
-    end
-  end
-
   describe "replica driving" do
-    describe "without replica configuration" do
-      before do
-        @saved_config = ActiveRecord::Base.configurations.find_db_config('test_replica')
-        ActiveRecord::Base.configurations.configurations.delete(@saved_config)
-        Thread.current[:shard_selection] = nil # drop caches
-        clear_connection_pool
-        ActiveRecord::Base.establish_connection(:test)
-      end
-
-      after do
-        ActiveRecord::Base.configurations.configurations << @saved_config
-        Thread.current[:shard_selection] = nil # drop caches
-      end
-
-      it "default to the primary database" do
-        Account.create!
-
-        ActiveRecord::Base.on_replica { assert_using_primary_db }
-        Account.on_replica { assert_using_primary_db }
-        Ticket.on_replica  { assert_using_primary_db }
-      end
-
-      it "successfully execute queries" do
-        Account.create!
-        assert_using_primary_db
-
-        assert_equal(Account.count, ActiveRecord::Base.on_replica { Account.count })
-        assert_equal(Account.count, Account.on_replica { Account.count })
-      end
-    end
-
     describe "with replica configuration" do
       it "successfully execute queries" do
         assert_using_primary_db
@@ -362,10 +274,6 @@ describe "connection switching" do
         it "not be marked as read only" do
           assert(!@model.readonly?)
         end
-
-        it "not be marked as comming from the replica" do
-          assert(!@model.from_replica?)
-        end
       end
     end
 
@@ -381,13 +289,10 @@ describe "connection switching" do
         assert_using_primary_db
         account = Account.create!
 
+        DbHelper.execute_sql("test", "shard_0", "INSERT INTO tickets (id, title, account_id, created_at, updated_at) VALUES (50000, 'primary ticket', #{account.id}, NOW(), NOW())")
+        DbHelper.execute_sql("test", "shard_0_replica", "INSERT INTO tickets (id, title, account_id, created_at, updated_at) VALUES (50000, 'replica ticket', #{account.id}, NOW(), NOW())")
+
         ActiveRecord::Base.on_shard(0) do
-          account.tickets.create! title: 'primary ticket'
-
-          Ticket.on_replica do
-            account.tickets.create! title: 'replica ticket'
-          end
-
           assert_equal "primary ticket", account.tickets.first.title
           assert_equal "replica ticket", account.tickets.on_replica.first.title
         end

@@ -11,12 +11,22 @@ describe ActiveRecordShards::SchemaDumperExtension do
     before do
       ActiveRecord::Base.establish_connection(RAILS_ENV.to_sym)
 
+      require 'models'
+      ActiveRecordShards::Configuration.shard_id_map = {
+        0 => :shard_0,
+        1 => :shard_1
+      }
+
       # create shard-specific columns
       ActiveRecord::Migrator.migrations_paths = [File.join(__dir__, "../support/migrations")]
       migrator.migrate
     end
 
-    after { schema_file.unlink }
+    after do
+      ActiveRecordShards::Configuration.shard_id_map = nil
+      ActiveRecord::Base.instance_variable_set(:@shard_names, nil)
+      schema_file.unlink
+    end
 
     it "includes the sharded tables" do
       ActiveRecord::SchemaDumper.dump(ActiveRecord::Base.connection, schema_file)
