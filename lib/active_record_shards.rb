@@ -2,6 +2,7 @@
 
 require 'active_record'
 require 'active_record/base'
+require 'active_record_shards/current_shard_patch'
 require 'active_record_shards/model'
 require 'active_record_shards/shard_selection'
 require 'active_record_shards/configuration'
@@ -21,24 +22,7 @@ module ActiveRecordShards
   end
 end
 
-module ConnectionRetrievalPatches
-  cattr_accessor :ars_current_shard, :ars_current_role
-  def current_shard
-    return :default unless is_sharded?
-    return :default if ActiveRecord::Base.ars_current_shard == :default
-
-    new_shard = if ars_current_shard.nil?
-                  super
-                else
-                  ars_current_shard
-                end
-    return :default if new_shard == :default || new_shard.nil?
-
-    ActiveRecordShards::Configuration.shard_id_map.fetch(new_shard.to_i)
-  end
-end
-
-ActiveRecord::Base.singleton_class.prepend ConnectionRetrievalPatches
+ActiveRecord::Base.singleton_class.prepend(ActiveRecordShards::CurrentShardPatch)
 ActiveRecord::Base.extend(ActiveRecordShards::Model)
 ActiveRecord::Base.extend(ActiveRecordShards::ConnectionSwitcher)
 ActiveRecord::Associations::CollectionProxy.include(ActiveRecordShards::AssociationCollectionConnectionSelection)
