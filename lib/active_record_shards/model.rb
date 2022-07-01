@@ -16,6 +16,6 @@ module ActiveRecordShards
 
     private
 
-    attr_accessor :sharded, :ars_current_shard, :ars_current_role
+    attr_accessor :sharded
   end
 end

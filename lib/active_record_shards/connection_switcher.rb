@@ -16,12 +16,12 @@ module ActiveRecordShards
     end
 
     def on_shard(shard)
-      old_shard = ActiveRecord::Base.ars_current_shard
+      old_shard = ars_current_shard
       shard = :default if shard.nil?
-      ActiveRecord::Base.ars_current_shard = shard
+      self.ars_current_shard = shard
       yield
     ensure
-      ActiveRecord::Base.ars_current_shard = old_shard
+      self.ars_current_shard = old_shard
     end
 
     def on_first_shard(&block)
