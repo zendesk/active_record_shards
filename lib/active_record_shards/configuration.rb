@@ -2,11 +2,13 @@
 
 module ActiveRecordShards
   module Configuration
-    def self.shard_id_map
+    module_function
+
+    def shard_id_map
       @shard_id_map ||= {}
     end
 
-    def self.shard_id_map=(shard_id_map)
+    def shard_id_map=(shard_id_map)
       @shard_id_map = shard_id_map
     end
   end
