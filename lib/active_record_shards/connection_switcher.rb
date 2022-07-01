@@ -6,14 +6,6 @@ module ActiveRecordShards
   module ConnectionSwitcher
     SHARD_NAMES_CONFIG_KEY = 'shard_names'
 
-    def self.extended(base)
-      base.singleton_class.send(:alias_method, :load_schema_without_default_shard!, :load_schema!)
-      base.singleton_class.send(:alias_method, :load_schema!, :load_schema_with_default_shard!)
-
-      base.singleton_class.send(:alias_method, :table_exists_without_default_shard?, :table_exists?)
-      base.singleton_class.send(:alias_method, :table_exists?, :table_exists_with_default_shard?)
-    end
-
     def default_shard=(new_default_shard)
       ActiveRecordShards::ShardSelection.default_shard = new_default_shard
       switch_connection(shard: new_default_shard)
@@ -125,10 +117,6 @@ module ActiveRecordShards
       @shard_names ||= ActiveRecordShards::Configuration.shard_id_map.keys
     end
 
-    def table_exists_with_default_shard?
-      with_default_shard { table_exists_without_default_shard? }
-    end
-
     private
 
     def config_for_env
@@ -171,20 +159,6 @@ module ActiveRecordShards
 
     def shard_env
       ActiveRecordShards.app_env
-    end
-
-    # Make these few schema related methods available before having switched to
-    # a shard.
-    def with_default_shard(&block)
-      if is_sharded? && current_shard_id.nil? && table_name != ActiveRecord::SchemaMigration.table_name
-        on_first_shard(&block)
-      else
-        yield
-      end
-    end
-
-    def load_schema_with_default_shard!
-      with_default_shard { load_schema_without_default_shard! }
     end
 
     class PrimaryReplicaProxy
