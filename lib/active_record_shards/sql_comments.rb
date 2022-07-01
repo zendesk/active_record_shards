@@ -3,10 +3,10 @@ module ActiveRecordShards
   module SqlComments
     module Methods
       def execute(query, name = nil)
-        shard = ActiveRecord::Base.current_shard_selection.shard
-        shard_text = shard ? "shard #{shard}" : 'unsharded'
-        replica = ActiveRecord::Base.current_shard_selection.on_replica?
-        replica_text = replica ? 'replica' : 'primary'
+        shard = ActiveRecord::Base.current_shard
+        shard_text = shard != :default ? "shard #{shard}" : 'unsharded'
+        replica = ActiveRecord::Base.current_role
+        replica_text = replica == :reading ? 'replica' : 'primary'
         query = "/* #{shard_text} #{replica_text} */ " + query
         super(query, name)
       end
