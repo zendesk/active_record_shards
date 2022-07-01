@@ -20,7 +20,7 @@ describe ActiveRecord::Migrator do
   end
 
   it "migrates" do
-    refute ActiveRecord::Base.current_shard_id
+    assert_equal :default, ActiveRecord::Base.current_shard
 
     migrator.migrate
 

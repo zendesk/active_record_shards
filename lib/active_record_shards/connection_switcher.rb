@@ -7,7 +7,6 @@ module ActiveRecordShards
     SHARD_NAMES_CONFIG_KEY = 'shard_names'
 
     def default_shard=(new_default_shard)
-      ActiveRecordShards::ShardSelection.default_shard = new_default_shard
       switch_connection(shard: new_default_shard)
     end
 
@@ -101,18 +100,6 @@ module ActiveRecordShards
       shard_names.any?
     end
 
-    def on_replica?
-      current_shard_selection.on_replica?
-    end
-
-    def current_shard_selection
-      Thread.current[:shard_selection] ||= ShardSelection.new
-    end
-
-    def current_shard_id
-      current_shard_selection.shard
-    end
-
     def shard_names
       @shard_names ||= ActiveRecordShards::Configuration.shard_id_map.keys
     end
@@ -133,14 +120,8 @@ module ActiveRecordShards
 
     def switch_connection(options)
       if options.any?
-        if options.key?(:replica)
-          current_shard_selection.on_replica = options[:replica]
-        end
-
         if options.key?(:shard)
           check_config_for_env
-
-          current_shard_selection.shard = options[:shard]
         end
 
         ensure_shard_connection
