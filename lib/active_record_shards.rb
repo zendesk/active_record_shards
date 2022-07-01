@@ -2,7 +2,6 @@
 
 require 'active_record'
 require 'active_record/base'
-require 'active_record_shards/configuration_parser'
 require 'active_record_shards/model'
 require 'active_record_shards/shard_selection'
 require 'active_record_shards/configuration'
@@ -40,7 +39,6 @@ module ConnectionRetrievalPatches
 end
 
 ActiveRecord::Base.singleton_class.prepend ConnectionRetrievalPatches
-ActiveRecord::Base.extend(ActiveRecordShards::ConfigurationParser)
 ActiveRecord::Base.extend(ActiveRecordShards::Model)
 ActiveRecord::Base.extend(ActiveRecordShards::ConnectionSwitcher)
 ActiveRecord::Associations::CollectionProxy.include(ActiveRecordShards::AssociationCollectionConnectionSelection)

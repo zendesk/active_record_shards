@@ -1,3 +1,6 @@
+require 'erb'
+require 'yaml'
+
 module DbHelper
   class << self
     def execute_sql(env_name, name, sql)
