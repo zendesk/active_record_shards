@@ -148,11 +148,15 @@ ActiveRecord::Base.on_replica do
 end
 ```
 
-This will perform the query on the replica, and mark the returned instances as read only. There is also a shortcut for this:
+This will perform the query on the replica, and mark the returned instances as read-only. There is also a shortcut for this:
 
 ```ruby
 Account.on_replica.find_by_big_expensive_query
 ```
+
+If you do not want instances returned from replicas to be marked as read-only, this can be disabled globally:
+
+`ActiveRecordShards.disable_replica_readonly_records = true`
 
 ## Debugging
 

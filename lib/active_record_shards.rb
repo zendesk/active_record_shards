@@ -12,6 +12,10 @@ require 'active_record_shards/default_replica_patches'
 require 'active_record_shards/schema_dumper_extension'
 
 module ActiveRecordShards
+  class << self
+    attr_accessor :disable_replica_readonly_records
+  end
+
   def self.app_env
     env = Rails.env if defined?(Rails.env)
     env ||= RAILS_ENV if Object.const_defined?(:RAILS_ENV)
