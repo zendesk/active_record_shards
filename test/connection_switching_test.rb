@@ -501,12 +501,40 @@ describe "connection switching" do
           assert_equal('replica_name', @model.name)
         end
 
-        it "be marked as read only" do
+        it "be marked as read-only" do
           assert(@model.readonly?)
         end
 
         it "be marked as comming from the replica" do
           assert(@model.from_replica?)
+        end
+
+        describe "when ActiveRecordShards.disable_replica_readonly_records is true" do
+          before do
+            @original_disable_replica_readonly_records = ActiveRecordShards.disable_replica_readonly_records
+            ActiveRecordShards.disable_replica_readonly_records = true
+
+            @model = Account.on_replica.find(1000)
+            assert(@model)
+            assert_equal('replica_name', @model.name)
+          end
+
+          it "read from replica on reload" do
+            @model.reload
+            assert_equal('replica_name', @model.name)
+          end
+
+          it "not be marked as read-only" do
+            refute(@model.readonly?)
+          end
+
+          it "be marked as comming from the replica" do
+            assert(@model.from_replica?)
+          end
+
+          after do
+            ActiveRecordShards.disable_replica_readonly_records = @original_disable_replica_readonly_records
+          end
         end
 
         after do
@@ -543,7 +571,7 @@ describe "connection switching" do
           assert(@model.readonly?)
         end
 
-        it "not be marked as read only" do
+        it "not be marked as read-only" do
           assert(!@model.readonly?)
         end
 
