@@ -183,20 +183,6 @@ module ActiveRecordShards
       end
     end
 
-    module AssociationsAssociationGetRecordsPatch
-      def get_records # rubocop:disable Naming/AccessorMethodName
-        if klass
-          on_replica_unless_tx { super }
-        else
-          super
-        end
-      end
-
-      def on_replica_unless_tx
-        klass.on_replica_unless_tx { yield }
-      end
-    end
-
     module AssociationsPreloaderAssociationAssociatedRecordsByOwnerPatch
       def associated_records_by_owner(preloader)
         if klass
