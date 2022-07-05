@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## v3.21.0
+
 ### Added
 
 Add a global setting to disable marking instances from replicas as read-only. To enable:
