@@ -99,7 +99,6 @@ end
 
 # Results using Ruby 2.7.5
 #
-# 5.0.7.2 DB switching    207.457  (± 8.2%) i/s
 #   5.1.7 DB switching    211.790  (± 3.8%) i/s
 #   5.2.5 DB switching    213.797  (± 5.1%) i/s
 #   6.0.4 DB switching    216.607  (± 4.2%) i/s

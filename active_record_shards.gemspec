@@ -6,10 +6,10 @@ Gem::Specification.new "active_record_shards", "3.19.1" do |s|
   s.description = "Easily run queries on shard and replica databases."
   s.license     = "MIT"
 
-  s.required_ruby_version = ">= 2.5"
+  s.required_ruby_version = ">= 2.6"
 
-  s.add_runtime_dependency("activerecord", ">= 5.0", "< 6.1")
-  s.add_runtime_dependency("activesupport", ">= 5.0", "< 6.1")
+  s.add_runtime_dependency("activerecord", ">= 5.1", "< 6.1")
+  s.add_runtime_dependency("activesupport", ">= 5.1", "< 6.1")
 
   s.add_development_dependency("bump")
   s.add_development_dependency("minitest", ">= 5.10.0")
