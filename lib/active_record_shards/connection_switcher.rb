@@ -4,7 +4,11 @@ require 'active_record_shards/shard_support'
 
 module ActiveRecordShards
   module ConnectionSwitcher
-    SHARD_NAMES_CONFIG_KEY = 'shard_names'
+    if "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}" == '6.1'
+      SHARD_NAMES_CONFIG_KEY = :shard_names
+    else
+      SHARD_NAMES_CONFIG_KEY = 'shard_names'
+    end
 
     def self.extended(base)
       base.singleton_class.send(:alias_method, :load_schema_without_default_shard!, :load_schema!)
