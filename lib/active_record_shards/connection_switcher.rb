@@ -209,7 +209,7 @@ end
 case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
 when '5.1', '5.2'
   require 'active_record_shards/connection_switcher-5-1'
-when '6.0'
+when '6.0', '6.1'
   require 'active_record_shards/connection_switcher-6-0'
 else
   raise "ActiveRecordShards is not compatible with #{ActiveRecord::VERSION::STRING}"
