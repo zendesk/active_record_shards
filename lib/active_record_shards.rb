@@ -9,6 +9,7 @@ require 'active_record_shards/connection_switcher'
 require 'active_record_shards/association_collection_connection_selection'
 require 'active_record_shards/migration'
 require 'active_record_shards/default_replica_patches'
+require 'active_record_shards/default_shard'
 require 'active_record_shards/schema_dumper_extension'
 
 module ActiveRecordShards
