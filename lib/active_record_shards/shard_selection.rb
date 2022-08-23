@@ -3,7 +3,7 @@
 module ActiveRecordShards
   class ShardSelection
     NO_SHARD = :_no_shard
-    cattr_accessor :default_shard
+    cattr_accessor :ars_default_shard
 
     def initialize
       @on_replica = false
@@ -14,7 +14,7 @@ module ActiveRecordShards
       if @shard.nil? || @shard == NO_SHARD
         nil
       else
-        @shard || self.class.default_shard
+        @shard || self.class.ars_default_shard
       end
     end
 

@@ -30,6 +30,7 @@ jobs:
           - rails5.1
           - rails5.2
           - rails6.0
+          - rails6.1
         exclude:
           - ruby-version: "2.7"
             gemfile: rails5.1

@@ -24,6 +24,8 @@ RAILS_ENV = "test"
 ActiveRecord::Base.logger = Logger.new(__dir__ + "/test.log")
 ActiveSupport.test_order = :sorted
 ActiveSupport::Deprecation.behavior = :raise
+ActiveSupport::Deprecation.behavior = :silence if "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}" == '6.1'
+ActiveRecord::Base.legacy_connection_handling = true if "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}" == '6.1'
 
 BaseMigration = ActiveRecord::Migration[4.2]
 

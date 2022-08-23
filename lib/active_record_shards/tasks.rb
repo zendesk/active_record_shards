@@ -94,15 +94,22 @@ module ActiveRecordShards
       def root_connection(conf)
         conf = conf.merge('database' => nil)
         spec = spec_for(conf)
-
-        ActiveRecord::Base.send("#{conf['adapter']}_connection", spec.config)
+        if "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}" == '6.1'
+          ActiveRecord::Base.send("#{conf['adapter']}_connection", spec.db_config.configuration_hash)
+        else
+          ActiveRecord::Base.send("#{conf['adapter']}_connection", spec.config)
+        end
       end
 
       private
 
       def spec_for(conf)
-        resolver = ActiveRecord::ConnectionAdapters::ConnectionSpecification::Resolver.new(ActiveRecord::Base.configurations)
-        resolver.spec(conf)
+        if "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}" == '6.1'
+          ActiveRecord::Base.connection_handler.send(:resolve_pool_config, conf, ActiveRecord::Base)
+        else
+          resolver = ActiveRecord::ConnectionAdapters::ConnectionSpecification::Resolver.new(ActiveRecord::Base.configurations)
+          resolver.spec(conf)
+        end
       end
     end
   end

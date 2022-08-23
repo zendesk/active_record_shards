@@ -4,7 +4,11 @@ require 'active_record_shards/shard_support'
 
 module ActiveRecordShards
   module ConnectionSwitcher
-    SHARD_NAMES_CONFIG_KEY = 'shard_names'
+    if "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}" == '6.1'
+      SHARD_NAMES_CONFIG_KEY = :shard_names
+    else
+      SHARD_NAMES_CONFIG_KEY = 'shard_names'
+    end
 
     def self.extended(base)
       base.singleton_class.send(:alias_method, :load_schema_without_default_shard!, :load_schema!)
@@ -12,11 +16,6 @@ module ActiveRecordShards
 
       base.singleton_class.send(:alias_method, :table_exists_without_default_shard?, :table_exists?)
       base.singleton_class.send(:alias_method, :table_exists?, :table_exists_with_default_shard?)
-    end
-
-    def default_shard=(new_default_shard)
-      ActiveRecordShards::ShardSelection.default_shard = new_default_shard
-      switch_connection(shard: new_default_shard)
     end
 
     def on_primary_db(&block)
@@ -209,7 +208,7 @@ end
 case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
 when '5.1', '5.2'
   require 'active_record_shards/connection_switcher-5-1'
-when '6.0'
+when '6.0', '6.1'
   require 'active_record_shards/connection_switcher-6-0'
 else
   raise "ActiveRecordShards is not compatible with #{ActiveRecord::VERSION::STRING}"
