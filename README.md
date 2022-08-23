@@ -7,6 +7,8 @@ switch between database connections. We've made the implementation very small, a
 
 ActiveRecord Shards has been used and tested on Rails 5.x and 6.0, and has in some form or another been used in production on large Rails apps for several years.
 
+Rails 6.1 introduced new connection handling and support for sharding. Apps are encouraged to migrate to the native sharding logic but ActiveRecord Shards supports Rails 6.1 when `legacy_connection_handling` is set to `true`. For more information see [Rails 6.1 installation](#rails-61-installation) and Rails' [multiple databases guide](https://guides.rubyonrails.org/active_record_multiple_databases.html).
+
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Migrations](#migrations)
@@ -21,6 +23,22 @@ ActiveRecord Shards has been used and tested on Rails 5.x and 6.0, and has in so
     $ gem install active_record_shards
 
 and make sure to require 'active\_record\_shards' in some way.
+
+### Rails 6.1 installation
+
+Rails 6.1 is **only** supported with `legacy_connection_handling` set to `true`.
+
+Enable the legacy handling in your configuration files e.g. `config/application.rb` by setting:
+
+``` Ruby
+config.active_record.legacy_connection_handling = true
+```
+
+or
+
+``` Ruby
+ActiveRecord::Base.legacy_connection_handling = true
+```
 
 ## Configuration
 
