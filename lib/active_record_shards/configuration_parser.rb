@@ -30,7 +30,7 @@ module ActiveRecordShards
         end
       end
 
-      conf
+      replace_primary_configs_with_replica_configs(conf)
     end
 
     def expand_child!(parent, child)
@@ -43,6 +43,26 @@ module ActiveRecordShards
 
     def configurations_with_shard_explosion=(conf)
       self.configurations_without_shard_explosion = explode(conf)
+    end
+
+    def replace_primary_configs_with_replica_configs(config)
+      ActiveRecordShards.configs_to_replace_with_replicas.each do |config_key|
+        replica_config = config["#{config_key}_replica"]
+        next unless replica_config.is_a?(Hash)
+
+        %w[adapter
+           database
+           host
+           password
+           port
+           username].each do |key|
+          if value = replica_config[key]
+            config[config_key][key] = value
+          end
+        end
+      end
+
+      config
     end
 
     def self.extended(base)
