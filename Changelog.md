@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) (from 3.17.0 onwards)
 
 ## [Unreleased]
+### Added
+
+`ActiveRecordShards.replace_with_replica_configuration` which takes 1 (or more) databases configuration keys and will overwrite those primary database configurations with their replica configurations. Useful for apps or environments that only need to read from specific databases.
 
 ## v5.1.0
 
