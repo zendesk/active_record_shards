@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+Support for Rails 7.0 when `legacy_connection_handling` is set to `true`. This is required to [opt-out of the native Rails 6.1+ sharding support](https://guides.rubyonrails.org/active_record_multiple_databases.html).
+
 ### Fixed
 
 Rails 6.1 deprecation warnings.
