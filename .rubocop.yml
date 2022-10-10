@@ -23,6 +23,7 @@ Naming/FileName:
   Exclude:
     - 'lib/active_record_shards/connection_switcher-5-1.rb'
     - 'lib/active_record_shards/connection_switcher-6-0.rb'
+    - 'lib/active_record_shards/connection_switcher-6-1.rb'
 
 Style/Alias:
   EnforcedStyle: prefer_alias_method
