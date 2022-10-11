@@ -342,7 +342,8 @@ describe "connection switching" do
   describe "in an environment without replica" do
     switch_app_env('test3')
     def spec_name
-      if "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}" == '6.1'
+      case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
+      when '6.1', '7.0'
         ActiveRecord::Base.connection_pool.db_config.name
       else
         ActiveRecord::Base.connection_pool.spec.name

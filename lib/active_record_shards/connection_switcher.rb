@@ -4,7 +4,8 @@ require 'active_record_shards/shard_support'
 
 module ActiveRecordShards
   module ConnectionSwitcher
-    if "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}" == '6.1'
+    case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
+    when '6.1', '7.0'
       SHARD_NAMES_CONFIG_KEY = :shard_names
     else
       SHARD_NAMES_CONFIG_KEY = 'shard_names'
@@ -145,6 +146,8 @@ module ActiveRecordShards
       @_ars_config_for_env ||= {}
       @_ars_config_for_env[shard_env] ||= begin
         case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
+        when '7.0'
+          config = configurations.configs_for(env_name: shard_env, include_hidden: true).first.configuration_hash
         when '6.1'
           config = configurations.configs_for(env_name: shard_env, include_replicas: true).first.configuration_hash
         else
@@ -218,6 +221,8 @@ when '6.0'
   require 'active_record_shards/connection_switcher-6-0'
 when '6.1'
   require 'active_record_shards/connection_switcher-6-1'
+when '7.0'
+  require 'active_record_shards/connection_switcher-7-0'
 else
   raise "ActiveRecordShards is not compatible with #{ActiveRecord::VERSION::STRING}"
 end

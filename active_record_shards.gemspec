@@ -8,8 +8,8 @@ Gem::Specification.new "active_record_shards", "5.1.0" do |s|
 
   s.required_ruby_version = ">= 2.6"
 
-  s.add_runtime_dependency("activerecord", ">= 5.1", "< 7.0")
-  s.add_runtime_dependency("activesupport", ">= 5.1", "< 7.0")
+  s.add_runtime_dependency("activerecord", ">= 5.1", "< 7.1")
+  s.add_runtime_dependency("activesupport", ">= 5.1", "< 7.1")
 
   s.add_development_dependency("bump")
   s.add_development_dependency("minitest", ">= 5.10.0")

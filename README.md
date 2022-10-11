@@ -24,9 +24,9 @@ Rails 6.1 introduced new connection handling and support for sharding. Apps are 
 
 and make sure to require 'active\_record\_shards' in some way.
 
-### Rails 6.1 installation
+### Rails 6.1 & 7.0 installation
 
-Rails 6.1 is **only** supported with `legacy_connection_handling` set to `true`.
+Rails 6.1 & 7.0 are **only** supported with `legacy_connection_handling` set to `true`.
 
 Enable the legacy handling in your configuration files e.g. `config/application.rb` by setting:
 

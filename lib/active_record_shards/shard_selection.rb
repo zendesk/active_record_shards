@@ -18,7 +18,7 @@ module ActiveRecordShards
       end
     end
     case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
-    when '6.1'
+    when '6.1', '7.0'
       PRIMARY = "ActiveRecord::Base"
     else
       PRIMARY = "primary"
@@ -35,6 +35,8 @@ module ActiveRecordShards
         name << "_shard_#{resolved_shard}" if resolved_shard
         replica_config = begin
           case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
+          when '7.0'
+            configurations.configs_for(env_name: "#{name}_replica", include_hidden: true).any?
           when '6.1'
             configurations.configs_for(env_name: "#{name}_replica", include_replicas: true).any?
           else
