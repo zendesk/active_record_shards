@@ -9,10 +9,20 @@ end
 namespace :db do
   desc 'Drops the database for the current RAILS_ENV including shards'
   task drop: :load_config do
-    ActiveRecord::Base.configurations.to_h.each do |key, conf|
+    configurations = begin
+      case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
+      when '6.1'
+        ActiveRecord::Base.configurations.configurations.map { |configuration| [configuration.env_name, configuration.configuration_hash] }
+      else
+        ActiveRecord::Base.configurations.to_h
+      end
+    end
+
+    configurations.each do |key, conf|
       next if !key.start_with?(ActiveRecordShards.app_env) || key.end_with?("_replica")
 
       begin
+        conf = conf.stringify_keys if "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}" == '6.1'
         ActiveRecordShards::Tasks.root_connection(conf).drop_database(conf['database'])
       # rescue ActiveRecord::NoDatabaseError # TODO: exists in AR but never is raised here ...
       #   $stderr.puts "Database '#{conf['database']}' does not exist"
@@ -30,13 +40,22 @@ namespace :db do
 
   desc "Create the database defined in config/database.yml for the current RAILS_ENV including shards"
   task create: :load_config do
-    ActiveRecord::Base.configurations.to_h.each do |key, conf|
+    configurations = begin
+      case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
+      when '6.1'
+        ActiveRecord::Base.configurations.configurations.map { |configuration| [configuration.env_name, configuration.configuration_hash] }
+      else
+        ActiveRecord::Base.configurations.to_h
+      end
+    end
+    configurations.each do |key, conf|
       next if !key.start_with?(ActiveRecordShards.app_env) || key.end_with?("_replica")
 
       begin
         # MysqlAdapter takes charset instead of encoding in Rails 4.2 or greater
         # https://github.com/rails/rails/blob/4-2-stable/activerecord/lib/active_record/tasks/mysql_database_tasks.rb#L85-L96
         symbolized_configuration = conf.symbolize_keys
+        conf = conf.stringify_keys if "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}" == '6.1'
         symbolized_configuration[:charset] = symbolized_configuration[:encoding]
 
         ActiveRecordShards::Tasks.root_connection(conf).create_database(conf['database'], symbolized_configuration)
@@ -94,7 +113,8 @@ module ActiveRecordShards
       def root_connection(conf)
         conf = conf.merge('database' => nil)
         spec = spec_for(conf)
-        if "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}" == '6.1'
+        case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
+        when '6.1'
           ActiveRecord::Base.send("#{conf['adapter']}_connection", spec.db_config.configuration_hash)
         else
           ActiveRecord::Base.send("#{conf['adapter']}_connection", spec.config)
@@ -104,7 +124,8 @@ module ActiveRecordShards
       private
 
       def spec_for(conf)
-        if "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}" == '6.1'
+        case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
+        when '6.1'
           ActiveRecord::Base.connection_handler.send(:resolve_pool_config, conf, ActiveRecord::Base)
         else
           resolver = ActiveRecord::ConnectionAdapters::ConnectionSpecification::Resolver.new(ActiveRecord::Base.configurations)

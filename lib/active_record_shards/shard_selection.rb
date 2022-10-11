@@ -17,8 +17,12 @@ module ActiveRecordShards
         @shard || self.class.ars_default_shard
       end
     end
-
-    PRIMARY = "primary"
+    case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
+    when '6.1'
+      PRIMARY = "ActiveRecord::Base"
+    else
+      PRIMARY = "primary"
+    end
     def resolve_connection_name(sharded:, configurations:)
       resolved_shard = sharded ? shard : nil
       env = ActiveRecordShards.app_env
@@ -29,7 +33,15 @@ module ActiveRecordShards
       @connection_names[env][resolved_shard][@on_replica] ||= begin
         name = env.dup
         name << "_shard_#{resolved_shard}" if resolved_shard
-        if @on_replica && configurations["#{name}_replica"]
+        replica_config = begin
+          case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
+          when '6.1'
+            configurations.configs_for(env_name: "#{name}_replica", include_replicas: true).any?
+          else
+            configurations["#{name}_replica"]
+          end
+        end
+        if @on_replica && replica_config
           "#{name}_replica"
         else
           # ActiveRecord always names its default connection pool 'primary'

@@ -144,7 +144,13 @@ module ActiveRecordShards
     def config_for_env
       @_ars_config_for_env ||= {}
       @_ars_config_for_env[shard_env] ||= begin
-        unless config = configurations[shard_env]
+        case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
+        when '6.1'
+          config = configurations.configs_for(env_name: shard_env, include_replicas: true).first.configuration_hash
+        else
+          config = configurations[shard_env]
+        end
+        unless config
           raise "Did not find #{shard_env} in configurations, did you forget to add it to your database config? (configurations: #{configurations.to_h.keys.inspect})"
         end
 
@@ -208,8 +214,10 @@ end
 case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
 when '5.1', '5.2'
   require 'active_record_shards/connection_switcher-5-1'
-when '6.0', '6.1'
+when '6.0'
   require 'active_record_shards/connection_switcher-6-0'
+when '6.1'
+  require 'active_record_shards/connection_switcher-6-1'
 else
   raise "ActiveRecordShards is not compatible with #{ActiveRecord::VERSION::STRING}"
 end
