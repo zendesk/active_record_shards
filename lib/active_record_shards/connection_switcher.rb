@@ -96,10 +96,9 @@ module ActiveRecordShards
     end
 
     def on_cx_switch_block(which, force: false, construct_ro_scope: nil, &block)
-      @disallow_replica ||= 0
-      @disallow_replica += 1 if which == :primary
+      self.disallow_replica += 1 if which == :primary
 
-      switch_to_replica = force || @disallow_replica.zero?
+      switch_to_replica = force || disallow_replica.zero?
       old_options = current_shard_selection.options
 
       switch_connection(replica: switch_to_replica)
@@ -112,8 +111,16 @@ module ActiveRecordShards
         readonly.scoping(&block)
       end
     ensure
-      @disallow_replica -= 1 if which == :primary
+      self.disallow_replica -= 1 if which == :primary
       switch_connection(old_options) if old_options
+    end
+
+    def disallow_replica=(value)
+      Thread.current[:__active_record_shards__disallow_replica_by_thread] = value
+    end
+
+    def disallow_replica
+      Thread.current[:__active_record_shards__disallow_replica_by_thread] ||= 0
     end
 
     def supports_sharding?

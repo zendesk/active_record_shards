@@ -8,6 +8,7 @@ mysql: &MYSQL
   port: <%= mysql.port %>
   password: <%= mysql.password %>
   ssl_mode: :disabled
+  reaping_frequency: 0 # Prevents ActiveRecord from spawning reaping threads.
 
 # We connect to the unsharded primary database on a different port, via a proxy,
 # so we can make the connection unavailable when testing on_replica_by_default
