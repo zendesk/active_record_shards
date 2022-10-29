@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## v5.3.0
+
+### Fixed
+
+Make connection switching thread safe, by fixing a thread safety issue caused by using a (class) instance variable instead of a thread-local variable.
+
 ## v5.2.0
 
 ### Added
