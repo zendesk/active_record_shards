@@ -9,7 +9,6 @@ require 'minitest/autorun'
 require 'minitest/rg'
 require 'rake'
 
-require 'mocha/minitest'
 Bundler.require
 
 $LOAD_PATH.unshift(File.join(__dir__, '..', 'lib'))

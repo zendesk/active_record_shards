@@ -85,9 +85,10 @@ describe "connection switching" do
     end
 
     it "does not fail on unrelated ensure error when current_shard_selection fails" do
-      ActiveRecord::Base.expects(:current_shard_selection).raises(ArgumentError)
-      assert_raises ArgumentError do
-        ActiveRecord::Base.on_replica { 1 }
+      ActiveRecord::Base.stub(:current_shard_selection, -> { raise ArgumentError }) do
+        assert_raises ArgumentError do
+          ActiveRecord::Base.on_replica { 1 }
+        end
       end
     end
 
@@ -123,9 +124,10 @@ describe "connection switching" do
       end
 
       it "execute the block unsharded" do
-        ActiveRecord::Base.expects(:supports_sharding?).at_least_once.returns false
-        result = ActiveRecord::Base.on_all_shards do |shard|
-          [ActiveRecord::Base.connection.select_value("SELECT DATABASE()"), shard]
+        result = ActiveRecord::Base.stub(:supports_sharding?, false) do
+          ActiveRecord::Base.on_all_shards do |shard|
+            [ActiveRecord::Base.connection.select_value("SELECT DATABASE()"), shard]
+          end
         end
         assert_equal [["ars_test", nil]], result
       end
