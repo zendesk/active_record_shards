@@ -84,8 +84,9 @@ describe "Database rake tasks" do
     end
 
     it "fails loudly when unknown error occurs" do
-      ActiveRecordShards::Tasks.stubs(:root_connection).raises(ArgumentError)
-      out = capture_stderr { rake('db:drop') }
+      out = ActiveRecordShards::Tasks.stub(:root_connection, -> { raise ArgumentError }) do
+        capture_stderr { rake('db:drop') }
+      end
       assert_includes(out, "Couldn't drop ")
       assert_includes(out, "test/helper.rb")
     end
@@ -97,17 +98,24 @@ describe "Database rake tasks" do
     end
 
     it "passes when there is no pending migrations" do
-      ActiveRecord::Migrator.any_instance.stubs(:pending_migrations).returns([])
-      out = capture_stderr { rake('db:abort_if_pending_migrations') }
+      migrator = Struct.new(:pending_migrations).new([])
+
+      out = ActiveRecord::Migrator.stub(:new, migrator) do
+        capture_stderr { rake('db:abort_if_pending_migrations') }
+      end
       assert_empty out
     end
 
     it "fails when migrations are pending" do
-      ActiveRecord::Migrator.any_instance.stubs(:pending_migrations).returns([stub(version: 1, name: 'Fake')])
-      out = capture_stderr do
-        rake('db:abort_if_pending_migrations')
-      rescue SystemExit
-        ""
+      migration = ActiveRecord::Migration.new('Fake', 1)
+      migrator = Struct.new(:pending_migrations).new([migration])
+
+      out = ActiveRecord::Migrator.stub(:new, migrator) do
+        capture_stderr do
+          rake('db:abort_if_pending_migrations')
+        rescue SystemExit
+          ""
+        end
       end
       assert_match(/You have \d+ pending migrations:/, out)
     end
