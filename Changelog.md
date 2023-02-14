@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## v5.3.1
+
+### Added
+Raises a new `LegacyConnectionHandlingError` exception when using ActiveRecord >= 6.1 and `legacy_connection_handling` is set to `false`.
+
 ## v5.3.0
 
 ### Fixed

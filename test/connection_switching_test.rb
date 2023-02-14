@@ -17,6 +17,38 @@ describe "connection switching" do
     require 'models'
   end
 
+  describe "legacy_connection_handling" do
+    if ActiveRecord.version >= Gem::Version.new('6.1')
+      it "raises an exception when legacy_connection_handling is false" do
+        legacy_connection_handling_owner ||=
+          case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
+          when '7.0'
+            ActiveRecord
+          when '6.1'
+            ActiveRecord::Base
+          end
+
+        begin
+          legacy_connection_handling_owner.legacy_connection_handling = false
+
+          assert_raises ActiveRecordShards::ConnectionSwitcher::LegacyConnectionHandlingError do
+            ActiveRecord::Base.on_primary_db do
+              1
+            end
+          end
+
+          assert_raises ActiveRecordShards::ConnectionSwitcher::LegacyConnectionHandlingError do
+            ActiveRecord::Base.on_shard(1) do
+              1
+            end
+          end
+        ensure
+          legacy_connection_handling_owner.legacy_connection_handling = true
+        end
+      end
+    end
+  end
+
   describe "on_primary_db" do
     after do
       ActiveRecord::Base.default_shard = nil

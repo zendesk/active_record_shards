@@ -4,6 +4,8 @@ require 'active_record_shards/shard_support'
 
 module ActiveRecordShards
   module ConnectionSwitcher
+    class LegacyConnectionHandlingError < StandardError; end
+
     case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
     when '6.1', '7.0'
       SHARD_NAMES_CONFIG_KEY = :shard_names
@@ -170,6 +172,8 @@ module ActiveRecordShards
     alias_method :check_config_for_env, :config_for_env
 
     def switch_connection(options)
+      ensure_legacy_connection_handling if ActiveRecord.version >= Gem::Version.new('6.1')
+
       if options.any?
         if options.key?(:replica)
           current_shard_selection.on_replica = options[:replica]
@@ -183,6 +187,22 @@ module ActiveRecordShards
 
         ensure_shard_connection
       end
+    end
+
+    def ensure_legacy_connection_handling
+      unless legacy_connection_handling_owner.legacy_connection_handling
+        raise LegacyConnectionHandlingError, "ActiveRecordShards is _only_ compatible with ActiveRecord `legacy_connection_handling` set to `true`."
+      end
+    end
+
+    def legacy_connection_handling_owner
+      @legacy_connection_handling_owner ||=
+        case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
+        when '7.0'
+          ActiveRecord
+        when '6.1'
+          ActiveRecord::Base
+        end
     end
 
     def shard_env
