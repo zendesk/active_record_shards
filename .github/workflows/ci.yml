@@ -3,7 +3,7 @@ name: CI
 on: push
 
 jobs:
-  test:
+  tests:
     runs-on: ubuntu-latest
 
     services:
@@ -33,24 +33,35 @@ jobs:
           - rails5.2
           - rails6.0
         exclude:
-          - ruby-version: "2.7"
-            gemfile: rails4.2
-          - ruby-version: "2.7"
-            gemfile: rails5.0
-          - ruby-version: "2.7"
-            gemfile: rails5.1
-          - ruby-version: "2.7"
-            gemfile: rails5.2
+          - {ruby-version: "2.7", gemfile: rails4.2}
+          - {ruby-version: "2.7", gemfile: rails5.0}
+          - {ruby-version: "2.7", gemfile: rails5.1}
+          - {ruby-version: "2.7", gemfile: rails5.2}
     env:
       BUNDLE_GEMFILE: gemfiles/${{ matrix.gemfile }}.gemfile
     steps:
-      - uses: zendesk/checkout@v2
+      - uses: zendesk/checkout@v3
       - name: Set up Ruby
         uses: zendesk/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby-version }}
           bundler-cache: true
       - run: bundle exec rake test
+
+  tests_successful:
+    name: Tests passing?
+    needs: tests
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          if ${{ needs.tests.result == 'success' }}
+          then
+            echo "All tests passed"
+          else
+            echo "Some tests failed"
+            false
+          fi
 
   lint:
     runs-on: ubuntu-latest
