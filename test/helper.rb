@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+# Stop Minitest creating threads we won't use.
+# They add noise to the thread safety tests when inspecting `Thread.list`.
+ENV["MT_CPU"] ||= "1"
+
 require 'bundler/setup'
 require 'minitest/autorun'
 require 'minitest/rg'
