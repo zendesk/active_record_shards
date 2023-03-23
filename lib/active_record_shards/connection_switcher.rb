@@ -142,10 +142,6 @@ module ActiveRecordShards
     end
 
     def shard_names
-      unless config_for_env.fetch(SHARD_NAMES_CONFIG_KEY, []).all? { |shard_name| shard_name.is_a?(Integer) }
-        raise "All shard names must be integers: #{config_for_env[SHARD_NAMES_CONFIG_KEY].inspect}."
-      end
-
       config_for_env[SHARD_NAMES_CONFIG_KEY] || []
     end
 
@@ -166,10 +162,18 @@ module ActiveRecordShards
           raise "Did not find #{shard_env} in configurations, did you forget to add it to your database config? (configurations: #{configurations.to_h.keys.inspect})"
         end
 
+        ensure_all_shard_names_are_integers(config)
+
         config
       end
     end
     alias_method :check_config_for_env, :config_for_env
+
+    def ensure_all_shard_names_are_integers(config)
+      unless config.fetch(SHARD_NAMES_CONFIG_KEY, []).all? { |shard_name| shard_name.is_a?(Integer) }
+        raise "All shard names must be integers: #{config.inspect}."
+      end
+    end
 
     def switch_connection(options)
       ensure_legacy_connection_handling if ActiveRecord.version >= Gem::Version.new('6.1')
