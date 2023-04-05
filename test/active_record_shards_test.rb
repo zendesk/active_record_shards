@@ -10,9 +10,13 @@ describe 'ActiveRecordShards' do
       end
 
       Object.send(:remove_const, 'RAILS_ENV')
+      ActiveRecordShards.instance_eval { @app_env = nil }
     end
 
-    after { Object.const_set('RAILS_ENV', 'test') }
+    after do
+      Object.const_set('RAILS_ENV', 'test')
+      ActiveRecordShards.instance_eval { @app_env = nil }
+    end
 
     describe 'Rails.env' do
       before do
