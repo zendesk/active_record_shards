@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## v5.3.2
+
+### Added
+* Run tests against Ruby 3.2 (the gem actually already worked with Ruby 3.2, but now we _promise_ that it does) ([#309](https://github.com/zendesk/active_record_shards/pull/309)).
+* Cache the results of `is_sharded?` and `app_env`, and ensure that the configuration is only validated once in `shard_names`. This should be a small performance improvement ([#311](https://github.com/zendesk/active_record_shards/pull/311), [#312](https://github.com/zendesk/active_record_shards/pull/312)).
+
 ## v5.3.1
 
 ### Added
