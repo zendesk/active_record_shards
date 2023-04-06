@@ -18,12 +18,14 @@ module ActiveRecordShards
   end
 
   def self.app_env
-    env = Rails.env if defined?(Rails.env)
-    env ||= RAILS_ENV if Object.const_defined?(:RAILS_ENV)
-    env ||= ENV['RAILS_ENV']
-    env ||= APP_ENV if Object.const_defined?(:APP_ENV)
-    env ||= ENV['APP_ENV']
-    env || 'development'
+    @app_env ||= begin
+      env = Rails.env if defined?(Rails.env)
+      env ||= RAILS_ENV if Object.const_defined?(:RAILS_ENV)
+      env ||= ENV['RAILS_ENV']
+      env ||= APP_ENV if Object.const_defined?(:APP_ENV)
+      env ||= ENV['APP_ENV']
+      env || 'development'
+    end
   end
 end
 
