@@ -186,12 +186,12 @@ module RailsEnvSwitch
   def switch_app_env(env)
     before do
       silence_warnings { Object.const_set("RAILS_ENV", env) }
-      ActiveRecordShards.instance_eval { @app_env = nil }
+      ActiveRecordShards.reset_app_env!
       ActiveRecord::Base.establish_connection(::RAILS_ENV.to_sym)
     end
     after do
       silence_warnings { Object.const_set("RAILS_ENV", 'test') }
-      ActiveRecordShards.instance_eval { @app_env = nil }
+      ActiveRecordShards.reset_app_env!
       ActiveRecord::Base.establish_connection(::RAILS_ENV.to_sym)
       tmp_sharded_model = Class.new(ActiveRecord::Base)
       assert_equal('ars_test', tmp_sharded_model.connection.current_database)

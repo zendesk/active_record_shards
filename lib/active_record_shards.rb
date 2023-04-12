@@ -27,6 +27,17 @@ module ActiveRecordShards
       env || 'development'
     end
   end
+
+  # Busts internal caches kept by active_record_shards, for things which are _supposed_ to be the
+  # same for the life of the process. You shouldn't need to call this unless you're doing something
+  # truly evil like changing RAILS_ENV after boot
+  def self.reset_app_env!
+    @app_env = nil
+    models = [ActiveRecord::Base] + ActiveRecord::Base.descendants
+    models.each do |model|
+      model.remove_instance_variable(:@_ars_model_is_sharded) if model.instance_variable_defined?(:@_ars_model_is_sharded)
+    end
+  end
 end
 
 ActiveRecord::Base.extend(ActiveRecordShards::ConfigurationParser)
