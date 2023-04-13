@@ -9,3 +9,4 @@ group :test do
 end
 
 gem 'benchmark-ips'
+gem 'debug', '>= 1.0.0'
