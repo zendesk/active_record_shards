@@ -28,8 +28,10 @@ module ActiveRecordShards
       rescue ActiveRecord::RecordNotFound => e
         exception = e
       end
+
       raise exception
     end
+
     ruby2_keywords(:find) if respond_to?(:ruby2_keywords, true)
 
     def count

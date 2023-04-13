@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require_relative 'helper'
+require_relative "helper"
 
 describe "connection switching" do
-  include ConnectionSwitchingSpecHelpers
-  extend RailsEnvSwitch
+  include(ConnectionSwitchingSpecHelpers)
+  extend(RailsEnvSwitch)
 
   def clear_connection_pool
     ActiveRecord::Base.connection_handler.connection_pool_list.clear
@@ -14,34 +14,35 @@ describe "connection switching" do
 
   before do
     ActiveRecord::Base.establish_connection(RAILS_ENV.to_sym)
-    require 'models'
+    require "models"
+
   end
 
   describe "legacy_connection_handling" do
-    if ActiveRecord.version >= Gem::Version.new('6.1')
+    if ActiveRecord.version >= Gem::Version.new("6.1")
       it "raises an exception when legacy_connection_handling is false" do
-        legacy_connection_handling_owner ||=
-          case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
-          when '7.0'
-            ActiveRecord
-          when '6.1'
-            ActiveRecord::Base
-          end
+        legacy_connection_handling_owner ||= case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
+        when "7.0"
+          ActiveRecord
+        when "6.1"
+          ActiveRecord::Base
+        end
 
         begin
           legacy_connection_handling_owner.legacy_connection_handling = false
 
-          assert_raises ActiveRecordShards::ConnectionSwitcher::LegacyConnectionHandlingError do
+          assert_raises(ActiveRecordShards::ConnectionSwitcher::LegacyConnectionHandlingError) do
             ActiveRecord::Base.on_primary_db do
               1
             end
           end
 
-          assert_raises ActiveRecordShards::ConnectionSwitcher::LegacyConnectionHandlingError do
+          assert_raises(ActiveRecordShards::ConnectionSwitcher::LegacyConnectionHandlingError) do
             ActiveRecord::Base.on_shard(1) do
               1
             end
           end
+
         ensure
           legacy_connection_handling_owner.legacy_connection_handling = true
         end
@@ -56,69 +57,69 @@ describe "connection switching" do
 
     it "switches to the primary database" do
       ActiveRecord::Base.on_primary_db do
-        assert_using_database('ars_test')
+        assert_using_database("ars_test")
       end
     end
 
     it "switches to the primary database and back when a default shard is set" do
       ActiveRecord::Base.default_shard = 0
-      assert_using_database('ars_test_shard0')
+      assert_using_database("ars_test_shard0")
 
       ActiveRecord::Base.on_primary_db do
-        assert_using_database('ars_test')
+        assert_using_database("ars_test")
       end
 
-      assert_using_database('ars_test_shard0')
+      assert_using_database("ars_test_shard0")
     end
 
     it "switches to the primary datatbase and back when nested of an on_shard block" do
       ActiveRecord::Base.on_shard(1) do
-        assert_using_database('ars_test_shard1')
+        assert_using_database("ars_test_shard1")
 
         ActiveRecord::Base.on_primary_db do
-          assert_using_database('ars_test')
+          assert_using_database("ars_test")
         end
 
-        assert_using_database('ars_test_shard1')
+        assert_using_database("ars_test_shard1")
       end
     end
   end
 
   describe "shard switching" do
     it "only switch connection on sharded models" do
-      assert_using_database('ars_test', Ticket)
-      assert_using_database('ars_test', Account)
+      assert_using_database("ars_test", Ticket)
+      assert_using_database("ars_test", Account)
 
       ActiveRecord::Base.on_shard(0) do
-        assert_using_database('ars_test_shard0', Ticket)
-        assert_using_database('ars_test', Account)
+        assert_using_database("ars_test_shard0", Ticket)
+        assert_using_database("ars_test", Account)
       end
     end
 
     it "switch to shard and back" do
-      assert_using_database('ars_test')
-      ActiveRecord::Base.on_replica { assert_using_database('ars_test_replica') }
+      assert_using_database("ars_test")
+      ActiveRecord::Base.on_replica { assert_using_database("ars_test_replica") }
 
       ActiveRecord::Base.on_shard(0) do
-        assert_using_database('ars_test_shard0')
-        ActiveRecord::Base.on_replica { assert_using_database('ars_test_shard0_replica') }
+        assert_using_database("ars_test_shard0")
+        ActiveRecord::Base.on_replica { assert_using_database("ars_test_shard0_replica") }
 
         ActiveRecord::Base.on_shard(nil) do
-          assert_using_database('ars_test')
-          ActiveRecord::Base.on_replica { assert_using_database('ars_test_replica') }
+          assert_using_database("ars_test")
+          ActiveRecord::Base.on_replica { assert_using_database("ars_test_replica") }
         end
 
-        assert_using_database('ars_test_shard0')
-        ActiveRecord::Base.on_replica { assert_using_database('ars_test_shard0_replica') }
+        assert_using_database("ars_test_shard0")
+        ActiveRecord::Base.on_replica { assert_using_database("ars_test_shard0_replica") }
       end
 
-      assert_using_database('ars_test')
-      ActiveRecord::Base.on_replica { assert_using_database('ars_test_replica') }
+      assert_using_database("ars_test")
+      ActiveRecord::Base.on_replica { assert_using_database("ars_test_replica") }
     end
 
     it "does not fail on unrelated ensure error when current_shard_selection fails" do
       ActiveRecord::Base.stub(:current_shard_selection, -> { raise ArgumentError }) do
-        assert_raises ArgumentError do
+        assert_raises(ArgumentError) do
           ActiveRecord::Base.on_replica { 1 }
         end
       end
@@ -127,7 +128,7 @@ describe "connection switching" do
     describe "on_first_shard" do
       it "use the first shard" do
         ActiveRecord::Base.on_first_shard do
-          assert_using_database('ars_test_shard0')
+          assert_using_database("ars_test_shard0")
         end
       end
     end
@@ -143,6 +144,7 @@ describe "connection switching" do
         result = ActiveRecord::Base.on_all_shards do |shard|
           [ActiveRecord::Base.connection.select_value("SELECT DATABASE()"), shard]
         end
+
         database_names = result.map(&:first)
         database_shards = result.map(&:last)
 
@@ -161,7 +163,8 @@ describe "connection switching" do
             [ActiveRecord::Base.connection.select_value("SELECT DATABASE()"), shard]
           end
         end
-        assert_equal [["ars_test", nil]], result
+
+        assert_equal([["ars_test", nil]], result)
       end
     end
 
@@ -205,7 +208,7 @@ describe "connection switching" do
         ActiveRecord::Base.on_all_shards { |s| Ticket.create!(title: s.to_s) }
 
         res = Ticket.where(title: "1").shards.to_a
-        assert_equal 1, res.size
+        assert_equal(1, res.size)
       end
     end
   end
@@ -217,8 +220,8 @@ describe "connection switching" do
       end
 
       it "use unsharded db for sharded models" do
-        assert_using_database('ars_test', Ticket)
-        assert_using_database('ars_test', Account)
+        assert_using_database("ars_test", Ticket)
+        assert_using_database("ars_test", Account)
       end
     end
 
@@ -232,14 +235,14 @@ describe "connection switching" do
       end
 
       it "use default shard db for sharded models" do
-        assert_using_database('ars_test_shard0', Ticket)
-        assert_using_database('ars_test', Account)
+        assert_using_database("ars_test_shard0", Ticket)
+        assert_using_database("ars_test", Account)
       end
 
       it "still be able to switch to shard nil" do
         ActiveRecord::Base.on_shard(nil) do
-          assert_using_database('ars_test', Ticket)
-          assert_using_database('ars_test', Account)
+          assert_using_database("ars_test", Ticket)
+          assert_using_database("ars_test", Account)
         end
       end
     end
@@ -262,18 +265,18 @@ describe "connection switching" do
         Account.on_replica do
           ActiveRecord::Base.connection.execute("alter table accounts drop column foo")
           Account.reset_column_information
-          refute_includes(Account.column_names, 'foo')
+          refute_includes(Account.column_names, "foo")
         end
       end
 
       it "use the non-sharded replica connection" do
-        assert_using_database('ars_test', Account)
-        assert_includes(Account.column_names, 'foo')
+        assert_using_database("ars_test", Account)
+        assert_includes(Account.column_names, "foo")
       end
 
       it "ignores primary/transactions" do
-        assert_using_database('ars_test', Account)
-        Account.on_primary { assert_includes(Account.column_names, 'foo') }
+        assert_using_database("ars_test", Account)
+        Account.on_primary { assert_includes(Account.column_names, "foo") }
       end
     end
 
@@ -297,12 +300,12 @@ describe "connection switching" do
       end
 
       it "gets columns from the replica shard" do
-        assert_includes(Ticket.column_names, 'foo')
+        assert_includes(Ticket.column_names, "foo")
       end
 
       it "have correct from_shard" do
         ActiveRecord::Base.on_all_shards do |shard|
-          assert_equal shard, Ticket.new.from_shard
+          assert_equal(shard, Ticket.new.from_shard)
         end
       end
     end
@@ -321,7 +324,7 @@ describe "connection switching" do
       end
 
       it "doesn't switch to shard" do
-        table_has_column?('schema_migrations', 'foo')
+        table_has_column?("schema_migrations", "foo")
       end
     end
   end
@@ -330,8 +333,8 @@ describe "connection switching" do
     it "doesn't use the primary (for escaping)" do
       with_unsharded_primary_unavailable do
         Account.all.to_sql
-        Account.where('id = 1').to_sql
-        Account.where('id = ?', 1).to_sql
+        Account.where("id = 1").to_sql
+        Account.where("id = ?", 1).to_sql
         Account.where(id: 1).to_sql
       end
     end
@@ -349,10 +352,10 @@ describe "connection switching" do
         end
 
         UnshardedModel.on_replica { UnshardedModel.connection.execute("create table unsharded_models (id int)") }
-        assert UnshardedModel.table_exists?
+        assert(UnshardedModel.table_exists?)
 
         ActiveRecord::Base.on_all_shards do
-          refute table_exists?("unsharded_models")
+          refute(table_exists?("unsharded_models"))
         end
       end
     end
@@ -368,16 +371,16 @@ describe "connection switching" do
           end
         end
 
-        assert ShardedModel.table_exists?
+        assert(ShardedModel.table_exists?)
       end
     end
   end
 
   describe "in an environment without replica" do
-    switch_app_env('test3')
+    switch_app_env("test3")
     def spec_name
       case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
-      when '6.1', '7.0'
+      when "6.1", "7.0"
         ActiveRecord::Base.connection_pool.db_config.name
       else
         ActiveRecord::Base.connection_pool.spec.name
@@ -390,12 +393,12 @@ describe "connection switching" do
         shard_spec_name = ActiveRecord::Base.on_shard(0) { spec_name }
 
         ActiveRecord::Base.on_replica do
-          assert_using_database('ars_test3', Account)
-          assert_equal main_spec_name, spec_name
+          assert_using_database("ars_test3", Account)
+          assert_equal(main_spec_name, spec_name)
 
           ActiveRecord::Base.on_shard(0) do
-            assert_using_database('ars_test3_shard0', Ticket)
-            assert_equal shard_spec_name, spec_name
+            assert_using_database("ars_test3_shard0", Ticket)
+            assert_equal(shard_spec_name, spec_name)
           end
         end
       end
@@ -403,16 +406,16 @@ describe "connection switching" do
   end
 
   describe "in an unsharded environment" do
-    switch_app_env('test2')
+    switch_app_env("test2")
 
     describe "shard switching" do
       it "just stay on the main db" do
-        assert_using_database('ars_test2', Ticket)
-        assert_using_database('ars_test2', Account)
+        assert_using_database("ars_test2", Ticket)
+        assert_using_database("ars_test2", Account)
 
         ActiveRecord::Base.on_shard(0) do
-          assert_using_database('ars_test2', Ticket)
-          assert_using_database('ars_test2', Account)
+          assert_using_database("ars_test2", Ticket)
+          assert_using_database("ars_test2", Account)
         end
       end
     end
@@ -435,12 +438,13 @@ describe "connection switching" do
     describe "without replica configuration" do
       before do
         if ActiveRecord::VERSION::MAJOR >= 6
-          @saved_config = ActiveRecord::Base.configurations.find_db_config('test_replica')
+          @saved_config = ActiveRecord::Base.configurations.find_db_config("test_replica")
           ActiveRecord::Base.configurations.configurations.delete(@saved_config)
         else
-          @saved_config = ActiveRecord::Base.configurations.delete('test_replica')
+          @saved_config = ActiveRecord::Base.configurations.delete("test_replica")
         end
-        Thread.current[:shard_selection] = nil # drop caches
+        # drop caches
+        Thread.current[:shard_selection] = nil
         clear_connection_pool
         ActiveRecord::Base.establish_connection(:test)
       end
@@ -449,9 +453,10 @@ describe "connection switching" do
         if ActiveRecord::VERSION::MAJOR >= 6
           ActiveRecord::Base.configurations.configurations << @saved_config
         else
-          ActiveRecord::Base.configurations['test_replica'] = @saved_config
+          ActiveRecord::Base.configurations["test_replica"] = @saved_config
         end
-        Thread.current[:shard_selection] = nil # drop caches
+        # drop caches
+        Thread.current[:shard_selection] = nil
       end
 
       it "default to the primary database" do
@@ -459,7 +464,7 @@ describe "connection switching" do
 
         ActiveRecord::Base.on_replica { assert_using_primary_db }
         Account.on_replica { assert_using_primary_db }
-        Ticket.on_replica  { assert_using_primary_db }
+        Ticket.on_replica { assert_using_primary_db }
       end
 
       it "successfully execute queries" do
@@ -519,20 +524,30 @@ describe "connection switching" do
         before do
           Account.on_replica_by_default = true
 
-          Account.on_primary.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'primary_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
+          Account
+            .on_primary
+            .connection
+            .execute(
+              "INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'primary_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')"
+            )
           assert(Account.on_primary.find(1000))
-          assert_equal('primary_name', Account.on_primary.find(1000).name)
+          assert_equal("primary_name", Account.on_primary.find(1000).name)
 
-          Account.on_replica.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'replica_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
+          Account
+            .on_replica
+            .connection
+            .execute(
+              "INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'replica_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')"
+            )
 
           @model = Account.on_replica.find(1000)
           assert(@model)
-          assert_equal('replica_name', @model.name)
+          assert_equal("replica_name", @model.name)
         end
 
         it "read from replica on reload" do
           @model.reload
-          assert_equal('replica_name', @model.name)
+          assert_equal("replica_name", @model.name)
         end
 
         it "be marked as read-only" do
@@ -550,12 +565,12 @@ describe "connection switching" do
 
             @model = Account.on_replica.find(1000)
             assert(@model)
-            assert_equal('replica_name', @model.name)
+            assert_equal("replica_name", @model.name)
           end
 
           it "read from replica on reload" do
             @model.reload
-            assert_equal('replica_name', @model.name)
+            assert_equal("replica_name", @model.name)
           end
 
           it "not be marked as read-only" do
@@ -580,8 +595,8 @@ describe "connection switching" do
         # before columns -> with_scope -> type-condition -> columns == loop
         it "not loop when on replica by default" do
           Person.on_replica_by_default = true
-          assert User.on_replica_by_default?
-          assert User.finder_needs_type_condition?
+          assert(User.on_replica_by_default?)
+          assert(User.finder_needs_type_condition?)
 
           User.reset_column_information
           User.columns_hash
@@ -592,10 +607,14 @@ describe "connection switching" do
 
       describe "a model loaded with the primary" do
         before do
-          Account.connection.execute("INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'primary_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')")
+          Account
+            .connection
+            .execute(
+              "INSERT INTO accounts (id, name, created_at, updated_at) VALUES(1000, 'primary_name', '2009-12-04 20:18:48', '2009-12-04 20:18:48')"
+            )
           @model = Account.first
           assert(@model)
-          assert_equal('primary_name', @model.name)
+          assert_equal("primary_name", @model.name)
         end
 
         it "not unset readonly" do
@@ -618,7 +637,7 @@ describe "connection switching" do
         assert_using_primary_db
         Account.create!
 
-        refute_equal Account.count, Account.on_replica.count
+        refute_equal(Account.count, Account.on_replica.count)
       end
 
       it "work on association collections" do
@@ -626,14 +645,14 @@ describe "connection switching" do
         account = Account.create!
 
         ActiveRecord::Base.on_shard(0) do
-          account.tickets.create! title: 'primary ticket'
+          account.tickets.create!(title: "primary ticket")
 
           Ticket.on_replica do
-            account.tickets.create! title: 'replica ticket'
+            account.tickets.create!(title: "replica ticket")
           end
 
-          assert_equal "primary ticket", account.tickets.first.title
-          assert_equal "replica ticket", account.tickets.on_replica.first.title
+          assert_equal("primary ticket", account.tickets.first.title)
+          assert_equal("replica ticket", account.tickets.on_replica.first.title)
         end
       end
     end

@@ -6,7 +6,7 @@ class Account < ActiveRecord::Base
 
   has_many :tickets
   has_many :account_things
-  has_and_belongs_to_many :people, join_table: 'account_people'
+  has_and_belongs_to_many :people, join_table: "account_people"
 end
 
 class AccountThing < ActiveRecord::Base
@@ -30,5 +30,5 @@ end
 class User < Person
   # Makes `User.new` a bit more complicated. Don't change without changing the
   # corresponding tests.
-  default_scope { where(type: 'User') }
+  default_scope { where(type: "User") }
 end

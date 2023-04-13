@@ -3,20 +3,20 @@
 module ActiveRecordShards
   module DefaultReplicaPatches
     def self.wrap_method_in_on_replica(class_method, base, method, force_on_replica: false)
-      base_methods =
-        if class_method
-          base.methods + base.private_methods
-        else
-          base.instance_methods + base.private_instance_methods
-        end
+      base_methods = if class_method
+        base.methods + base.private_methods
+      else
+        base.instance_methods + base.private_instance_methods
+      end
 
       return unless base_methods.include?(method)
 
       _, method, punctuation = method.to_s.match(/^(.*?)([\?\!]?)$/).to_a
       # _ALWAYS_ on replica, or only for on `on_replica_by_default = true` models?
-      wrapper = force_on_replica ? 'force_on_replica' : 'on_replica_unless_tx'
-      base.class_eval <<-RUBY, __FILE__, __LINE__ + 1
-        #{class_method ? 'class << self' : ''}
+      wrapper = force_on_replica ? "force_on_replica" : "on_replica_unless_tx"
+      base.class_eval(
+        <<-RUBY,
+        #{class_method ? "class << self" : ""}
           def #{method}_with_default_replica#{punctuation}(*args, &block)
             #{wrapper} do
               #{method}_without_default_replica#{punctuation}(*args, &block)
@@ -25,8 +25,11 @@ module ActiveRecordShards
           ruby2_keywords(:#{method}_with_default_replica#{punctuation}) if respond_to?(:ruby2_keywords, true)
           alias_method :#{method}_without_default_replica#{punctuation}, :#{method}#{punctuation}
           alias_method :#{method}#{punctuation}, :#{method}_with_default_replica#{punctuation}
-        #{class_method ? 'end' : ''}
-      RUBY
+        #{class_method ? "end" : ""}
+        RUBY
+        __FILE__,
+        __LINE__ + 1
+      )
     end
 
     def transaction_with_replica_off(*args, &block)
@@ -42,6 +45,7 @@ module ActiveRecordShards
         transaction_without_replica_off(*args, &block)
       end
     end
+
     ruby2_keywords(:transaction_with_replica_off) if respond_to?(:ruby2_keywords, true)
 
     module InstanceMethods
@@ -79,11 +83,11 @@ module ActiveRecordShards
       ActiveRecordShards::DefaultReplicaPatches.wrap_method_in_on_replica(false, base, :reload)
 
       base.class_eval do
-        include InstanceMethods
+        include(InstanceMethods)
 
         class << self
-          alias_method :transaction_without_replica_off, :transaction
-          alias_method :transaction, :transaction_with_replica_off
+          alias_method(:transaction_without_replica_off, :transaction)
+          alias_method(:transaction, :transaction_with_replica_off)
         end
       end
     end
@@ -138,8 +142,8 @@ module ActiveRecordShards
     module Rails41HasAndBelongsToManyBuilderExtension
       def self.included(base)
         base.class_eval do
-          alias_method :through_model_without_inherit_default_replica_from_lhs, :through_model
-          alias_method :through_model, :through_model_with_inherit_default_replica_from_lhs
+          alias_method(:through_model_without_inherit_default_replica_from_lhs, :through_model)
+          alias_method(:through_model, :through_model_with_inherit_default_replica_from_lhs)
         end
       end
 

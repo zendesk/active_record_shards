@@ -14,7 +14,7 @@ module ActiveRecordShards
     private
 
     def ars_shard_type?(shard)
-      return true if ActiveRecord.version < Gem::Version.new('6.1')
+      return true if ActiveRecord.version < Gem::Version.new("6.1")
       return true if shard.nil?
       return true if shard == :_no_shard
       return true if shard.is_a?(Integer)

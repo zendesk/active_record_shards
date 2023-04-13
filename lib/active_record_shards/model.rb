@@ -10,21 +10,21 @@ module ActiveRecordShards
       self.sharded = false
     end
 
-    def is_sharded? # rubocop:disable Naming/PredicateName
+    # rubocop:disable Naming/PredicateName
+    def is_sharded?
       return @_ars_model_is_sharded unless @_ars_model_is_sharded.nil?
 
-      @_ars_model_is_sharded =
-        if self == ActiveRecord::Base
-          sharded != false && supports_sharding?
-        elsif self == base_class
-          if sharded.nil?
-            ActiveRecord::Base.is_sharded?
-          else
-            sharded != false
-          end
+      @_ars_model_is_sharded = if self == ActiveRecord::Base
+        sharded != false && supports_sharding?
+      elsif self == base_class
+        if sharded.nil?
+          ActiveRecord::Base.is_sharded?
         else
-          base_class.is_sharded?
+          sharded != false
         end
+      else
+        base_class.is_sharded?
+      end
     end
 
     def on_replica_by_default?
@@ -63,7 +63,7 @@ module ActiveRecordShards
 
     def self.extended(base)
       base.send(:include, InstanceMethods)
-      base.after_initialize :initialize_shard_and_replica
+      base.after_initialize(:initialize_shard_and_replica)
     end
 
     private

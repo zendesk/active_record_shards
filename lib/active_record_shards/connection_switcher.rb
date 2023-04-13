@@ -1,16 +1,17 @@
 # frozen_string_literal: true
 
-require 'active_record_shards/shard_support'
+require "active_record_shards/shard_support"
 
 module ActiveRecordShards
   module ConnectionSwitcher
-    class LegacyConnectionHandlingError < StandardError; end
+    class LegacyConnectionHandlingError < StandardError
+    end
 
     case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
-    when '6.1', '7.0'
+    when "6.1", "7.0"
       SHARD_NAMES_CONFIG_KEY = :shard_names
     else
-      SHARD_NAMES_CONFIG_KEY = 'shard_names'
+      SHARD_NAMES_CONFIG_KEY = "shard_names"
     end
 
     def self.extended(base)
@@ -52,6 +53,7 @@ module ActiveRecordShards
       else
         [yield]
       end
+
     ensure
       switch_connection(old_options)
     end
@@ -107,11 +109,15 @@ module ActiveRecordShards
 
       # we avoid_readonly_scope to prevent some stack overflow problems, like when
       # .columns calls .with_scope which calls .columns and onward, endlessly.
-      if self == ActiveRecord::Base || !switch_to_replica || construct_ro_scope == false || ActiveRecordShards.disable_replica_readonly_records == true
+      if self == ActiveRecord::Base ||
+          !switch_to_replica ||
+          construct_ro_scope == false ||
+          ActiveRecordShards.disable_replica_readonly_records == true
         yield
       else
         readonly.scoping(&block)
       end
+
     ensure
       self.disallow_replica -= 1 if which == :primary
       switch_connection(old_options) if old_options
@@ -151,15 +157,18 @@ module ActiveRecordShards
       @_ars_config_for_env ||= {}
       @_ars_config_for_env[shard_env] ||= begin
         case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
-        when '7.0'
+        when "7.0"
           config = configurations.configs_for(env_name: shard_env, include_hidden: true).first.configuration_hash
-        when '6.1'
+        when "6.1"
           config = configurations.configs_for(env_name: shard_env, include_replicas: true).first.configuration_hash
         else
           config = configurations[shard_env]
         end
+
         unless config
-          raise "Did not find #{shard_env} in configurations, did you forget to add it to your database config? (configurations: #{configurations.to_h.keys.inspect})"
+          raise(
+            "Did not find #{shard_env} in configurations, did you forget to add it to your database config? (configurations: #{configurations.to_h.keys.inspect})"
+          )
         end
 
         ensure_all_shard_names_are_integers(config)
@@ -167,6 +176,7 @@ module ActiveRecordShards
         config
       end
     end
+
     alias_method :check_config_for_env, :config_for_env
 
     def ensure_all_shard_names_are_integers(config)
@@ -176,7 +186,7 @@ module ActiveRecordShards
     end
 
     def switch_connection(options)
-      ensure_legacy_connection_handling if ActiveRecord.version >= Gem::Version.new('6.1')
+      ensure_legacy_connection_handling if ActiveRecord.version >= Gem::Version.new("6.1")
 
       if options.any?
         if options.key?(:replica)
@@ -195,18 +205,20 @@ module ActiveRecordShards
 
     def ensure_legacy_connection_handling
       unless legacy_connection_handling_owner.legacy_connection_handling
-        raise LegacyConnectionHandlingError, "ActiveRecordShards is _only_ compatible with ActiveRecord `legacy_connection_handling` set to `true`."
+        raise(
+          LegacyConnectionHandlingError,
+          "ActiveRecordShards is _only_ compatible with ActiveRecord `legacy_connection_handling` set to `true`."
+        )
       end
     end
 
     def legacy_connection_handling_owner
-      @legacy_connection_handling_owner ||=
-        case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
-        when '7.0'
-          ActiveRecord
-        when '6.1'
-          ActiveRecord::Base
-        end
+      @legacy_connection_handling_owner ||= case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
+      when "7.0"
+        ActiveRecord
+      when "6.1"
+        ActiveRecord::Base
+      end
     end
 
     def shard_env
@@ -237,23 +249,29 @@ module ActiveRecordShards
         @which = which
       end
 
-      def method_missing(method, *args, &block) # rubocop:disable Style/MethodMissingSuper, Style/MissingRespondToMissing
+      # rubocop:disable Style/MethodMissingSuper, Style/MissingRespondToMissing
+      def method_missing(method, *args, &block)
         @target.on_primary_or_replica(@which) { @target.send(method, *args, &block) }
       end
+
       ruby2_keywords(:method_missing) if respond_to?(:ruby2_keywords, true)
     end
   end
 end
 
 case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
-when '5.1', '5.2'
-  require 'active_record_shards/connection_switcher-5-1'
-when '6.0'
-  require 'active_record_shards/connection_switcher-6-0'
-when '6.1'
-  require 'active_record_shards/connection_switcher-6-1'
-when '7.0'
-  require 'active_record_shards/connection_switcher-7-0'
+when "5.1", "5.2"
+  require "active_record_shards/connection_switcher-5-1"
+
+when "6.0"
+  require "active_record_shards/connection_switcher-6-0"
+
+when "6.1"
+  require "active_record_shards/connection_switcher-6-1"
+
+when "7.0"
+  require "active_record_shards/connection_switcher-7-0"
+
 else
   raise "ActiveRecordShards is not compatible with #{ActiveRecord::VERSION::STRING}"
 end

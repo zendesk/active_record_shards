@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require_relative 'helper'
-require_relative 'models'
+require_relative "helper"
+require_relative "models"
 
 describe "connection switching thread safety" do
   with_fresh_databases
@@ -21,10 +21,12 @@ describe "connection switching thread safety" do
       pause_and_mark_ready
       switch_through_all_databases
     end
+
     new_thread("switches_through_all_2") do
       pause_and_mark_ready
       switch_through_all_databases
     end
+
     new_thread("switches_through_all_3") do
       pause_and_mark_ready
       switch_through_all_databases
@@ -38,12 +40,12 @@ describe "connection switching thread safety" do
     it "allows threads to parallelize their IO" do
       results = []
 
-      query_delay = { fast: "0.01", slow: "1", medium: "0.5" }
+      query_delay = {fast: "0.01", slow: "1", medium: "0.5"}
       new_thread("different_db_parallel_thread1") do
         ActiveRecord::Base.on_primary do
           pause_and_mark_ready
           result = execute_sql("SELECT name,'slower query',SLEEP(#{query_delay.fetch(:slow)}) FROM accounts")
-          assert_equal('Primary account', result.first[0])
+          assert_equal("Primary account", result.first[0])
           results.push(result)
         end
       end
@@ -52,7 +54,7 @@ describe "connection switching thread safety" do
         ActiveRecord::Base.on_replica do
           pause_and_mark_ready
           result = execute_sql("SELECT name, 'faster query',SLEEP(#{query_delay.fetch(:fast)}) FROM accounts")
-          assert_equal('Replica account', result.first[0])
+          assert_equal("Replica account", result.first[0])
           results.push(result)
         end
       end
@@ -61,7 +63,7 @@ describe "connection switching thread safety" do
         ActiveRecord::Base.on_shard(0) do
           pause_and_mark_ready
           result = execute_sql("SELECT title, 'medium query',SLEEP(#{query_delay.fetch(:medium)}) FROM tickets")
-          assert_equal('Shard 0 Primary ticket', result.first[0])
+          assert_equal("Shard 0 Primary ticket", result.first[0])
           results.push(result)
         end
       end
@@ -119,7 +121,7 @@ describe "connection switching thread safety" do
     it "allows threads to parallelize their IO" do
       results = []
 
-      query_delay = { fast: "0.01", slow: "1", medium: "0.5" }
+      query_delay = {fast: "0.01", slow: "1", medium: "0.5"}
       new_thread("same_db_parallel_thread1") do
         ActiveRecord::Base.on_primary do
           pause_and_mark_ready
@@ -184,10 +186,12 @@ describe "connection switching thread safety" do
       result = ActiveRecord::Base.connection.execute("SELECT * from accounts")
       assert_equal("Primary account", record_name(result))
     end
+
     ActiveRecord::Base.on_replica do
       result = ActiveRecord::Base.connection.execute("SELECT * from accounts")
       assert_equal("Replica account", record_name(result))
     end
+
     ActiveRecord::Base.on_shard(0) do
       result = ActiveRecord::Base.connection.execute("SELECT * from tickets")
       assert_equal("Shard 0 Primary ticket", record_name(result))
@@ -197,6 +201,7 @@ describe "connection switching thread safety" do
         assert_equal("Shard 0 Replica ticket", record_name(result))
       end
     end
+
     ActiveRecord::Base.on_shard(1) do
       result = ActiveRecord::Base.connection.execute("SELECT * from tickets")
       assert_equal("Shard 1 Primary ticket", record_name(result))

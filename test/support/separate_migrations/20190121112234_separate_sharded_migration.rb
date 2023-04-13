@@ -4,8 +4,8 @@ class SeparateShardedMigration < BaseMigration
   shard :all
 
   def self.up
-    create_table :sharded_table do |t|
-      t.string :name
+    create_table(:sharded_table) do |t|
+      t.string(:name)
     end
   end
 

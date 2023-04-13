@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require_relative '../helper'
-require 'active_record_shards/sql_comments'
+require_relative "../helper"
+require "active_record_shards/sql_comments"
 
 describe ActiveRecordShards::SqlComments do
   with_fresh_databases
@@ -19,6 +19,6 @@ describe ActiveRecordShards::SqlComments do
 
   it "adds sql comment" do
     comment.execute("foo")
-    assert_equal ["/* unsharded primary */ foo"], comment.called
+    assert_equal(["/* unsharded primary */ foo"], comment.called)
   end
 end

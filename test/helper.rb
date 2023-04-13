@@ -4,23 +4,23 @@
 # They add noise to the thread safety tests when inspecting `Thread.list`.
 ENV["MT_CPU"] ||= "1"
 
-require 'bundler/setup'
-require 'minitest/autorun'
-require 'minitest/rg'
-require 'rake'
+require "bundler/setup"
+require "minitest/autorun"
+require "minitest/rg"
+require "rake"
 
 Bundler.require
 
-$LOAD_PATH.unshift(File.join(__dir__, '..', 'lib'))
+$LOAD_PATH.unshift(File.join(__dir__, "..", "lib"))
 $LOAD_PATH.unshift(__dir__)
-require 'active_support'
-require 'active_record_shards'
-require 'mysql2'
-require 'support/db_helper'
-require 'support/tcp_proxy'
-require 'logger'
+require "active_support"
+require "active_record_shards"
+require "mysql2"
+require "support/db_helper"
+require "support/tcp_proxy"
+require "logger"
 
-require 'pry-byebug'
+require "pry-byebug"
 
 RAILS_ENV = "test"
 
@@ -29,15 +29,15 @@ ActiveSupport.test_order = :sorted
 ActiveSupport::Deprecation.behavior = :raise
 
 case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
-when '7.0'
+when "7.0"
   ActiveRecord.legacy_connection_handling = true
-when '6.1'
+when "6.1"
   ActiveRecord::Base.legacy_connection_handling = true
 end
 
 BaseMigration = ActiveRecord::Migration[4.2]
 
-require 'active_support/test_case'
+require "active_support/test_case"
 
 # support multiple before/after blocks per example
 module SpecDslPatch
@@ -63,18 +63,19 @@ module SpecDslPatch
     )
   end
 end
+
 Minitest::Spec.singleton_class.prepend(SpecDslPatch)
 
 module RakeSpecHelpers
   def show_databases(config)
     client = Mysql2::Client.new(
-      host: config['test']['host'],
-      port: config['test']['port'],
-      username: config['test']['username'],
-      password: config['test']['password']
+      host: config["test"]["host"],
+      port: config["test"]["port"],
+      username: config["test"]["username"],
+      password: config["test"]["password"]
     )
     databases = client.query("SHOW DATABASES")
-    databases.map { |d| d['Database'] }
+    databases.map { |d| d["Database"] }
   end
 
   def rake(name)
@@ -85,11 +86,11 @@ end
 
 module ConnectionSwitchingSpecHelpers
   def assert_using_primary_db
-    assert_using_database('ars_test')
+    assert_using_database("ars_test")
   end
 
   def assert_using_replica_db
-    assert_using_database('ars_test_replica')
+    assert_using_database("ars_test_replica")
   end
 
   def assert_using_database(db_name, model = ActiveRecord::Base)
@@ -99,25 +100,25 @@ end
 
 module SpecHelpers
   def self.mysql_url
-    URI(ENV['MYSQL_URL'] || 'mysql://root@127.0.0.1:3306')
+    URI(ENV["MYSQL_URL"] || "mysql://root@127.0.0.1:3306")
   end
 
   @@unsharded_primary_proxy ||= TCPProxy.start(
     remote_host: mysql_url.host,
     remote_port: mysql_url.port,
-    local_port: '13306'
+    local_port: "13306"
   )
 
   @@shard_1_primary_proxy ||= TCPProxy.start(
     remote_host: mysql_url.host,
     remote_port: mysql_url.port,
-    local_port: '13307'
+    local_port: "13307"
   )
 
   @@shard_2_primary_proxy ||= TCPProxy.start(
     remote_host: mysql_url.host,
     remote_port: mysql_url.port,
-    local_port: '13308'
+    local_port: "13308"
   )
 
   # Verifies that a block of code is not using any of the the primaries by
@@ -166,7 +167,7 @@ module SpecHelpers
     !ActiveRecord::Base.connection.select_values("desc #{table}").grep(column).empty?
   end
 
-  def migrator(direction = :up, path = 'migrations', target_version = nil)
+  def migrator(direction = :up, path = "migrations", target_version = nil)
     migration_path = File.join(__dir__, "support", path)
     if ActiveRecord::VERSION::MAJOR >= 6
       migrations = ActiveRecord::MigrationContext.new(migration_path, ActiveRecord::SchemaMigration).migrations
@@ -180,6 +181,7 @@ module SpecHelpers
     end
   end
 end
+
 Minitest::Spec.include(SpecHelpers)
 
 module RailsEnvSwitch
@@ -189,12 +191,13 @@ module RailsEnvSwitch
       ActiveRecordShards.reset_app_env!
       ActiveRecord::Base.establish_connection(::RAILS_ENV.to_sym)
     end
+
     after do
-      silence_warnings { Object.const_set("RAILS_ENV", 'test') }
+      silence_warnings { Object.const_set("RAILS_ENV", "test") }
       ActiveRecordShards.reset_app_env!
       ActiveRecord::Base.establish_connection(::RAILS_ENV.to_sym)
       tmp_sharded_model = Class.new(ActiveRecord::Base)
-      assert_equal('ars_test', tmp_sharded_model.connection.current_database)
+      assert_equal("ars_test", tmp_sharded_model.connection.current_database)
     end
   end
 end

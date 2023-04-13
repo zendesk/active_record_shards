@@ -12,7 +12,7 @@
 #     do_work_that_cannot_call_proxied_service
 #   end
 #
-require 'socket'
+require "socket"
 
 class TCPProxy
   THREAD_CHECK_INTERVAL = 0.001
@@ -34,7 +34,7 @@ class TCPProxy
   end
 
   def start
-    proxy_server = TCPServer.new('0.0.0.0', local_port)
+    proxy_server = TCPServer.new("0.0.0.0", local_port)
 
     @thr = Thread.new do
       loop do
@@ -52,15 +52,16 @@ class TCPProxy
           # Either thread can be the first to finish - requests if the mysql2 client
           # closes the connection; responses if the MySQL server closes - so we
           # cannot do the more common `requests.join and responses.join`.
-          sleep THREAD_CHECK_INTERVAL while requests.alive? && responses.alive?
+          sleep(THREAD_CHECK_INTERVAL) while requests.alive? && responses.alive?
           requests.kill
           responses.kill
-          sleep THREAD_CHECK_INTERVAL until requests.stop? && responses.stop?
+          sleep(THREAD_CHECK_INTERVAL) until requests.stop? && responses.stop?
         ensure
           requesting_socket&.close
           responding_socket&.close
         end
       end
+
     ensure
       proxy_server.close
     end
@@ -68,7 +69,7 @@ class TCPProxy
 
   def pause(&_block)
     # Give requests already sent to the socket a chance to be picked up before pausing.
-    sleep 0.001
+    sleep(0.001)
     @disabled = true
     yield
   ensure
@@ -92,9 +93,9 @@ class TCPProxy
           dst.send(data, 0)
         end
       elsif disabled? && pause_behavior == :return
-        clean_data = data.gsub(/[^\w. ]/, '').strip
+        clean_data = data.gsub(/[^\w. ]/, "").strip
 
-        warn "TCPProxy received a request while paused: `#{clean_data}`"
+        warn("TCPProxy received a request while paused: `#{clean_data}`")
         return
       else
         raise "Invalid state"

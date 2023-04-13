@@ -32,10 +32,12 @@ module ActiveRecordShards
         @which = which
       end
 
-      def method_missing(method, *args, &block) # rubocop:disable Style/MethodMissingSuper, Style/MissingRespondToMissing
+      # rubocop:disable Style/MethodMissingSuper, Style/MissingRespondToMissing
+      def method_missing(method, *args, &block)
         reflection = @association_collection.proxy_association.reflection
         reflection.klass.on_cx_switch_block(@which) { @association_collection.send(method, *args, &block) }
       end
+
       ruby2_keywords(:method_missing) if respond_to?(:ruby2_keywords, true)
     end
   end

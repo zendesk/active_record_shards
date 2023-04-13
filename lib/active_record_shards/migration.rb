@@ -5,7 +5,7 @@ module ActiveRecord
     def self.shards_migration_context
       if ActiveRecord::VERSION::MAJOR >= 6
         ActiveRecord::MigrationContext.new(ActiveRecord::Migrator.migrations_paths, ActiveRecord::SchemaMigration)
-      elsif ActiveRecord::VERSION::STRING >= '5.2.0'
+      elsif ActiveRecord::VERSION::STRING >= "5.2.0"
         ActiveRecord::MigrationContext.new(ActiveRecord::Migrator.migrations_paths)
       else
         self
@@ -22,6 +22,7 @@ module ActiveRecord
         ActiveRecord::InternalMetadata.create_table
       end
     end
+
     ruby2_keywords(:initialize_with_sharding) if respond_to?(:ruby2_keywords, true)
     alias_method :initialize_without_sharding, :initialize
     alias_method :initialize, :initialize_with_sharding
@@ -30,6 +31,7 @@ module ActiveRecord
       ActiveRecord::Base.on_shard(nil) { run_without_sharding }
       ActiveRecord::Base.on_all_shards { run_without_sharding }
     end
+
     alias_method :run_without_sharding, :run
     alias_method :run, :run_with_sharding
 
@@ -37,6 +39,7 @@ module ActiveRecord
       ActiveRecord::Base.on_shard(nil) { migrate_without_sharding }
       ActiveRecord::Base.on_all_shards { migrate_without_sharding }
     end
+
     alias_method :migrate_without_sharding, :migrate
     alias_method :migrate, :migrate_with_sharding
 
@@ -91,8 +94,10 @@ module ActiveRecordShards
   module ActualMigrationExtension
     def migrate_with_forced_shard(direction)
       if migration_shard.blank?
-        raise "#{name}: Can't run migrations without a shard spec: this may be :all, :none,
+        raise(
+          "#{name}: Can't run migrations without a shard spec: this may be :all, :none,
                  or a specific shard (for data-fixups).  please call shard(arg) in your migration."
+        )
       end
 
       shard = ActiveRecord::Base.current_shard_selection.shard
@@ -114,11 +119,11 @@ module ActiveRecordShards
 end
 
 ActiveRecord::Migration.class_eval do
-  extend ActiveRecordShards::MigrationClassExtension
-  include ActiveRecordShards::ActualMigrationExtension
+  extend(ActiveRecordShards::MigrationClassExtension)
+  include(ActiveRecordShards::ActualMigrationExtension)
 
-  alias_method :migrate_without_forced_shard, :migrate
-  alias_method :migrate, :migrate_with_forced_shard
+  alias_method(:migrate_without_forced_shard, :migrate)
+  alias_method(:migrate, :migrate_with_forced_shard)
 end
 
-ActiveRecord::MigrationProxy.delegate :migration_shard, to: :migration
+ActiveRecord::MigrationProxy.delegate(:migration_shard, to: :migration)

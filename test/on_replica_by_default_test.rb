@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require_relative 'helper'
-require 'models'
+require_relative "helper"
+require "models"
 
 describe ".on_replica_by_default" do
   with_fresh_databases
@@ -12,15 +12,23 @@ describe ".on_replica_by_default" do
     Account.on_replica_by_default = true
     Person.on_replica_by_default = true
 
-    Account.connection.execute(
-      "INSERT INTO accounts (id, name, created_at, updated_at) VALUES (1000, 'Primary account', NOW(), NOW())"
-    )
-    Account.on_replica.connection.execute(
-      "INSERT INTO accounts (id, name, created_at, updated_at) VALUES (1000, 'Replica account', NOW(), NOW())"
-    )
-    Account.on_replica.connection.execute(
-      "INSERT INTO accounts (id, name, created_at, updated_at) VALUES (1001, 'Replica account 2', NOW(), NOW())"
-    )
+    Account
+      .connection
+      .execute(
+        "INSERT INTO accounts (id, name, created_at, updated_at) VALUES (1000, 'Primary account', NOW(), NOW())"
+      )
+    Account
+      .on_replica
+      .connection
+      .execute(
+        "INSERT INTO accounts (id, name, created_at, updated_at) VALUES (1000, 'Replica account', NOW(), NOW())"
+      )
+    Account
+      .on_replica
+      .connection
+      .execute(
+        "INSERT INTO accounts (id, name, created_at, updated_at) VALUES (1001, 'Replica account 2', NOW(), NOW())"
+      )
 
     Person.connection.execute(
       "REPLACE INTO people(id, name) VALUES (10, 'Primary person')"
@@ -62,11 +70,11 @@ describe ".on_replica_by_default" do
 
   describe "on ActiveRecord::Base class" do
     it "reader is always false" do
-      refute ActiveRecord::Base.on_replica_by_default?
+      refute(ActiveRecord::Base.on_replica_by_default?)
     end
 
     it "setter does not work" do
-      assert_raises ArgumentError do
+      assert_raises(ArgumentError) do
         ActiveRecord::Base.on_replica_by_default = true
       end
     end
@@ -75,34 +83,34 @@ describe ".on_replica_by_default" do
   it "executes `find` on the replica" do
     with_all_primaries_unavailable do
       account = Account.find(1000)
-      assert_equal "Replica account", account.name
+      assert_equal("Replica account", account.name)
     end
   end
 
   it "executes `find_by` on the replica" do
     with_all_primaries_unavailable do
       account = Account.find_by(id: 1000)
-      assert_equal "Replica account", account.name
+      assert_equal("Replica account", account.name)
     end
   end
 
   it "executes `count` on the replica" do
     with_all_primaries_unavailable do
       count = Account.count
-      assert_equal 2, count
+      assert_equal(2, count)
     end
   end
 
   it "executes `reload` on the replica" do
     with_all_primaries_unavailable do
       account = Account.find(1000)
-      assert_equal "Replica account", account.reload.name
+      assert_equal("Replica account", account.reload.name)
     end
   end
 
   it "executes `exists?` on the replica" do
     with_all_primaries_unavailable do
-      assert Account.exists?(1001)
+      assert(Account.exists?(1001))
     end
   end
 
@@ -111,7 +119,7 @@ describe ".on_replica_by_default" do
     AccountThing.on_replica.connection.execute("INSERT INTO account_things (id, account_id) VALUES (123125, 1000)")
 
     with_all_primaries_unavailable do
-      assert AccountThing.enabled.exists?(123125)
+      assert(AccountThing.enabled.exists?(123125))
     end
 
     AccountThing.on_replica_by_default = false
@@ -123,7 +131,7 @@ describe ".on_replica_by_default" do
     AccountThing.on_replica.connection.execute("INSERT INTO account_things (id, account_id) VALUES (123124, 1000)")
 
     with_all_primaries_unavailable do
-      assert_equal 2, Account.find(1000).account_things.count
+      assert_equal(2, Account.find(1000).account_things.count)
     end
 
     AccountThing.on_replica_by_default = false
@@ -133,19 +141,19 @@ describe ".on_replica_by_default" do
     with_all_primaries_unavailable do
       a = Account.where(id: 1001).includes(:people).first
       refute_empty(a.people)
-      assert_equal "Replica person", a.people.first.name
+      assert_equal("Replica person", a.people.first.name)
     end
   end
 
   it "sets up has_and_belongs_to_many sharded-ness correctly" do
     with_all_primaries_unavailable do
-      refute Account.const_get(:HABTM_People).is_sharded?
+      refute(Account.const_get(:HABTM_People).is_sharded?)
     end
   end
 
   it "executes `pluck` on the replica" do
     with_all_primaries_unavailable do
-      assert_equal ["Replica account", "Replica account 2"], Account.pluck(:name)
+      assert_equal(["Replica account", "Replica account 2"], Account.pluck(:name))
     end
   end
 
@@ -153,23 +161,28 @@ describe ".on_replica_by_default" do
     with_all_primaries_unavailable do
       account = Account.find(1001)
       person = account.people.first
-      assert_equal "Replica person", person.name
+      assert_equal("Replica person", person.name)
     end
   end
 
   it "executes `map` on preloaded relation on the primary" do
     Ticket.on_shard(1) do
-      Ticket.connection.execute(
-        "INSERT INTO tickets (id, title, account_id, created_at, updated_at) VALUES (50000, 'Primary ticket', 1001, NOW(), NOW())"
-      )
-      Ticket.on_replica.connection.execute(
-        "INSERT INTO tickets (id, title, account_id, created_at, updated_at) VALUES (50001, 'Replica ticket', 1001, NOW(), NOW())"
-      )
+      Ticket
+        .connection
+        .execute(
+          "INSERT INTO tickets (id, title, account_id, created_at, updated_at) VALUES (50000, 'Primary ticket', 1001, NOW(), NOW())"
+        )
+      Ticket
+        .on_replica
+        .connection
+        .execute(
+          "INSERT INTO tickets (id, title, account_id, created_at, updated_at) VALUES (50001, 'Replica ticket', 1001, NOW(), NOW())"
+        )
 
       with_unsharded_primary_unavailable do
         ticket_rel = Ticket.preload(:account).where(id: 50000)
         ticket_titles = ticket_rel.map(&:title)
-        assert_equal ["Primary ticket"], ticket_titles
+        assert_equal(["Primary ticket"], ticket_titles)
       end
     end
   end
@@ -178,7 +191,7 @@ describe ".on_replica_by_default" do
     with_all_primaries_unavailable do
       account = Account.find(1001)
       all_people = account.people.all
-      assert_equal ["Replica person"], all_people.map(&:name)
+      assert_equal(["Replica person"], all_people.map(&:name))
     end
   end
 
@@ -193,18 +206,23 @@ describe ".on_replica_by_default" do
     with_all_primaries_unavailable do
       account = Account.find(1001)
       count = account.people.count
-      assert_equal 2, count
+      assert_equal(2, count)
     end
   end
 
   it "can call preload from sharded model to unsharded model" do
     Ticket.on_shard(1) do
-      Ticket.connection.execute(
-        "INSERT INTO tickets (id, title, account_id, created_at, updated_at) VALUES (50000, 'Primary ticket', 1000, NOW(), NOW())"
-      )
-      Ticket.on_replica.connection.execute(
-        "INSERT INTO tickets (id, title, account_id, created_at, updated_at) VALUES (50001, 'Replica ticket', 1001, NOW(), NOW())"
-      )
+      Ticket
+        .connection
+        .execute(
+          "INSERT INTO tickets (id, title, account_id, created_at, updated_at) VALUES (50000, 'Primary ticket', 1000, NOW(), NOW())"
+        )
+      Ticket
+        .on_replica
+        .connection
+        .execute(
+          "INSERT INTO tickets (id, title, account_id, created_at, updated_at) VALUES (50001, 'Replica ticket', 1001, NOW(), NOW())"
+        )
     end
 
     begin
@@ -215,10 +233,11 @@ describe ".on_replica_by_default" do
           tickets = Ticket.preload(:account)
           ticket = tickets.first
 
-          assert_equal "Replica ticket", ticket.title
-          assert_equal "Replica account 2", ticket.account.name
+          assert_equal("Replica ticket", ticket.title)
+          assert_equal("Replica account 2", ticket.account.name)
         end
       end
+
     ensure
       Ticket.on_replica_by_default = false
     end
@@ -226,12 +245,17 @@ describe ".on_replica_by_default" do
 
   it "can handle association from sharded model to unsharded model" do
     Ticket.on_shard(1) do
-      Ticket.connection.execute(
-        "INSERT INTO tickets (id, title, account_id, created_at, updated_at) VALUES (50000, 'Primary ticket', 1000, NOW(), NOW())"
-      )
-      Ticket.on_replica.connection.execute(
-        "INSERT INTO tickets (id, title, account_id, created_at, updated_at) VALUES (50001, 'Replica ticket', 1001, NOW(), NOW())"
-      )
+      Ticket
+        .connection
+        .execute(
+          "INSERT INTO tickets (id, title, account_id, created_at, updated_at) VALUES (50000, 'Primary ticket', 1000, NOW(), NOW())"
+        )
+      Ticket
+        .on_replica
+        .connection
+        .execute(
+          "INSERT INTO tickets (id, title, account_id, created_at, updated_at) VALUES (50001, 'Replica ticket', 1001, NOW(), NOW())"
+        )
     end
 
     begin
@@ -241,9 +265,10 @@ describe ".on_replica_by_default" do
         with_all_primaries_unavailable do
           ticket = Ticket.find(50001)
           account_name = ticket.account.name
-          assert_equal "Replica account 2", account_name
+          assert_equal("Replica account 2", account_name)
         end
       end
+
     ensure
       Ticket.on_replica_by_default = false
     end
@@ -259,12 +284,12 @@ describe ".on_replica_by_default" do
     Account.reset_column_information
 
     # Verify that the schema hasn't been loaded yet
-    assert_nil Account.instance_variable_get :@columns
-    assert_nil Account.instance_variable_get :@columns_hash
-    assert_nil Account.instance_variable_get :@column_names
+    assert_nil(Account.instance_variable_get(:@columns))
+    assert_nil(Account.instance_variable_get(:@columns_hash))
+    assert_nil(Account.instance_variable_get(:@column_names))
 
     with_all_primaries_unavailable do
-      assert_equal ["id", "name", "created_at", "updated_at"], Account.column_names
+      assert_equal(["id", "name", "created_at", "updated_at"], Account.column_names)
     end
   end
 
@@ -272,7 +297,7 @@ describe ".on_replica_by_default" do
     with_all_primaries_unavailable do
       Account.reset_primary_key
 
-      assert_equal "id", Account.primary_key
+      assert_equal("id", Account.primary_key)
     end
   end
 
@@ -281,7 +306,7 @@ describe ".on_replica_by_default" do
       with_all_primaries_unavailable do
         accounts = Account.includes(:account_things).references(:account_things)
         account_names = accounts.order("account_things.id").map(&:name).sort
-        assert_equal ["Replica account", "Replica account 2"], account_names
+        assert_equal(["Replica account", "Replica account 2"], account_names)
       end
     end
 
@@ -289,7 +314,7 @@ describe ".on_replica_by_default" do
       with_all_primaries_unavailable do
         accounts = Account.joins("LEFT OUTER JOIN account_things ON account_things.account_id = accounts.id")
         account_names = accounts.map(&:name).sort
-        assert_equal ["Replica account", "Replica account 2"], account_names
+        assert_equal(["Replica account", "Replica account 2"], account_names)
       end
     end
 
@@ -311,29 +336,29 @@ describe ".on_replica_by_default" do
   describe "overriding with `on_primary`" do
     it "allows overriding with `on_primary`" do
       model = Account.on_primary.find(1000)
-      assert_equal "Primary account", model.name
+      assert_equal("Primary account", model.name)
     end
 
     it "does not allow overriding `on_primary` with `on_replica`" do
       model = Account.on_primary { Account.on_replica.find(1000) }
-      assert_equal "Primary account", model.name
+      assert_equal("Primary account", model.name)
     end
 
     it "allows overriding `on_replica` with `on_primary`" do
       model = Account.on_replica { Account.on_primary.find(1000) }
-      assert_equal "Primary account", model.name
+      assert_equal("Primary account", model.name)
     end
   end
 
   describe "inheritance" do
     it "propagates the `on_replica_by_default?` reader to inherited classes" do
-      assert AccountInherited.on_replica_by_default?
+      assert(AccountInherited.on_replica_by_default?)
     end
 
     it "propagates the `on_replica_by_default` writer to inherited classes" do
       AccountInherited.on_replica_by_default = false
-      refute AccountInherited.on_replica_by_default?
-      refute Account.on_replica_by_default?
+      refute(AccountInherited.on_replica_by_default?)
+      refute(Account.on_replica_by_default?)
     ensure
       AccountInherited.on_replica_by_default = true
     end

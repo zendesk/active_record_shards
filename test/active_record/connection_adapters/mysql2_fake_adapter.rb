@@ -3,9 +3,9 @@
 # ActiveRecord expects adapter definition to be under active_record/connection_adapter in the LOAD_PATH, see
 # https://github.com/rails/rails/blob/fdf3f0b9306ba8145e6e3acb84a50e5d23dfe48c/activerecord/lib/active_record/connection_adapters/connection_specification.rb#L168
 
-require 'active_record'
-require 'active_record/connection_adapters/mysql2_adapter'
-require 'mysql2'
+require "active_record"
+require "active_record/connection_adapters/mysql2_adapter"
+require "mysql2"
 
 module ActiveRecord
   class Base
@@ -14,8 +14,8 @@ module ActiveRecord
       config = config.symbolize_keys
       config[:flags] ||= 0
 
-      if config[:flags].is_a? Array
-        config[:flags].push "FOUND_ROWS"
+      if config[:flags].is_a?(Array)
+        config[:flags].push("FOUND_ROWS")
       else
         config[:flags] |= Mysql2::Client::FOUND_ROWS
       end
@@ -26,6 +26,7 @@ module ActiveRecord
   end
 
   module ConnectionAdapters
-    class Mysql2FakeAdapter < Mysql2Adapter; end
+    class Mysql2FakeAdapter < Mysql2Adapter
+    end
   end
 end
