@@ -82,3 +82,12 @@ jobs:
           ruby-version: "3.0"
           bundler-cache: true
       - run: bundle exec rake rubocop
+      - name: Fetch rubyfmt
+        run: |
+          wget https://github.com/fables-tales/rubyfmt/releases/download/v0.8.1/rubyfmt-v0.8.1-Linux.tar.gz
+          tar -xvzf rubyfmt-v0.8.1-Linux.tar.gz
+          mkdir bin
+          mv tmp/releases/v0.8.1-Linux/rubyfmt bin/rubyfmt
+          rm -rv tmp/releases/v0.8.1-Linux rubyfmt-v0.8.1-Linux.tar.gz
+      - name: Run rubyfmt
+        run: bin/rubyfmt -c -- .
