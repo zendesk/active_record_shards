@@ -73,6 +73,8 @@ jobs:
           fi
 
   lint:
+    env:
+      RUST_BACKTRACE: 1
     runs-on: ubuntu-latest
     steps:
       - uses: zendesk/checkout@v2
