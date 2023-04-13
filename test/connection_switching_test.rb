@@ -623,11 +623,11 @@ describe "connection switching" do
         end
 
         it "not be marked as read-only" do
-          assert(!@model.readonly?)
+          refute(@model.readonly?)
         end
 
         it "not be marked as comming from the replica" do
-          assert(!@model.from_replica?)
+          refute(@model.from_replica?)
         end
       end
     end

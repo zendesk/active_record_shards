@@ -32,7 +32,6 @@ module ActiveRecordShards
         @which = which
       end
 
-      # rubocop:disable Style/MethodMissingSuper, Style/MissingRespondToMissing
       def method_missing(method, *args, &block)
         reflection = @association_collection.proxy_association.reflection
         reflection.klass.on_cx_switch_block(@which) { @association_collection.send(method, *args, &block) }

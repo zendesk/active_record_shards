@@ -48,13 +48,13 @@ module DbHelper
     def load_database_configuration(path_or_io = "test/database.yml")
       erb_config = path_or_io.is_a?(String) ? IO.read(path_or_io) : path_or_io.read
       yaml_config = ERB.new(erb_config).result
+      # rubocop:disable Security/YAMLLoad
       ActiveRecord::Base.configurations = begin
-        # rubocop:disable Security/YAMLLoad
         YAML.load(yaml_config, aliases: true)
       rescue ArgumentError
-        # rubocop:disable Security/YAMLLoad
         YAML.load(yaml_config)
       end
+      # rubocop:enable Security/YAMLLoad
     end
   end
 

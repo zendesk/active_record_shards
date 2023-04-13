@@ -35,15 +35,13 @@ module ActiveRecordShards
       @connection_names[env][resolved_shard][@on_replica] ||= begin
         name = env.dup
         name << "_shard_#{resolved_shard}" if resolved_shard
-        replica_config = begin
-          case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
-          when "7.0"
-            configurations.configs_for(env_name: "#{name}_replica", include_hidden: true).any?
-          when "6.1"
-            configurations.configs_for(env_name: "#{name}_replica", include_replicas: true).any?
-          else
-            configurations["#{name}_replica"]
-          end
+        replica_config = case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
+        when "7.0"
+          configurations.configs_for(env_name: "#{name}_replica", include_hidden: true).any?
+        when "6.1"
+          configurations.configs_for(env_name: "#{name}_replica", include_replicas: true).any?
+        else
+          configurations["#{name}_replica"]
         end
 
         if @on_replica && replica_config

@@ -8,16 +8,18 @@ AllCops:
     - .git/**/*
     - gemfiles/vendor/**/*
     - vendor/**/*
+  NewCops: disable
   TargetRubyVersion: 2.6
 
-# Configured cops
+Layout: {Enabled: false}
+Metrics: {Enabled: false}
+Style: {Enabled: false}
 
-Layout/FirstHashElementIndentation:
-  EnforcedStyle: consistent
+Lint/AssignmentInCondition: {Enabled: false}
 
-Layout/HashAlignment:
-  EnforcedHashRocketStyle:
-    - table
+Lint/ConstantDefinitionInBlock:
+  Exclude:
+    - 'test/**/*'
 
 Naming/FileName:
   Exclude:
@@ -25,59 +27,3 @@ Naming/FileName:
     - 'lib/active_record_shards/connection_switcher-6-0.rb'
     - 'lib/active_record_shards/connection_switcher-6-1.rb'
     - 'lib/active_record_shards/connection_switcher-7-0.rb'
-
-Style/Alias:
-  EnforcedStyle: prefer_alias_method
-
-Style/EmptyMethod:
-  EnforcedStyle: expanded
-
-Style/FormatString:
-  EnforcedStyle: percent
-
-# Disabled cops
-
-Lint/AssignmentInCondition:
-  Enabled: false
-
-Metrics:
-  Enabled: false
-
-Style/AsciiComments:
-  Enabled: false
-
-Style/ClassVars:
-  Enabled: false
-
-Style/ConditionalAssignment:
-  Enabled: false
-
-Style/Documentation:
-  Enabled: false
-
-Style/DoubleNegation:
-  Enabled: false
-
-Style/FormatStringToken:
-  Enabled: false
-
-Style/FrozenStringLiteralComment:
-  Enabled: false
-
-Style/GuardClause:
-  Enabled: false
-
-Style/IfUnlessModifier:
-  Enabled: false
-
-Style/NumericLiterals:
-  Enabled: false
-
-Style/StringLiterals:
-  Enabled: false
-
-Style/SymbolArray:
-  Enabled: false
-
-Style/WordArray:
-  Enabled: false

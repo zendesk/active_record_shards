@@ -9,13 +9,11 @@ end
 namespace(:db) do
   desc("Drops the database for the current RAILS_ENV including shards")
   task(drop: :load_config) do
-    configurations = begin
-      case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
-      when "6.1", "7.0"
-        ActiveRecord::Base.configurations.configurations.map { |configuration| [configuration.env_name, configuration.configuration_hash] }
-      else
-        ActiveRecord::Base.configurations.to_h
-      end
+    configurations = case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
+    when "6.1", "7.0"
+      ActiveRecord::Base.configurations.configurations.map { |configuration| [configuration.env_name, configuration.configuration_hash] }
+    else
+      ActiveRecord::Base.configurations.to_h
     end
 
     configurations.each do |key, conf|
@@ -38,20 +36,17 @@ namespace(:db) do
   end
 
   task(reset: :load_config) do |t|
-    # rubocop:disable Style/RescueModifier
     Rake.application.lookup("db:drop", t.scope).invoke rescue nil
     Rake.application.lookup("db:setup", t.scope).invoke
   end
 
   desc("Create the database defined in config/database.yml for the current RAILS_ENV including shards")
   task(create: :load_config) do
-    configurations = begin
-      case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
-      when "6.1", "7.0"
-        ActiveRecord::Base.configurations.configurations.map { |configuration| [configuration.env_name, configuration.configuration_hash] }
-      else
-        ActiveRecord::Base.configurations.to_h
-      end
+    configurations = case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
+    when "6.1", "7.0"
+      ActiveRecord::Base.configurations.configurations.map { |configuration| [configuration.env_name, configuration.configuration_hash] }
+    else
+      ActiveRecord::Base.configurations.to_h
     end
 
     configurations.each do |key, conf|

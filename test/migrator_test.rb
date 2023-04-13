@@ -67,12 +67,12 @@ describe ActiveRecord::Migrator do
     # now test down/ up
     migrator(:down, "migrations", 20110824010216).run
     ActiveRecord::Base.on_all_shards do
-      assert(!table_has_column?("tickets", "sharded_column"))
+      refute(table_has_column?("tickets", "sharded_column"))
     end
 
     migrator(:down, "migrations", 20110829215912).run
     ActiveRecord::Base.on_shard(nil) do
-      assert(!table_has_column?("accounts", "non_sharded_column"))
+      refute(table_has_column?("accounts", "non_sharded_column"))
     end
 
     migrator(:up, "migrations", 20110824010216).run
@@ -107,7 +107,7 @@ describe ActiveRecord::Migrator do
       retry
     end
 
-    assert(!failure_migration_pending?("failure_migration"))
+    refute(failure_migration_pending?("failure_migration"))
     ActiveRecord::Base.on_all_shards do
       assert(table_has_column?("tickets", "sharded_column"))
     end

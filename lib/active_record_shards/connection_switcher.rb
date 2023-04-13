@@ -249,7 +249,6 @@ module ActiveRecordShards
         @which = which
       end
 
-      # rubocop:disable Style/MethodMissingSuper, Style/MissingRespondToMissing
       def method_missing(method, *args, &block)
         @target.on_primary_or_replica(@which) { @target.send(method, *args, &block) }
       end

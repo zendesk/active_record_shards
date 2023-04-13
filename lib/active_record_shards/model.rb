@@ -26,6 +26,7 @@ module ActiveRecordShards
         base_class.is_sharded?
       end
     end
+    # rubocop:enable Naming/PredicateName
 
     def on_replica_by_default?
       if self == ActiveRecord::Base

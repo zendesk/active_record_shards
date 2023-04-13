@@ -11,7 +11,7 @@ module ActiveRecordShards
 
       return unless base_methods.include?(method)
 
-      _, method, punctuation = method.to_s.match(/^(.*?)([\?\!]?)$/).to_a
+      _, method, punctuation = method.to_s.match(/^(.*?)([?!]?)$/).to_a
       # _ALWAYS_ on replica, or only for on `on_replica_by_default = true` models?
       wrapper = force_on_replica ? "force_on_replica" : "on_replica_unless_tx"
       base.class_eval(
