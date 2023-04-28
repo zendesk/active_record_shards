@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## v5.3.3
+
+### Added
+* Added new 'ActiveRecordShards.reset_rails_env!' method to clear the cache within a process ([#315](https://github.com/zendesk/active_record_shards/pull/315)).
+
 ## v5.3.2
 
 ### Added
