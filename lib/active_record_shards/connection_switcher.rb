@@ -134,7 +134,8 @@ module ActiveRecordShards
     end
 
     def current_shard_selection
-      Thread.current[:shard_selection] ||= ShardSelection.new
+      cs = Thread.current.thread_variable_get(:shard_selection) || ShardSelection.new
+      Thread.current.thread_variable_set(:shard_selection, cs)
     end
 
     def current_shard_id
