@@ -6,7 +6,6 @@ ENV["MT_CPU"] ||= "1"
 
 require 'bundler/setup'
 require 'minitest/autorun'
-require 'minitest/rg'
 require 'rake'
 
 Bundler.require
