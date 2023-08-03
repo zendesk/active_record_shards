@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+Fixes an issue where ARS switches to the replica database in the middle of a transaction when it is supposed to remain on the Primary.
+
 ## v5.3.3
 
 ### Added
