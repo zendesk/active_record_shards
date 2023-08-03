@@ -91,12 +91,17 @@ module ActiveRecordShards
     def on_replica_unless_tx(&block)
       return yield if Thread.current[:_active_record_shards_in_migration]
       return yield if Thread.current[:_active_record_shards_in_tx]
+      return yield if _in_transaction?
 
       if on_replica_by_default?
         on_replica(&block)
       else
         yield
       end
+    end
+
+    def _in_transaction?
+      connected? && connection.transaction_open?
     end
 
     def force_on_replica(&block)
@@ -123,6 +128,7 @@ module ActiveRecordShards
       def connection
         return super if Thread.current[:_active_record_shards_in_migration]
         return super if Thread.current[:_active_record_shards_in_tx]
+        return super if _in_transaction?
 
         if @klass.on_replica_by_default?
           @klass.on_replica.connection
@@ -215,6 +221,7 @@ module ActiveRecordShards
       def connection
         return super if Thread.current[:_active_record_shards_in_migration]
         return super if Thread.current[:_active_record_shards_in_tx]
+        return super if ActiveRecord::Base._in_transaction?
 
         if @klass.on_replica_by_default?
           @klass.on_replica.connection
