@@ -338,4 +338,16 @@ describe ".on_replica_by_default" do
       AccountInherited.on_replica_by_default = true
     end
   end
+
+  describe 'inside an #after_save hook' do
+    it 'performs reads on the primary' do
+      model = Account.on_primary.find(1000)
+      model.name = 'bartfoo'
+      model.singleton_class.after_save do
+        @fetched_person = Person.find(10)
+      end
+      model.save!
+      assert_equal "Primary person", model.instance_variable_get(:@fetched_person).name
+    end
+  end
 end
