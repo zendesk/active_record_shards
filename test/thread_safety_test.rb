@@ -16,6 +16,39 @@ describe "connection switching thread safety" do
     ActiveRecord::Base.connection_handler.clear_all_connections!
   end
 
+  describe "isolation level" do
+    it "uses the same connection for all fibers in a thread" do
+      main_thread_connections = []
+      secondary_thread_connections = []
+
+      main_thread_connections << ActiveRecord::Base.connection.object_id
+      Fiber.new { main_thread_connections << ActiveRecord::Base.connection.object_id }.resume
+
+      Thread.new  do
+        secondary_thread_connections << ActiveRecord::Base.connection.object_id
+        Fiber.new { secondary_thread_connections << ActiveRecord::Base.connection.object_id }.resume
+      end.join
+
+      assert_equal main_thread_connections.uniq.length, 1
+      assert_equal secondary_thread_connections.uniq.length, 1
+      refute_equal main_thread_connections.uniq, secondary_thread_connections.uniq
+    end
+
+    if ActiveRecord.version >= Gem::Version.new('7.0')
+      it "raises an exception when isolation_level is not set to :thread" do
+        assert_raises ActiveRecordShards::ConnectionSwitcher::IsolationLevelError do
+          iso_level_was = ActiveSupport::IsolatedExecutionState.isolation_level
+          ActiveSupport::IsolatedExecutionState.isolation_level = :fiber
+          ActiveRecord::Base.on_primary_db do
+            1
+          end
+        ensure
+          ActiveSupport::IsolatedExecutionState.isolation_level = iso_level_was
+        end
+      end
+    end
+  end
+
   it "can safely switch between all database connections in parallel" do
     new_thread("switches_through_all_1") do
       pause_and_mark_ready

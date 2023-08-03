@@ -7,8 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+* Stays on the correct database, even when using a new Fiber. Some Ruby methods, such as `to_enum` create a new Fiber for the block. `to_enum` is used by ActiveRecord when finding things in batches. This should resolve issues where ARS would connect to the unsharded database, even inside an `on_shard` block. The downside is we are now violating fiber concurrency and thus this breaks multi-fiber webservers.
 
-Fixes an issue where ARS switches to the replica database in the middle of a transaction when it is supposed to remain on the Primary.
+*Fixes an issue where ARS switches to the replica database in the middle of a transaction when it is supposed to remain on the Primary.
 
 ## v5.3.3
 

@@ -210,6 +210,20 @@ describe "connection switching" do
     end
   end
 
+  describe "fibers" do
+    it "switches to the correct shard, even when changing fibers" do
+      # Rails utilizes Object#to_enum in a few places such as #find_in_batches.
+      # to_enum, in the C code, is creating a new _Fiber_ and executing the block
+      # in the context of that Fiber. We want to ensure that, when we call on_shard
+      # that we remain on the shard we intend, even if the fiber changes.
+      ActiveRecord::Base.on_shard(0) do
+        Fiber.new { assert_using_database('ars_test_shard0', Ticket) }.resume
+      end
+
+      assert_using_primary_db
+    end
+  end
+
   describe "default shard selection" do
     describe "of nil" do
       before do
@@ -440,7 +454,7 @@ describe "connection switching" do
         else
           @saved_config = ActiveRecord::Base.configurations.delete('test_replica')
         end
-        Thread.current[:shard_selection] = nil # drop caches
+        Thread.current.thread_variable_set(:shard_selection, nil) # drop caches
         clear_connection_pool
         ActiveRecord::Base.establish_connection(:test)
       end
@@ -451,7 +465,7 @@ describe "connection switching" do
         else
           ActiveRecord::Base.configurations['test_replica'] = @saved_config
         end
-        Thread.current[:shard_selection] = nil # drop caches
+        Thread.current.thread_variable_set(:shard_selection, nil) # drop caches
       end
 
       it "default to the primary database" do

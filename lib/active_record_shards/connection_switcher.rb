@@ -5,6 +5,7 @@ require 'active_record_shards/shard_support'
 module ActiveRecordShards
   module ConnectionSwitcher
     class LegacyConnectionHandlingError < StandardError; end
+    class IsolationLevelError < StandardError; end
 
     case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
     when '6.1', '7.0'
@@ -134,7 +135,8 @@ module ActiveRecordShards
     end
 
     def current_shard_selection
-      Thread.current[:shard_selection] ||= ShardSelection.new
+      cs = Thread.current.thread_variable_get(:shard_selection) || ShardSelection.new
+      Thread.current.thread_variable_set(:shard_selection, cs)
     end
 
     def current_shard_id
@@ -177,6 +179,7 @@ module ActiveRecordShards
 
     def switch_connection(options)
       ensure_legacy_connection_handling if ActiveRecord.version >= Gem::Version.new('6.1')
+      ensure_thread_isolation_level if ActiveRecord.version >= Gem::Version.new('7.0')
 
       if options.any?
         if options.key?(:replica)
@@ -196,6 +199,12 @@ module ActiveRecordShards
     def ensure_legacy_connection_handling
       unless legacy_connection_handling_owner.legacy_connection_handling
         raise LegacyConnectionHandlingError, "ActiveRecordShards is _only_ compatible with ActiveRecord `legacy_connection_handling` set to `true`."
+      end
+    end
+
+    def ensure_thread_isolation_level
+      unless ActiveSupport::IsolatedExecutionState.isolation_level == :thread
+        raise IsolationLevelError, "ActiveRecordShards is _only_ compatible when ActiveSupport::IsolatedExecutionState's isolation_level is set to :thread"
       end
     end
 
