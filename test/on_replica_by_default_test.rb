@@ -339,8 +339,8 @@ describe ".on_replica_by_default" do
     end
   end
 
-  describe 'inside an #after_save hook' do
-    it 'performs reads on the primary' do
+  describe 'in transactions' do
+    it 'performs reads on the primary in an #after_save hook' do
       model = Account.on_primary.find(1000)
       model.name = 'bartfoo'
       model.singleton_class.after_save do
@@ -348,6 +348,33 @@ describe ".on_replica_by_default" do
       end
       model.save!
       assert_equal "Primary person", model.instance_variable_get(:@fetched_person).name
+    end
+
+    it 'stays on Primary when calling .transaction on AR::Base' do
+      ActiveRecord::Base.transaction do
+        assert_equal Account.find(1000).name, 'Primary account'
+        assert ActiveRecord::Base._in_transaction?
+      end
+
+      refute ActiveRecord::Base._in_transaction?
+    end
+
+    it 'stays on Primary when calling #transaction on connection' do
+      ActiveRecord::Base.connection.transaction do
+        assert_equal Account.find(1000).name, 'Primary account'
+        assert ActiveRecord::Base._in_transaction?
+      end
+
+      refute ActiveRecord::Base._in_transaction?
+    end
+
+    it 'stays on Primary when calling .transaction on a model' do
+      Account.transaction do
+        assert_equal Account.find(1000).name, 'Primary account'
+        assert Account._in_transaction?
+      end
+
+      refute ActiveRecord::Base._in_transaction?
     end
   end
 end
