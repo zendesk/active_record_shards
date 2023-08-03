@@ -29,21 +29,6 @@ module ActiveRecordShards
       RUBY
     end
 
-    def transaction_with_replica_off(*args, &block)
-      if on_replica_by_default?
-        begin
-          old_val = Thread.current[:_active_record_shards_in_tx]
-          Thread.current[:_active_record_shards_in_tx] = true
-          transaction_without_replica_off(*args, &block)
-        ensure
-          Thread.current[:_active_record_shards_in_tx] = old_val
-        end
-      else
-        transaction_without_replica_off(*args, &block)
-      end
-    end
-    ruby2_keywords(:transaction_with_replica_off) if respond_to?(:ruby2_keywords, true)
-
     module InstanceMethods
       def on_replica_unless_tx
         self.class.on_replica_unless_tx { yield }
@@ -80,23 +65,22 @@ module ActiveRecordShards
 
       base.class_eval do
         include InstanceMethods
-
-        class << self
-          alias_method :transaction_without_replica_off, :transaction
-          alias_method :transaction, :transaction_with_replica_off
-        end
       end
     end
 
     def on_replica_unless_tx(&block)
       return yield if Thread.current[:_active_record_shards_in_migration]
-      return yield if Thread.current[:_active_record_shards_in_tx]
+      return yield if _in_transaction?
 
       if on_replica_by_default?
         on_replica(&block)
       else
         yield
       end
+    end
+
+    def _in_transaction?
+      connected? && connection.transaction_open?
     end
 
     def force_on_replica(&block)
@@ -122,7 +106,7 @@ module ActiveRecordShards
     module Rails52RelationPatches
       def connection
         return super if Thread.current[:_active_record_shards_in_migration]
-        return super if Thread.current[:_active_record_shards_in_tx]
+        return super if _in_transaction?
 
         if @klass.on_replica_by_default?
           @klass.on_replica.connection
@@ -214,7 +198,7 @@ module ActiveRecordShards
     module TypeCasterConnectionConnectionPatch
       def connection
         return super if Thread.current[:_active_record_shards_in_migration]
-        return super if Thread.current[:_active_record_shards_in_tx]
+        return super if ActiveRecord::Base._in_transaction?
 
         if @klass.on_replica_by_default?
           @klass.on_replica.connection
