@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## v5.4.1
+
+### Fixed
+* Changes all fiber-local variables to thread-local variables. Fixes any lingering issues where a fiber change could cause the state to be lost.
+
 ## v5.4.0
 
 ### Changed
