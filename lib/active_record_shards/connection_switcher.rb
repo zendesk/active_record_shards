@@ -7,6 +7,10 @@ module ActiveRecordShards
     class LegacyConnectionHandlingError < StandardError; end
     class IsolationLevelError < StandardError; end
 
+    Thread.attr_accessor :_active_record_shards_disallow_replica_by_thread,
+                         :_active_record_shards_in_migration,
+                         :_active_record_shards_shard_selection
+
     case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
     when '6.1', '7.0'
       SHARD_NAMES_CONFIG_KEY = :shard_names
@@ -119,11 +123,11 @@ module ActiveRecordShards
     end
 
     def disallow_replica=(value)
-      Thread.current[:__active_record_shards__disallow_replica_by_thread] = value
+      Thread.current._active_record_shards_disallow_replica_by_thread = value
     end
 
     def disallow_replica
-      Thread.current[:__active_record_shards__disallow_replica_by_thread] ||= 0
+      Thread.current._active_record_shards_disallow_replica_by_thread ||= 0
     end
 
     def supports_sharding?
@@ -135,8 +139,7 @@ module ActiveRecordShards
     end
 
     def current_shard_selection
-      cs = Thread.current.thread_variable_get(:shard_selection) || ShardSelection.new
-      Thread.current.thread_variable_set(:shard_selection, cs)
+      Thread.current._active_record_shards_shard_selection ||= ShardSelection.new
     end
 
     def current_shard_id
