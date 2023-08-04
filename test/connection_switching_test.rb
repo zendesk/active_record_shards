@@ -454,7 +454,7 @@ describe "connection switching" do
         else
           @saved_config = ActiveRecord::Base.configurations.delete('test_replica')
         end
-        Thread.current.thread_variable_set(:shard_selection, nil) # drop caches
+        Thread.current._active_record_shards_shard_selection = nil # drop caches
         clear_connection_pool
         ActiveRecord::Base.establish_connection(:test)
       end
@@ -465,7 +465,7 @@ describe "connection switching" do
         else
           ActiveRecord::Base.configurations['test_replica'] = @saved_config
         end
-        Thread.current.thread_variable_set(:shard_selection, nil) # drop caches
+        Thread.current._active_record_shards_shard_selection = nil # drop caches
       end
 
       it "default to the primary database" do

@@ -69,7 +69,7 @@ module ActiveRecordShards
     end
 
     def on_replica_unless_tx(&block)
-      return yield if Thread.current[:_active_record_shards_in_migration]
+      return yield if Thread.current._active_record_shards_in_migration
       return yield if _in_transaction?
 
       if on_replica_by_default?
@@ -84,7 +84,7 @@ module ActiveRecordShards
     end
 
     def force_on_replica(&block)
-      return yield if Thread.current[:_active_record_shards_in_migration]
+      return yield if Thread.current._active_record_shards_in_migration
 
       on_cx_switch_block(:replica, construct_ro_scope: false, force: true, &block)
     end
@@ -105,7 +105,7 @@ module ActiveRecordShards
 
     module Rails52RelationPatches
       def connection
-        return super if Thread.current[:_active_record_shards_in_migration]
+        return super if Thread.current._active_record_shards_in_migration
         return super if _in_transaction?
 
         if @klass.on_replica_by_default?
@@ -197,7 +197,7 @@ module ActiveRecordShards
 
     module TypeCasterConnectionConnectionPatch
       def connection
-        return super if Thread.current[:_active_record_shards_in_migration]
+        return super if Thread.current._active_record_shards_in_migration
         return super if ActiveRecord::Base._in_transaction?
 
         if @klass.on_replica_by_default?
@@ -210,11 +210,11 @@ module ActiveRecordShards
 
     module SchemaDefinePatch
       def define(info, &block)
-        old_val = Thread.current[:_active_record_shards_in_migration]
-        Thread.current[:_active_record_shards_in_migration] = true
+        old_val = Thread.current._active_record_shards_in_migration
+        Thread.current._active_record_shards_in_migration = true
         super
       ensure
-        Thread.current[:_active_record_shards_in_migration] = old_val
+        Thread.current._active_record_shards_in_migration = old_val
       end
     end
   end
