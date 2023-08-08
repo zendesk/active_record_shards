@@ -49,6 +49,8 @@ ActiveRecord::Associations::CollectionProxy.include(ActiveRecordShards::Associat
 ActiveRecord::Associations::Builder::HasAndBelongsToMany.include(ActiveRecordShards::DefaultReplicaPatches::Rails41HasAndBelongsToManyBuilderExtension)
 ActiveRecord::SchemaDumper.prepend(ActiveRecordShards::SchemaDumperExtension)
 
+Arel::SelectManager.prepend(ActiveRecordShards::DefaultReplicaPatches::ArelSelectPatch)
+
 case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
 when '5.1'
   # https://github.com/rails/rails/blob/v5.1.7/activerecord/lib/active_record/associations/association.rb#L97

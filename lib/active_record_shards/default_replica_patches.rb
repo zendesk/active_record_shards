@@ -29,6 +29,12 @@ module ActiveRecordShards
       RUBY
     end
 
+    module ArelSelectPatch
+      def initialize(...)
+        ActiveRecord::Base.on_replica_unless_tx { super }
+      end
+    end
+
     module InstanceMethods
       def on_replica_unless_tx
         self.class.on_replica_unless_tx { yield }
@@ -57,7 +63,7 @@ module ActiveRecordShards
     ].freeze
 
     def self.extended(base)
-      CLASS_REPLICA_METHODS.each { |m| ActiveRecordShards::DefaultReplicaPatches.wrap_method_in_on_replica(true, base, m) }
+      # CLASS_REPLICA_METHODS.each { |m| ActiveRecordShards::DefaultReplicaPatches.wrap_method_in_on_replica(true, base, m) }
       CLASS_FORCE_REPLICA_METHODS.each { |m| ActiveRecordShards::DefaultReplicaPatches.wrap_method_in_on_replica(true, base, m, force_on_replica: true) }
 
       ActiveRecordShards::DefaultReplicaPatches.wrap_method_in_on_replica(true, base, :load_schema!, force_on_replica: true)
