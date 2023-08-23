@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+* Use the default shard when resetting primary key
+
 ## v5.4.1
 
 ### Fixed

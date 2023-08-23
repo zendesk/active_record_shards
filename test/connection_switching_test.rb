@@ -208,6 +208,12 @@ describe "connection switching" do
         assert_equal 1, res.size
       end
     end
+
+    describe "when loading primary keys" do
+      it "uses the default shard" do
+        refute_nil Ticket.primary_key
+      end
+    end
   end
 
   describe "fibers" do

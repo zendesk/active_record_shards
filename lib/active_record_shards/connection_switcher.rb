@@ -24,6 +24,9 @@ module ActiveRecordShards
 
       base.singleton_class.send(:alias_method, :table_exists_without_default_shard?, :table_exists?)
       base.singleton_class.send(:alias_method, :table_exists?, :table_exists_with_default_shard?)
+
+      base.singleton_class.send(:alias_method, :reset_primary_key_without_default_shard, :reset_primary_key)
+      base.singleton_class.send(:alias_method, :reset_primary_key, :reset_primary_key_with_default_shard)
     end
 
     def on_primary_db(&block)
@@ -148,6 +151,10 @@ module ActiveRecordShards
 
     def shard_names
       config_for_env[SHARD_NAMES_CONFIG_KEY] || []
+    end
+
+    def reset_primary_key_with_default_shard
+      with_default_shard { reset_primary_key_without_default_shard }
     end
 
     private
