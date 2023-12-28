@@ -85,7 +85,7 @@ class TCPProxy
       data = src.recv(1024)
 
       if enabled? || pause_behavior == :ignore
-        if data.empty?
+        if data.nil? || data.empty?
           zero_counter += 1
           return if zero_counter >= 5
         else
