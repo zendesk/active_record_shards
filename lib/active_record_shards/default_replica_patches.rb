@@ -197,7 +197,8 @@ module ActiveRecordShards
 
     module TypeCasterConnectionConnectionPatch
       def connection
-        return super if Thread.current._active_record_shards_in_migration
+            return super if Thread.current._active_record_shards_in_migration
+
         return super if ActiveRecord::Base._in_transaction?
 
         if @klass.on_replica_by_default?
