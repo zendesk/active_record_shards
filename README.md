@@ -1,5 +1,5 @@
-[![Build Status](https://github.com/zendesk/active_record_shards/workflows/CI/badge.svg)](https://github.com/zendesk/active_record_shards/actions?query=workflow%3ACI)
 
+[![CI status](https://github.com/zendesk/active_record_shards/actions/workflows/ci.yml/badge.svg?branch%3Amain)](https://github.com/zendesk/active_record_shards/actions/workflows/ci.yml?query=branch%3Amain)
 # ActiveRecord Shards
 
 ActiveRecord Shards is an extension for ActiveRecord that provides support for sharded database and replicas. Basically it is just a nice way to
