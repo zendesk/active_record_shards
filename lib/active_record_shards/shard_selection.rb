@@ -35,7 +35,8 @@ module ActiveRecordShards
         name << "_shard_#{resolved_shard}" if resolved_shard
         replica_config = begin
           case "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
-          when '7.0'
+          when '7.0', '7.1'
+            binding.pry
             configurations.configs_for(env_name: "#{name}_replica", include_hidden: true).any?
           when '6.1'
             configurations.configs_for(env_name: "#{name}_replica", include_replicas: true).any?
@@ -48,6 +49,10 @@ module ActiveRecordShards
         else
           # ActiveRecord always names its default connection pool 'primary'
           # while everything else is named by the configuration name
+
+          # NOTE: for some reason this might need to return the environment.
+          # my 7.1 specs fail because  see `connection_switcher-7-0.rb:8`
+          # configurations.configs_for(env_name: "primiary", include_hidden: true).any? == false
           resolved_shard ? name : PRIMARY
         end
       end

@@ -271,7 +271,7 @@ when '6.0'
   require 'active_record_shards/connection_switcher-6-0'
 when '6.1'
   require 'active_record_shards/connection_switcher-6-1'
-when '7.0'
+when '7.0', '7.1'
   require 'active_record_shards/connection_switcher-7-0'
 else
   raise "ActiveRecordShards is not compatible with #{ActiveRecord::VERSION::STRING}"
