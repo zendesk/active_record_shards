@@ -37,6 +37,7 @@ end
 BaseMigration = ActiveRecord::Migration[4.2]
 
 require 'active_support/test_case'
+require 'models'
 
 # support multiple before/after blocks per example
 module SpecDslPatch

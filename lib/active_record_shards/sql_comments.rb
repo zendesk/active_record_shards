@@ -2,13 +2,13 @@
 module ActiveRecordShards
   module SqlComments
     module Methods
-      def execute(query, name = nil)
+      def execute(query, name = nil, **kwargs)
         shard = ActiveRecord::Base.current_shard_selection.shard
         shard_text = shard ? "shard #{shard}" : 'unsharded'
         replica = ActiveRecord::Base.current_shard_selection.on_replica?
         replica_text = replica ? 'replica' : 'primary'
         query = "/* #{shard_text} #{replica_text} */ " + query
-        super(query, name)
+        super(query, name, **kwargs)
       end
     end
 

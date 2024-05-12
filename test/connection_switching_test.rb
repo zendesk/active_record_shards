@@ -14,7 +14,6 @@ describe "connection switching" do
 
   before do
     ActiveRecord::Base.establish_connection(RAILS_ENV.to_sym)
-    require 'models'
   end
 
   describe "legacy_connection_handling" do

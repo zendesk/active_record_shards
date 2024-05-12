@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+* Fixed `SqlComments` when using Rails 7.0.
+
 ## v5.5.0
 
 ### Changed
