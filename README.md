@@ -1,3 +1,6 @@
+> [!CAUTION]
+> ActiveRecordShards is archived. Rails 6.1 introduced native support for multiple databases, including horizontal shards, please use the native functionality instead.
+
 [![Build Status](https://github.com/zendesk/active_record_shards/workflows/CI/badge.svg)](https://github.com/zendesk/active_record_shards/actions?query=workflow%3ACI)
 
 # ActiveRecord Shards
